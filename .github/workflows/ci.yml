@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── TypeScript: build, typecheck, unit tests ──────────────────────────────
+  js:
+    name: JS – build / typecheck / test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build + typecheck + test
+        run: npm run check
+
+  # ── Python: ruff lint + pytest ────────────────────────────────────────────
+  python:
+    name: Python – lint / test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Lint
+        run: uv run ruff check apps/solera-api connectors/easy-pi flows
+
+      - name: Test
+        run: uv run pytest --tb=short
+
+  # ── Playwright: browser smoke ────────────────────────────────────────────
+  browser:
+    name: Browser – MV3 extension smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Browser smoke
+        run: npm run test:browser
+
+  # ── Extension package + manifest security gate ───────────────────────────
+  package:
+    name: Package – extension zip + security gate
+    runs-on: ubuntu-latest
+    needs: [js]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package extension
+        run: npm run package:extension
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: solera-sidecar-${{ github.sha }}
+          path: artifacts/solera-sidecar-*.zip
+          retention-days: 30

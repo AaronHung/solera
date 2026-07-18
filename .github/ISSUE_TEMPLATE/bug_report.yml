@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a defect in Solera v0.1
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, confirm the issue reproduces on the latest `main`
+        and is not in the [known residual risks](../docs/security/THREAT_MODEL.md).
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Sidecar extension (browser)
+        - Solera API / Agent orchestrator
+        - Easy PI connector
+        - Canvas renderer
+        - Flow / nightly jobs
+        - Documentation / runbooks
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      placeholder: "Describe the observed behaviour and expected behaviour."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open PI Vision page at …
+        2. Click Sidecar icon
+        3. Ask: "…"
+        4. See error …
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment
+      placeholder: |
+        - Chrome version:
+        - Extension version (from manifest.json):
+        - API commit (git log -1 --oneline):
+        - OS:
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: "This issue does NOT involve write/control operations to industrial systems"
+          required: true
+        - label: "I have NOT included real PI credentials or production data in this report"
+          required: true

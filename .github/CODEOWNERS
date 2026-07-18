@@ -1,0 +1,10 @@
+# Default owner for all files
+* @AaronHung
+
+# Contracts and ADRs require explicit review
+/docs/contracts/      @AaronHung
+/docs/adr/            @AaronHung
+/packages/contracts/  @AaronHung
+
+# Security documents
+/docs/security/       @AaronHung

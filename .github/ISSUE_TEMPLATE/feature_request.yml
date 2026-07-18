@@ -1,0 +1,46 @@
+name: Feature / backlog request
+description: Propose a new capability or improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        v0.1 scope is fixed. New features targeting v0.2+ are welcome here.
+        See [V0_1_BACKLOG.md](../docs/backlog/V0_1_BACKLOG.md) for current items.
+
+  - type: dropdown
+    id: target_version
+    attributes:
+      label: Target version
+      options:
+        - v0.1 (current – scope changes require ADR)
+        - v0.2 (Bridge / SCADA adapter / Portal)
+        - v0.3 (HPI / PdM)
+        - Scene Gate (2.5D / 3D)
+        - Unscheduled
+    validations:
+      required: true
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User story
+      placeholder: "As a [persona], I want [capability] so that [outcome]."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "List measurable conditions that must be true for this to be considered done."
+
+  - type: checkboxes
+    id: invariants
+    attributes:
+      label: Safety invariants
+      options:
+        - label: "This request does NOT require write/control tools in the Agent"
+          required: true
+        - label: "Any new data source will run through the Evidence provenance pipeline"
+          required: true
