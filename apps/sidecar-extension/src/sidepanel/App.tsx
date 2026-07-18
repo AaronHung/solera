@@ -106,6 +106,34 @@ export function App() {
         .map((asset) => asset.assetId.replace("pi-tag:", "")) ?? [],
     [context],
   );
+  const quickQuestions = useMemo(() => {
+    if (tags.length >= 2) {
+      return [
+        {
+          label: `Compare ${tags[0]} and ${tags[1]}`,
+          question: `比較 ${tags[0]} 與 ${tags[1]}`,
+        },
+        {
+          label: `Explain ${tags[0]} trend`,
+          question: `顯示 ${tags[0]} 最近 24 小時的趨勢`,
+        },
+      ];
+    }
+    if (tags.length === 1) {
+      return [
+        {
+          label: `Explain ${tags[0]} trend`,
+          question: `顯示 ${tags[0]} 最近 24 小時的趨勢`,
+        },
+        {
+          label: `Show current ${tags[0]} value`,
+          question: `顯示 ${tags[0]} 目前數值`,
+        },
+      ];
+    }
+    return [];
+  }, [tags]);
+  const isPiVision = context?.page.systemType === "pi-vision";
 
   const confirmAsset = () => {
     if (!context || !selectedAsset) {
@@ -207,7 +235,7 @@ export function App() {
     <div className="sidecar-shell">
       <header className="topbar">
         <div className="brand-mark" aria-hidden="true">
-          S
+          <img src="icons/solera.svg" alt="" />
         </div>
         <div>
           <strong>Solera</strong>
@@ -238,6 +266,7 @@ export function App() {
             <input
               type="password"
               value={settings.bearerToken}
+              placeholder="dev:tenant-demo:demo-user:viewer"
               autoComplete="off"
               onChange={(event) =>
                 setSettings({ ...settings, bearerToken: event.target.value })
@@ -256,7 +285,10 @@ export function App() {
           <button className="primary" onClick={() => void saveSettings()}>
             Save and reconnect
           </button>
-          <p>Credentials are stored only in extension-local storage for this Pilot.</p>
+          <p>
+            Local demo token: <code>dev:tenant-demo:demo-user:viewer</code>.
+            Credentials are stored only in extension-local storage for this Pilot.
+          </p>
         </section>
       )}
 
@@ -304,17 +336,25 @@ export function App() {
                 <p className="eyebrow">READ-ONLY AGENT</p>
                 <h1>What should we verify?</h1>
                 <p>
-                  Solera uses the current page as context and retrieves numerical
-                  truth from approved industrial APIs.
+                  {isPiVision
+                    ? "Solera detected this PI Vision display as context. Display context comes from PI Vision; numerical truth comes from approved PI Tags."
+                    : "Solera uses the current page as context and retrieves numerical truth from approved industrial APIs."}
                 </p>
-                <div className="suggestions">
-                  <button onClick={() => void submit("比較 CDT158 與 CDT159")}>
-                    Compare CDT158 and CDT159
-                  </button>
-                  <button onClick={() => void submit("顯示 SINUSOID 最近 24 小時的趨勢")}>
-                    Explain SINUSOID trend
-                  </button>
-                </div>
+                {quickQuestions.length > 0 ? (
+                  <div className="suggestions">
+                    {quickQuestions.map((item) => (
+                      <button key={item.question} onClick={() => void submit(item.question)}>
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="context-hint">
+                    {isPiVision
+                      ? "No approved PI Tag was detected on this display. Confirm the candidate asset in Context, then name the PI Tag you want to verify."
+                      : "Name an approved PI Tag in your question to begin an analysis."}
+                  </div>
+                )}
               </div>
             )}
             {(running || answer) && (
@@ -388,7 +428,11 @@ export function App() {
             <textarea
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="Ask about the current asset or PI Tag…"
+              placeholder={
+                tags.length > 0
+                  ? `Ask about ${tags.join(", ")}…`
+                  : "Name an approved PI Tag to analyze…"
+              }
               rows={3}
             />
             {running ? (

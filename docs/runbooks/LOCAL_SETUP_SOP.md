@@ -132,13 +132,24 @@ INFO:     Application startup complete.
 
 1. 確認你在 Easy PI 或 PI Vision 的頁面上
 2. 點右上角工具列的 **Solera S logo**
-3. Sidecar 側欄彈出，自動偵測當前頁面 Context
-4. 在 **Chat** 欄輸入問題，例如：
+3. 點 Sidecar 右上角的 ⚙ **Connection settings**
+4. 填入：
+   - API URL：`http://localhost:8000`
+   - Bearer token：`dev:tenant-demo:demo-user:viewer`
+   - Tenant：`tenant-demo`
+5. 點 **Save and reconnect**
+6. Sidecar 側欄彈出，自動偵測當前頁面 Context
+7. 在 **Chat** 欄輸入問題，例如：
    - `CDT158 過去 1 小時的最大值是多少？`
    - `比較 CDT158 和 CDT159 過去 24 小時的趨勢`
-5. Agent 回傳帶 Evidence 的答案
-6. 點「**Add to Canvas**」→ 彈出趨勢圖 overlay
-7. 按 **Esc** 或 X 關閉 Canvas，畫面完全復原
+   - 在 PI Vision 頁面，請改用該頁面實際對應的 PI Tag；不要直接套用
+     Easy PI 範例中的 CDT158/CDT159。
+8. Agent 回傳帶 Evidence 的答案
+9. 點「**Add to Canvas**」→ 彈出趨勢圖 overlay
+10. 按 **Esc** 或 X 關閉 Canvas，畫面完全復原
+
+> 這個 `dev:` token 只適用於本機 `.env` 的 development mode，
+> 不要拿到 production 或客戶環境使用。正式環境會改用 OIDC bearer token。
 
 ---
 
@@ -157,7 +168,17 @@ INFO:     Application startup complete.
 **原因：** 後端 API 沒有啟動  
 **解法：** 開終端機執行步驟 1 的 uvicorn 指令，再重新整理側欄
 
-### Q2：Agent 說「analysis complete」但沒有 LLM 說明文字
+### Q2：畫面出現「Configure an authenticated Solera bearer token first」
+**原因：** Sidecar 的設定面板尚未填入本機 development token。  
+**解法：** 點右上角 ⚙，填入：
+```
+API URL: http://localhost:8000
+Bearer token: dev:tenant-demo:demo-user:viewer
+Tenant: tenant-demo
+```
+按 **Save and reconnect** 後再送出問題。
+
+### Q3：Agent 說「analysis complete」但沒有 LLM 說明文字
 **原因：** `.env` 中 `SOLERA_MODEL_PROVIDER=disabled` 或 API key 錯誤  
 **解法：** 確認 `.env` 中：
 ```
@@ -165,18 +186,25 @@ SOLERA_MODEL_PROVIDER=openai-chat
 SOLERA_MODEL_API_KEY=sk-or-v1-...（真實 key）
 ```
 
-### Q3：PI Vision 頁面 Sidecar 顯示「未知頁面」
+### Q4：PI Vision 頁面 Sidecar 顯示「未知頁面」
 **原因：** 可能是 URL 不在 allowlist  
 **解法：** 確認 URL 包含 `pivision.iiotfab.com:8443`，extension 的 content script 只注入這個 domain
 
-### Q4：更新了程式碼但 extension 沒變
+### Q5：PI Vision 頁面顯示候選 Asset，但信心只有 45% 或 80%
+**原因：** PI Vision 的 display URL／DOM 只能提供候選 context，Solera 不會從圖形
+目測或猜測設備數值。  
+**解法：** 打開 **Context** 分頁，確認候選 Asset；確認後，在 Chat 中輸入
+該 display 對應的已核准 PI Tag。PI Vision 提供 display context，Easy PI/API
+才是 v0.1 的數值權威來源。
+
+### Q6：更新了程式碼但 extension 沒變
 **解法：**
 ```bash
 npm run build
 # 然後去 brave://extensions，點 Solera Sidecar 的刷新圖示
 ```
 
-### Q5：Easy PI 資料查不到
+### Q7：Easy PI 資料查不到
 **原因：** Tag 不在 allowlist，或時間範圍太大  
 **確認：** `.env` 中 `SOLERA_ALLOWED_TAGS=CDT158,CDT159,SINUSOID`
 
