@@ -1,0 +1,45 @@
+{
+  "name": "solera",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/contracts",
+    "packages/canvas-renderer",
+    "apps/sidecar-extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w @solera/contracts && npm run build -w @solera/canvas-renderer && npm run build -w @solera/sidecar-extension",
+    "check": "npm run build && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint:python": "uv run ruff check apps/solera-api connectors/easy-pi flows",
+    "test:python": "uv run pytest",
+    "test:browser": "npm run build && playwright test",
+    "verify": "npm run check && npm run lint:python && npm run test:python && npm run test:browser",
+    "package:extension": "npm run build && node scripts/package-extension.mjs",
+    "sbom:js": "npm sbom --sbom-format cyclonedx > artifacts/npm-sbom.cdx.json",
+    "sbom:python": "uv export --frozen --no-dev --format requirements-txt > artifacts/python-dependencies.txt"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "fsevents": "2.3.3"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@playwright/test": "^1.61.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/chrome": "^0.2.2",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "archiver": "^8.0.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  }
+}
