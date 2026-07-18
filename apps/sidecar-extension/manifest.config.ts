@@ -7,9 +7,9 @@ export default defineManifest({
   minimum_chrome_version: "114",
   description: "Read-only industrial AI Agent Sidecar for Easy PI and PI Vision.",
   icons: {
-    16: "public/icons/icon16.png",
-    48: "public/icons/icon48.png",
-    128: "public/icons/icon128.png",
+    16: "icons/icon16.png",
+    48: "icons/icon48.png",
+    128: "icons/icon128.png",
   },
   permissions: ["activeTab", "sidePanel", "storage"],
   host_permissions: [
@@ -25,9 +25,9 @@ export default defineManifest({
   action: {
     default_title: "Open Solera Sidecar",
     default_icon: {
-      16: "public/icons/icon16.png",
-      48: "public/icons/icon48.png",
-      128: "public/icons/icon128.png",
+      16: "icons/icon16.png",
+      48: "icons/icon48.png",
+      128: "icons/icon128.png",
     },
   },
   side_panel: {

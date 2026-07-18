@@ -52,4 +52,10 @@ test("Chrome and Edge managed-package contract is compatible", () => {
   expect(manifest.permissions).toEqual(
     expect.arrayContaining(["activeTab", "sidePanel", "storage"]),
   );
+  for (const iconPath of Object.values(manifest.icons)) {
+    expect(fs.existsSync(path.join(extensionPath, String(iconPath)))).toBe(true);
+  }
+  for (const iconPath of Object.values(manifest.action.default_icon)) {
+    expect(fs.existsSync(path.join(extensionPath, String(iconPath)))).toBe(true);
+  }
 });
