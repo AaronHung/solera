@@ -1,0 +1,415 @@
+:root {
+  color: #f5f2eb;
+  background: #111311;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% -10%, rgb(214 139 54 / 18%), transparent 34%),
+    #111311;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+.sidecar-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #2b302c;
+  background: rgb(16 18 16 / 88%);
+  backdrop-filter: blur(16px);
+}
+
+.topbar > div:nth-child(2) {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.topbar strong {
+  letter-spacing: 0.02em;
+}
+
+.topbar span {
+  overflow: hidden;
+  color: #949b95;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  border: 1px solid #db9447;
+  border-radius: 50%;
+  color: #ffb45e;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  box-shadow: inset 0 0 16px rgb(219 148 71 / 14%);
+}
+
+.icon-button {
+  border: 0;
+  background: none;
+  color: #a9afa9;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.settings-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #34352e;
+  background: #1b1d19;
+}
+
+.settings-panel label {
+  display: grid;
+  gap: 5px;
+  color: #bbbcb5;
+  font-size: 11px;
+}
+
+.settings-panel input {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #41443d;
+  border-radius: 7px;
+  outline: none;
+  background: #10120f;
+  color: #f3eee5;
+}
+
+.settings-panel p {
+  margin: 0;
+  color: #80867e;
+  font-size: 10px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid #292d29;
+}
+
+.tabs button {
+  padding: 11px 4px 9px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #858c86;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tabs button.active {
+  border-bottom-color: #d98c3d;
+  color: #f8efe4;
+}
+
+.chat-panel {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-rows: auto 1fr auto;
+}
+
+.context-strip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #232623;
+  background: #151815;
+}
+
+.context-strip > div {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.context-strip strong,
+.context-strip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-strip strong {
+  font-size: 12px;
+}
+
+.context-strip span {
+  color: #8e958f;
+  font-size: 10px;
+}
+
+.context-strip button,
+.evidence-link {
+  border: 0;
+  background: none;
+  color: #dd9c57;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #7a8179;
+}
+
+.status-dot.healthy {
+  background: #51c7a5;
+  box-shadow: 0 0 8px rgb(81 199 165 / 50%);
+}
+
+.status-dot.warning {
+  background: #db9447;
+}
+
+.conversation {
+  overflow: auto;
+  padding: 18px 15px;
+}
+
+.welcome {
+  padding: 14px 5px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #d9944d;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.welcome h1,
+.detail-panel h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.welcome > p:not(.eyebrow),
+.detail-panel > p {
+  color: #9aa098;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.suggestions {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.suggestions button {
+  padding: 11px 12px;
+  border: 1px solid #333831;
+  border-radius: 9px;
+  background: #191c18;
+  color: #d8d7d0;
+  cursor: pointer;
+  font-size: 11px;
+  text-align: left;
+}
+
+.suggestions button:hover {
+  border-color: #815f38;
+  background: #211f19;
+}
+
+.answer-card,
+.source-card,
+.asset-card {
+  padding: 14px;
+  border: 1px solid #31352f;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #191c19, #151715);
+}
+
+.answer-card p {
+  margin: 13px 0;
+  color: #e4e0d7;
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.answer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #949b95;
+  font-size: 10px;
+}
+
+.answer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d9944d;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 5px rgb(217 148 77 / 0%);
+    opacity: 0.55;
+  }
+}
+
+.error-banner {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #753b35;
+  border-radius: 8px;
+  background: #2d1917;
+  color: #e5a59e;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px 14px;
+  border-top: 1px solid #272a27;
+  background: #121412;
+}
+
+.composer textarea {
+  min-height: 62px;
+  flex: 1;
+  resize: none;
+  padding: 10px 11px;
+  border: 1px solid #3a3e38;
+  border-radius: 10px;
+  outline: none;
+  background: #1b1e1b;
+  color: #f1eee7;
+  font-size: 12px;
+}
+
+.composer textarea:focus {
+  border-color: #886238;
+}
+
+.send,
+.stop,
+.primary {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #c87931;
+  color: #17130f;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.send:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.stop {
+  background: #6d3733;
+  color: #f2dad5;
+}
+
+.detail-panel {
+  overflow: auto;
+  flex: 1;
+  padding: 20px 16px;
+}
+
+.detail-panel dl,
+.source-card dl {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.detail-panel dt,
+.source-card dt {
+  color: #777e78;
+}
+
+.detail-panel dd,
+.source-card dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #d1d2cb;
+}
+
+.asset-card {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.asset-card span,
+.source-card span {
+  color: #898f88;
+  font-size: 10px;
+}
+
+.asset-card small {
+  color: #d49550;
+}
+
+.source-card {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0;
+}
