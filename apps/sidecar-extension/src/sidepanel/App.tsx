@@ -434,6 +434,7 @@ export function App() {
   const abortRef = useRef<AbortController | null>(null);
   const startedAtRef = useRef<number | null>(null);
   const attachmentInputRef = useRef<HTMLInputElement | null>(null);
+  const composerTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const tabSessionsRef = useRef(new Map<number, TabSession>());
   const activeTabIdRef = useRef<number | null>(null);
   const sessionsLoadedRef = useRef(false);
@@ -609,6 +610,15 @@ export function App() {
     thoughts,
     viewSpec,
   ]);
+
+  useEffect(() => {
+    const textarea = composerTextareaRef.current;
+    if (!textarea) {
+      return;
+    }
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  }, [question]);
 
   const selectedAsset = context?.candidateAssets[0];
   const tags = useMemo(
@@ -1106,6 +1116,7 @@ export function App() {
               </div>
             )}
             <textarea
+              ref={composerTextareaRef}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={(event) => {
@@ -1121,7 +1132,7 @@ export function App() {
                     ? "Ask what this PI Vision screen shows…"
                     : "Ask what this page shows…"
               }
-              rows={3}
+              rows={1}
             />
             <div className="composer-toolbar">
               <select
