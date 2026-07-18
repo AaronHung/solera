@@ -2,10 +2,15 @@ import { defineManifest } from "@crxjs/vite-plugin";
 
 export default defineManifest({
   manifest_version: 3,
-  name: "Project Solera Sidecar",
+  name: "Solera Sidecar",
   version: "0.1.0",
   minimum_chrome_version: "114",
-  description: "Read-only industrial Agent Sidecar for approved systems.",
+  description: "Read-only industrial AI Agent Sidecar for Easy PI and PI Vision.",
+  icons: {
+    16: "public/icons/icon16.png",
+    48: "public/icons/icon48.png",
+    128: "public/icons/icon128.png",
+  },
   permissions: ["activeTab", "sidePanel", "storage"],
   host_permissions: [
     "https://easypi.iiotfab.com/*",
@@ -19,6 +24,11 @@ export default defineManifest({
   },
   action: {
     default_title: "Open Solera Sidecar",
+    default_icon: {
+      16: "public/icons/icon16.png",
+      48: "public/icons/icon48.png",
+      128: "public/icons/icon128.png",
+    },
   },
   side_panel: {
     default_path: "sidepanel.html",

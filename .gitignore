@@ -1,4 +1,4 @@
-# JavaScript
+# JavaScript / Node
 node_modules/
 dist/
 coverage/
@@ -12,18 +12,36 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 .coverage
 htmlcov/
 
-# Runtime data and secrets
+# Environment & secrets – NEVER commit .env with real values
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+
+# Runtime data
 data/
 *.db
 *.sqlite*
+*.log
+logs/
 
-# Local tooling
-.DS_Store
+# Trace / eval exports (may contain PI values)
+*.jsonl
+
+# Build artifacts & local cache
 .cache/
 artifacts/
+
+# IDE / editor
+.idea/
+.vscode/
+.cursor/settings/
+
+# macOS
+.DS_Store
+Thumbs.db
