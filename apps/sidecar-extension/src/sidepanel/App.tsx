@@ -23,16 +23,16 @@ const LOCAL_DEMO_TOKEN = "dev:tenant-demo:demo-user:viewer";
 const OPENROUTER_MODELS = [
   { id: "deepseek/deepseek-v4-pro", label: "DeepSeek V4 Pro" },
   { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna" },
-  { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
-  { id: "anthropic/claude-opus-4.8", label: "Claude Opus 4.8" },
+  { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6 💰" },
+  { id: "anthropic/claude-opus-4.8", label: "Claude Opus 4.8 💰💰" },
   { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash" },
   {
     id: "nvidia/nemotron-3-ultra-550b-a55b:free",
-    label: "Nemotron 3 Ultra",
+    label: "Nemotron 3 Ultra 🎁",
   },
   { id: "xiaomi/mimo-v2.5", label: "Mimo V2.5" },
   { id: "minimax/minimax-m3", label: "Minimax M3" },
-  { id: "tencent/hy3:free", label: "Tencent HY3" },
+  { id: "tencent/hy3:free", label: "Tencent HY3 🎁" },
   { id: "z-ai/glm-5.2", label: "GLM 5.2" },
 ] as const;
 const DEFAULT_MODEL = OPENROUTER_MODELS[0].id;
@@ -1147,6 +1147,7 @@ export function App() {
                   </option>
                 ))}
               </select>
+              <span className="composer-spacer" />
               <button
                 type="button"
                 className="attach-button"
@@ -1156,7 +1157,6 @@ export function App() {
               >
                 <span aria-hidden="true">📎</span>
               </button>
-              <span className="composer-spacer" />
               {running ? (
                 <button
                   type="button"
