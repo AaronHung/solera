@@ -245,3 +245,94 @@ This proposal is subordinate to `SOLERA_V0_1.md` until accepted through a
 future contract version or ADR. New Skills must reference a backlog item,
 manifest version, evaluation set, and security review. Removing or weakening
 read-only, Evidence, tenant, or data-egress invariants requires an ADR.
+
+## 13. Industrial data flywheel
+
+The v0.2 direction includes a governed Data Flywheel. Its purpose is to turn
+approved observations, analyses, documents, feedback, and relationships into
+better future context without copying an unrestricted historian archive.
+
+```text
+Approved sources
+  → ingest and normalize
+  → quality, identity, and lineage checks
+  → time-window aggregates and derived observations
+  → Site / Asset / Tag relationships
+  → Open Wiki and Graph knowledge
+  → Vector retrieval with tenant filters
+  → Skills, Canvas, feedback, and evaluation
+  → versioned outcomes feed the next cycle
+```
+
+The Flywheel must preserve:
+
+- source system, site, asset, Tag, timestamp, timezone, and query lineage
+- data-quality state, calculation version, and aggregation window
+- tenant, retention, sensitivity, and model-egress policy
+- reproducibility from a raw-approved input or redacted fixture
+- explicit distinction between observation, calculation, document claim, and
+  model-generated hypothesis
+
+Monthly and multi-day analysis is a first-class v0.2 use case. A Skill may
+request a bounded historical window such as “the three days before and after
+the displayed timestamp” or “the last month”, but the policy layer must
+enforce range, point, cost, and connector limits.
+
+## 14. Site and Asset Management
+
+Solera should model the industrial hierarchy independently from a single
+browser display:
+
+```text
+Tenant
+  → Site
+    → Area / Line
+      → Unit / Equipment
+        → Asset
+          → Tag / Signal / Document / Event
+```
+
+The model must support stable IDs, aliases, provenance, effective dates,
+parent/child relationships, candidate confidence, and tenant-specific
+operating metadata. A display or page may resolve to this hierarchy, but it
+does not become the authoritative definition of the Asset.
+
+Site/Asset Management enables:
+
+- cross-display and cross-system navigation
+- long-window trends for one Asset
+- comparison of similar Assets across Sites
+- SOP, maintenance, event, and sensor relationships
+- Canvas topology and future 2.5D/3D Scene views
+
+## 15. Knowledge and data services
+
+The proposed v0.2 platform services are deliberately complementary:
+
+- **Data Services** — normalized read access, historical query, aggregates,
+  quality, lineage, and Evidence references.
+- **Open Wiki** — versioned human-readable knowledge pages, SOPs, definitions,
+  and operator annotations with citations.
+- **Graph DB / relational graph** — typed relationships among Sites, Assets,
+  Tags, documents, events, Skills, and analyses.
+- **Vector DB** — semantically searchable document and observation chunks,
+  always filtered by tenant, Site, Asset, sensitivity, and retention policy.
+
+Vector retrieval must not replace the graph or Evidence. It provides recall;
+the graph provides structure; Data Services provides numerical truth; Evidence
+provides reproducibility.
+
+## 16. Canvas, 2.5D, and Scene readiness
+
+v0.2 should not jump directly to arbitrary 3D rendering. It should first
+define a stable spatial and asset contract for:
+
+- Site maps and area layouts
+- equipment cards and asset topology
+- 2D/2.5D process views with time-aware overlays
+- linked trend, status, document, and Evidence panels
+- future 3D Scene geometry, coordinate systems, and object identity
+
+Canvas remains the trusted renderer. Scene is a future renderer over the same
+validated Site/Asset, Evidence, and ViewSpec contracts. The Agent may propose a
+spatial view, but it cannot inject arbitrary executable scene code.

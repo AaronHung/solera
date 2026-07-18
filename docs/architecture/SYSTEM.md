@@ -58,6 +58,32 @@ flowchart LR
 - Flow jobs are idempotent and versioned. Local development runs them in-process
   or by CLI; production scheduling remains an adapter.
 
+### Proposed v0.2 Data Flywheel
+
+The post-Pilot direction adds a governed data and knowledge loop:
+
+```text
+PI / Easy PI / MES / ERP / documents
+  → Data Services
+  → quality + lineage + bounded aggregates
+  → Site / Asset / Tag graph
+  → Open Wiki + tenant-filtered Vector retrieval
+  → Skills, Canvas, reports, and feedback
+  → replayable evaluation and next-cycle improvements
+```
+
+This is a proposal, not a v0.1 implementation claim. Solera should retain
+Evidence and controlled aggregates rather than blindly copying an entire
+historian. Monthly windows and long-term trends require explicit retention,
+cost, downsampling, timezone, and tenant policies. Vector retrieval provides
+recall; the graph provides typed relationships; Data Services remains the
+numerical source of truth.
+
+The Site/Asset model is also the foundation for future 2.5D Canvas and 3D
+Scene experiences. Spatial rendering must consume validated identity,
+time-series, and Evidence contracts rather than arbitrary model-generated
+scene code.
+
 ## Trust boundaries
 
 ```mermaid

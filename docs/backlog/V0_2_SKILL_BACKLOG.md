@@ -122,6 +122,76 @@ updated evaluation evidence, and an update to `docs/PROJECT_STATE.md`.
   - Done when: one customer Skill can be deployed and disabled without
     rebuilding the extension or affecting another tenant.
 
+## Gate 5 — Data Flywheel and industrial knowledge
+
+- **SOL-V02-BL-050** Define the canonical Site / Area / Line / Unit / Asset /
+  Tag hierarchy and cross-system identity mapping.
+  - Requirement: `SOL-V02-DATA-001`.
+  - Done when: stable IDs, aliases, provenance, effective dates, confidence,
+    and tenant ownership are represented in contract fixtures.
+
+- **SOL-V02-BL-051** Extend the connector contract for bounded historical
+  windows, including multi-day and monthly queries, downsampling, quality,
+  timezone, and cost limits.
+  - Requirement: `SOL-V02-DATA-002`.
+  - Done when: a read-only PI historian query can retrieve a policy-approved
+    range with complete Evidence and cancellation behavior.
+
+- **SOL-V02-BL-052** Implement PI Vision Historical Analysis Skill.
+  - Requirement: `SOL-V02-DATA-003`.
+  - Done when: a question such as “the three days before and after this
+    timestamp” resolves a Tag, queries the bounded window, and calculates
+    average/min/max/rate with explicit units and data quality.
+
+- **SOL-V02-BL-053** Build Data Services for normalized observations,
+  aggregates, lineage, Evidence references, and retention.
+  - Requirement: `SOL-V02-DATA-004`.
+  - Done when: Skills can consume a stable provider-neutral read contract
+    without copying an unrestricted PI archive.
+
+- **SOL-V02-BL-054** Implement the first idempotent Data Flywheel:
+  ingest → normalize → quality → aggregate → link → index → evaluate.
+  - Requirement: `SOL-V02-DATA-005`.
+  - Done when: a replayable monthly fixture produces the same versioned
+    aggregates, relationships, and evaluation artifacts.
+
+- **SOL-V02-BL-055** Add a typed Asset / Site relationship graph.
+  - Requirement: `SOL-V02-DATA-006`.
+  - Done when: Site, equipment, Asset, Tag, document, event, and analysis
+    edges are queryable with tenant and provenance filters.
+
+- **SOL-V02-BL-056** Add tenant-filtered Vector DB retrieval for documents and
+  approved observation summaries.
+  - Requirement: `SOL-V02-DATA-007`.
+  - Done when: vector recall cannot bypass graph, Evidence, sensitivity,
+    retention, or tenant policy.
+
+- **SOL-V02-BL-057** Add Open Wiki data services for versioned definitions,
+  SOPs, operator notes, and citations.
+  - Requirement: `SOL-V02-DATA-008`.
+  - Done when: every retrieved knowledge claim has owner, version, source,
+    effective date, and Evidence/citation metadata.
+
+## Gate 6 — Spatial industrial experience
+
+- **SOL-V02-BL-060** Define spatial Site/Asset ViewSpec extensions for maps,
+  equipment topology, 2.5D overlays, and linked trends.
+  - Requirement: `SOL-V02-SPATIAL-001`.
+  - Done when: a trusted Canvas can render a Site or Asset view without
+    arbitrary model-generated code.
+
+- **SOL-V02-BL-061** Build a 2.5D industrial Canvas prototype driven by Site,
+  Asset, time-series, and Evidence contracts.
+  - Requirement: `SOL-V02-SPATIAL-002`.
+  - Done when: selecting an Asset opens its related trends, documents,
+    status, and Evidence without changing host-system state.
+
+- **SOL-V02-BL-062** Define Scene-ready contracts for future 3D geometry,
+  coordinate systems, object identity, and lifecycle cleanup.
+  - Requirement: `SOL-V02-SPATIAL-003`.
+  - Done when: a future 3D renderer can consume the same validated identity
+    and Evidence model; 3D rendering itself remains a later milestone.
+
 ## Cross-cutting evaluation and operations
 
 - **SOL-V02-BL-040** Create a Skill golden set covering routing, ambiguity,
@@ -149,5 +219,6 @@ evaluation gates pass. The first implementation slice is:
 
 ```text
 SkillManifest → Registry → Hybrid selection → Page Understanding
-→ PI Vision Industrial Analysis → Tank Capacity → Skill golden set
+→ PI Vision Industrial Analysis → Tank Capacity → Historical Analysis
+→ Data Flywheel fixture → Asset graph → Skill golden set
 ```

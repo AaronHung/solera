@@ -27,8 +27,10 @@ const DEFAULT_SETTINGS: SidecarSettings = {
 };
 
 const EASY_PI_DEMO_TAGS = ["CDT158", "CDT159", "SINUSOID"];
+const TAB_SESSIONS_STORAGE_KEY = "soleraTabSessions";
 
 type Tab = "chat" | "context" | "evidence" | "canvas";
+type Feedback = "positive" | "negative" | null;
 
 interface ConversationTurn {
   id: string;
@@ -37,6 +39,8 @@ interface ConversationTurn {
   evidence: Evidence[];
   thoughts: string[];
   durationMs: number | null;
+  createdAt: number;
+  feedback: Feedback;
 }
 
 interface TabSession {
@@ -51,6 +55,8 @@ interface TabSession {
   error: string | null;
   thoughts: string[];
   durationMs: number | null;
+  submittedAt: number | null;
+  feedback: Feedback;
 }
 
 async function loadSettings(): Promise<SidecarSettings> {
@@ -63,6 +69,30 @@ async function loadSettings(): Promise<SidecarSettings> {
     settings.bearerToken = LOCAL_DEMO_TOKEN;
   }
   return settings;
+}
+
+function tabSessionStorage() {
+  return chrome.storage.session ?? chrome.storage.local;
+}
+
+async function loadTabSessions(): Promise<Map<number, TabSession>> {
+  const stored = await tabSessionStorage().get(TAB_SESSIONS_STORAGE_KEY);
+  const serialized = stored[TAB_SESSIONS_STORAGE_KEY] as
+    | Record<string, TabSession>
+    | undefined;
+  return new Map(
+    Object.entries(serialized ?? {}).map(([tabId, session]) => [
+      Number(tabId),
+      session,
+    ]),
+  );
+}
+
+async function saveTabSessions(sessions: Map<number, TabSession>): Promise<void> {
+  const serialized = Object.fromEntries(
+    [...sessions.entries()].map(([tabId, session]) => [String(tabId), session]),
+  );
+  await tabSessionStorage().set({ [TAB_SESSIONS_STORAGE_KEY]: serialized });
 }
 
 async function captureContext(settings: SidecarSettings): Promise<PageContext> {
@@ -105,10 +135,19 @@ function assetNeedsConfirmation(context: PageContext | null): boolean {
 }
 
 function InlineMarkdown({ text }: { text: string }) {
-  const malformedStrong = text.match(/^\*([^*]+?)\s*\*{2}$/);
-  const normalized = malformedStrong
-    ? `**${malformedStrong[1]?.trim() ?? ""}**`
+  const wholeMalformedStrong = text.match(/^\*([^*]+?)\s*\*{2}$/);
+  let normalized = wholeMalformedStrong
+    ? `**${wholeMalformedStrong[1]?.trim() ?? ""}**`
     : text;
+  normalized = normalized
+    .replace(
+      /(^|[^*])\*([^*\n]+?)\*{2}(?=\s|$|[：:，,。！？；;])/g,
+      "$1**$2**",
+    )
+    .replace(
+      /(^|[^*])\*{2}([^*\n]+?)\*(?=\s|$|[：:，,。！？；;])/g,
+      "$1**$2**",
+    );
   const parts = normalized.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
   return (
     <span className="markdown-inline">
@@ -268,6 +307,76 @@ function ActivityDetails({
   );
 }
 
+function formatMessageTime(timestamp: number): string {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
+}
+
+function MessageActions({
+  text,
+  timestamp,
+  durationMs,
+  feedback,
+  onFeedback,
+}: {
+  text: string;
+  timestamp: number | null;
+  durationMs?: number | null;
+  feedback?: Feedback;
+  onFeedback?: (value: Exclude<Feedback, null>) => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copyText = async () => {
+    if (!text) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="message-actions">
+      <button type="button" title="Copy" aria-label="Copy message" onClick={() => void copyText()}>
+        {copied ? "✓" : "⧉"}
+      </button>
+      {onFeedback && (
+        <>
+          <button
+            type="button"
+            className={feedback === "positive" ? "selected" : ""}
+            title="Good response"
+            aria-label="Good response"
+            onClick={() => onFeedback("positive")}
+          >
+            👍
+          </button>
+          <button
+            type="button"
+            className={feedback === "negative" ? "selected" : ""}
+            title="Bad response"
+            aria-label="Bad response"
+            onClick={() => onFeedback("negative")}
+          >
+            👎
+          </button>
+        </>
+      )}
+      {timestamp !== null && <time>{formatMessageTime(timestamp)}</time>}
+      {durationMs !== undefined && durationMs !== null && (
+        <span>{Math.max(1, Math.round(durationMs / 1000))}s</span>
+      )}
+    </div>
+  );
+}
+
 export function App() {
   const [tab, setTab] = useState<Tab>("chat");
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -277,9 +386,11 @@ export function App() {
   const [question, setQuestion] = useState("");
   const [conversation, setConversation] = useState<ConversationTurn[]>([]);
   const [lastSubmittedQuestion, setLastSubmittedQuestion] = useState("");
+  const [submittedAt, setSubmittedAt] = useState<number | null>(null);
   const [answer, setAnswer] = useState("");
   const [thoughts, setThoughts] = useState<string[]>([]);
   const [durationMs, setDurationMs] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const [status, setStatus] = useState("Ready");
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [viewSpec, setViewSpec] = useState<ViewSpec | null>(null);
@@ -290,10 +401,12 @@ export function App() {
   const startedAtRef = useRef<number | null>(null);
   const tabSessionsRef = useRef(new Map<number, TabSession>());
   const activeTabIdRef = useRef<number | null>(null);
+  const sessionsLoadedRef = useRef(false);
   const sessionStateRef = useRef<TabSession>({
     tab: "chat",
     conversation: [],
     lastSubmittedQuestion: "",
+    submittedAt: null,
     question: "",
     answer: "",
     status: "Ready",
@@ -302,11 +415,13 @@ export function App() {
     error: null,
     thoughts: [],
     durationMs: null,
+    feedback: null,
   });
   sessionStateRef.current = {
     tab,
     conversation,
     lastSubmittedQuestion,
+    submittedAt,
     question,
     answer,
     status,
@@ -315,6 +430,7 @@ export function App() {
     error,
     thoughts,
     durationMs,
+    feedback,
   };
 
   const refreshContext = useCallback(async (nextSettings: SidecarSettings) => {
@@ -345,6 +461,7 @@ export function App() {
     setTab("chat");
     setConversation([]);
     setLastSubmittedQuestion("");
+    setSubmittedAt(null);
     setQuestion("");
     setAnswer("");
     setThoughts([]);
@@ -353,9 +470,13 @@ export function App() {
     setViewSpec(null);
     setError(null);
     setStatus("Ready");
+    setFeedback(null);
   };
 
   const refreshActiveTab = useCallback(async (reset = false) => {
+    if (!sessionsLoadedRef.current) {
+      return;
+    }
     const [activeBrowserTab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
@@ -367,16 +488,22 @@ export function App() {
     const previousTabId = activeTabIdRef.current;
     if (previousTabId !== null && previousTabId !== nextTabId) {
       tabSessionsRef.current.set(previousTabId, sessionStateRef.current);
+      void saveTabSessions(tabSessionsRef.current);
       abortRef.current?.abort();
       setRunning(false);
     }
     activeTabIdRef.current = nextTabId;
 
+    if (reset) {
+      tabSessionsRef.current.delete(nextTabId);
+      void saveTabSessions(tabSessionsRef.current);
+    }
     const savedSession = reset ? undefined : tabSessionsRef.current.get(nextTabId);
     if (savedSession) {
       setTab(savedSession.tab);
       setConversation(savedSession.conversation);
       setLastSubmittedQuestion(savedSession.lastSubmittedQuestion);
+      setSubmittedAt(savedSession.submittedAt);
       setQuestion(savedSession.question);
       setAnswer(savedSession.answer);
       setEvidence(savedSession.evidence);
@@ -385,6 +512,7 @@ export function App() {
       setStatus(savedSession.status);
       setThoughts(savedSession.thoughts);
       setDurationMs(savedSession.durationMs);
+      setFeedback(savedSession.feedback);
     } else {
       resetAnalysis();
     }
@@ -395,7 +523,11 @@ export function App() {
   }, [refreshContext]);
 
   useEffect(() => {
-    void refreshActiveTab(true);
+    void loadTabSessions().then((sessions) => {
+      tabSessionsRef.current = sessions;
+      sessionsLoadedRef.current = true;
+      void refreshActiveTab();
+    });
     const onActivated = () => {
       void refreshActiveTab();
     };
@@ -415,6 +547,28 @@ export function App() {
       chrome.tabs.onUpdated.removeListener(onUpdated);
     };
   }, [refreshActiveTab]);
+
+  useEffect(() => {
+    const activeTabId = activeTabIdRef.current;
+    if (!sessionsLoadedRef.current || activeTabId === null || running) {
+      return;
+    }
+    tabSessionsRef.current.set(activeTabId, sessionStateRef.current);
+    void saveTabSessions(tabSessionsRef.current);
+  }, [
+    answer,
+    conversation,
+    durationMs,
+    error,
+    evidence,
+    feedback,
+    lastSubmittedQuestion,
+    running,
+    status,
+    submittedAt,
+    thoughts,
+    viewSpec,
+  ]);
 
   const selectedAsset = context?.candidateAssets[0];
   const tags = useMemo(
@@ -535,10 +689,13 @@ export function App() {
           evidence,
           thoughts,
           durationMs,
+          createdAt: submittedAt ?? Date.now(),
+          feedback,
         },
       ]);
     }
     setLastSubmittedQuestion(trimmed);
+    setSubmittedAt(Date.now());
     setQuestion(trimmed);
     setAnswer("");
     setEvidence([]);
@@ -547,6 +704,7 @@ export function App() {
     setStatus("Understanding context");
     setThoughts(["讀取目前頁面 context", "判斷問題需要頁面理解或資料查詢"]);
     setDurationMs(null);
+    setFeedback(null);
     setQuestion("");
     startedAtRef.current = Date.now();
     const controller = new AbortController();
@@ -715,6 +873,7 @@ export function App() {
               <article className="history-card" key={turn.id}>
                 <div className="question-label">You</div>
                 <p className="question-text">{turn.question}</p>
+                <MessageActions text={turn.question} timestamp={turn.createdAt} />
                 <div className="answer-meta">
                   <span className="status-dot healthy" />
                   Complete
@@ -724,6 +883,19 @@ export function App() {
                   durationMs={turn.durationMs}
                 />
                 <MarkdownText text={turn.answer} className="history-answer" />
+                <MessageActions
+                  text={turn.answer}
+                  timestamp={turn.createdAt}
+                  durationMs={turn.durationMs}
+                  feedback={turn.feedback}
+                  onFeedback={(value) =>
+                    setConversation((current) =>
+                      current.map((item) =>
+                        item.id === turn.id ? { ...item, feedback: value } : item,
+                      ),
+                    )
+                  }
+                />
                 {turn.evidence.length > 0 && (
                   <span className="history-source-count">
                     {turn.evidence.length} source{turn.evidence.length === 1 ? "" : "s"}
@@ -763,6 +935,7 @@ export function App() {
               <article className="answer-card">
                 <div className="question-label">You</div>
                 <p className="question-text">{lastSubmittedQuestion}</p>
+                <MessageActions text={lastSubmittedQuestion} timestamp={submittedAt} />
                 <div className="answer-meta">
                   <span className={running ? "pulse" : "status-dot healthy"} />
                   {status}
@@ -776,6 +949,15 @@ export function App() {
                   <MarkdownText text={answer} className="answer-markdown" />
                 ) : (
                   <p>Retrieving authoritative data…</p>
+                )}
+                {answer && (
+                  <MessageActions
+                    text={answer}
+                    timestamp={submittedAt}
+                    durationMs={durationMs}
+                    feedback={feedback}
+                    onFeedback={(value) => setFeedback(value)}
+                  />
                 )}
                 {evidence.length > 0 && (
                   <div className="answer-actions">

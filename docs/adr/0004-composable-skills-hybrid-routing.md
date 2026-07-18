@@ -40,6 +40,10 @@ After v0.1 acceptance:
 - Keep industrial Skills read-only by default.
 - Make Web Research, camera/vision, PPT/report, and general planning explicit
   Skills with separate permissions and evaluation sets.
+- Treat Data Services, the Site/Asset graph, Open Wiki, and Vector retrieval as
+  governed shared substrates for Skills, not as unrestricted autonomous
+  Agents. Data Services remains numerical authority; graph and Vector layers
+  preserve tenant, provenance, and Evidence filters.
 - Make customer Skills tenant-scoped, versioned, auditable, disableable, and
   rollbackable.
 

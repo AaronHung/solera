@@ -53,6 +53,10 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
   `docs/architecture/SOLERA_VS_GPT_SIDECAR.md`.
 - The implementation work is decomposed into
   `docs/backlog/V0_2_SKILL_BACKLOG.md`, with stable `SOL-V02-*` IDs.
+- The v0.2 direction now explicitly includes bounded historical/monthly
+  analysis, Site/Asset Management, the Data Flywheel, Data Services, Open
+  Wiki, relationship Graph, tenant-filtered Vector retrieval, and
+  2.5D/Scene-ready Canvas contracts.
 - ADR-0004 proposes composable Skills with Auto, Manual, and Hybrid routing,
   while preserving the v0.1 single-orchestrator and read-only boundaries.
 - No v0.2 runtime implementation has started. The v0.1 Pilot acceptance gate
@@ -94,8 +98,9 @@ live PI Vision adapter, run the golden set and load test, then begin the 5–10
 user instrumented Pilot. After acceptance is recorded, start the first slice
 in `docs/backlog/V0_2_SKILL_BACKLOG.md`: SkillManifest → Registry → Hybrid
 selection → Page Understanding → PI Vision Industrial Analysis → Tank
-Capacity. Do not start Bridge/Portal/Scene work before these v0.1 acceptance
-results are recorded.
+Capacity → Historical Analysis → Data Flywheel fixture → Asset graph. Do not
+start Bridge/Portal/Scene runtime work before these v0.1 acceptance results are
+recorded.
 
 ## Session handoff checklist
 

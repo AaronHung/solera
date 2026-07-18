@@ -35,7 +35,8 @@ numeric readings are unavailable when the payload explicitly says that no
 numeric observations were captured. Use page metadata to retain the display
 title and system. Do not recommend saving or editing the host page; keep next
 steps read-only and safe.
-Return concise plain text or Markdown; do not return HTML or JavaScript."""
+Return concise plain text or valid Markdown; keep all emphasis markers
+balanced and use standard table syntax; do not return HTML or JavaScript."""
 
 
 class ModelGatewayError(RuntimeError):

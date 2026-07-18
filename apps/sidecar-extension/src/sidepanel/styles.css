@@ -336,6 +336,55 @@ button {
   user-select: text;
 }
 
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  margin: -5px 0 8px;
+  color: #8b918b;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.history-card:hover .message-actions,
+.history-card:focus-within .message-actions,
+.answer-card:hover .message-actions,
+.answer-card:focus-within .message-actions {
+  opacity: 1;
+}
+
+.message-actions button {
+  min-width: 22px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #9da39d;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.message-actions button:hover,
+.message-actions button.selected {
+  background: #2b302a;
+  color: #f0c47e;
+}
+
+.message-actions time,
+.message-actions > span {
+  margin-left: 4px;
+  color: #858c85;
+}
+
+@media (hover: none) {
+  .message-actions {
+    opacity: 1;
+  }
+}
+
 .markdown-text p,
 .history-answer p {
   margin: 0 0 9px;
