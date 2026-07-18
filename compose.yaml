@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: solera
+      POSTGRES_USER: solera
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - solera-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solera -d solera"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/solera-api/Dockerfile
+    environment:
+      SOLERA_ENVIRONMENT: ${SOLERA_ENVIRONMENT:-development}
+      SOLERA_DATABASE_URL: postgresql+asyncpg://solera:${POSTGRES_PASSWORD}@postgres:5432/solera
+      SOLERA_ALLOWED_DOMAINS: ${SOLERA_ALLOWED_DOMAINS:-["easypi.iiotfab.com","pivision.iiotfab.com"]}
+      SOLERA_ALLOWED_TAGS: ${SOLERA_ALLOWED_TAGS:-["CDT158","CDT159","SINUSOID"]}
+      SOLERA_EASY_PI_BASE_URL: ${SOLERA_EASY_PI_BASE_URL:-https://easypi.iiotfab.com}
+      SOLERA_EASY_PI_SETTING_NAME: ${SOLERA_EASY_PI_SETTING_NAME:-PI-PRD}
+      SOLERA_EASY_PI_TIMEZONE: ${SOLERA_EASY_PI_TIMEZONE:-Asia/Taipei}
+      SOLERA_DEV_AUTH_ENABLED: ${SOLERA_DEV_AUTH_ENABLED:-true}
+      SOLERA_OIDC_ISSUER: ${SOLERA_OIDC_ISSUER:-}
+      SOLERA_OIDC_AUDIENCE: ${SOLERA_OIDC_AUDIENCE:-}
+      SOLERA_OIDC_JWKS_URL: ${SOLERA_OIDC_JWKS_URL:-}
+      SOLERA_MODEL_PROVIDER: ${SOLERA_MODEL_PROVIDER:-disabled}
+      SOLERA_MODEL_ENDPOINT: ${SOLERA_MODEL_ENDPOINT:-https://api.openai.com/v1/responses}
+      SOLERA_MODEL_NAME: ${SOLERA_MODEL_NAME:-frontier-model}
+      SOLERA_MODEL_API_KEY: ${SOLERA_MODEL_API_KEY:-}
+      SOLERA_MODEL_DATA_POLICY: ${SOLERA_MODEL_DATA_POLICY:-summary-only}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  solera-postgres:
