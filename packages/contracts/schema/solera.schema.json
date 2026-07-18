@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solera.example/contracts/v0.1/solera.schema.json",
+  "title": "Solera v0.1 Contracts",
+  "$defs": {
+    "PageContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contextVersion",
+        "tenantId",
+        "tabSessionId",
+        "capturedAt",
+        "page",
+        "candidateAssets",
+        "timeContext",
+        "sensitivity"
+      ],
+      "properties": {
+        "contextVersion": { "const": "0.1" },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "tabSessionId": { "type": "string", "minLength": 1 },
+        "capturedAt": { "type": "string", "format": "date-time" },
+        "page": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "urlPattern", "systemType", "viewType", "title"],
+          "properties": {
+            "url": { "type": "string", "format": "uri", "maxLength": 4096 },
+            "urlPattern": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "systemType": {
+              "enum": ["easy-pi", "pi-vision", "generic"]
+            },
+            "viewType": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "title": { "type": "string", "maxLength": 512 },
+            "selectedText": { "type": ["string", "null"], "maxLength": 2000 },
+            "visibleTextDigest": { "type": ["string", "null"], "maxLength": 8000 },
+            "adapterId": { "type": "string", "maxLength": 128 },
+            "adapterVersion": { "type": "string", "maxLength": 64 }
+          }
+        },
+        "candidateAssets": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["assetId", "label", "confidence", "source"],
+            "properties": {
+              "assetId": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "source": {
+                "enum": ["adapter", "url", "dom", "user", "catalog"]
+              },
+              "confirmed": { "type": "boolean", "default": false }
+            }
+          }
+        },
+        "timeContext": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end", "timezone", "source"],
+          "properties": {
+            "start": { "type": "string", "format": "date-time" },
+            "end": { "type": "string", "format": "date-time" },
+            "timezone": { "type": "string", "minLength": 1 },
+            "source": { "enum": ["adapter", "default", "user"] },
+            "confirmed": { "type": "boolean", "default": false }
+          }
+        },
+        "sensitivity": {
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "screenshotIncluded": { "type": "boolean", "default": false },
+            "redactionsApplied": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "ToolManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolVersion",
+        "name",
+        "description",
+        "readOnly",
+        "requiredRoles",
+        "limits",
+        "modelDataPolicy"
+      ],
+      "properties": {
+        "toolVersion": { "const": "0.1" },
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "readOnly": { "const": true },
+        "requiredRoles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxRangeSeconds", "maxPoints", "timeoutMs"],
+          "properties": {
+            "maxRangeSeconds": { "type": "integer", "minimum": 1 },
+            "maxPoints": { "type": "integer", "minimum": 1 },
+            "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 120000 }
+          }
+        },
+        "modelDataPolicy": {
+          "enum": ["none", "summary-only", "sampled", "raw"]
+        },
+        "auditPolicy": { "enum": ["metadata", "inputs-redacted", "full-redacted"] }
+      }
+    },
+    "DataPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "value", "quality"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "value": { "type": ["number", "string", "boolean", "null"] },
+        "quality": { "enum": ["good", "bad", "questionable", "missing"] }
+      }
+    },
+    "DataQuality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampleCount", "validCount", "badCount", "missingCount", "coverage"],
+      "properties": {
+        "sampleCount": { "type": "integer", "minimum": 0 },
+        "validCount": { "type": "integer", "minimum": 0 },
+        "badCount": { "type": "integer", "minimum": 0 },
+        "missingCount": { "type": "integer", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "freshnessSeconds": { "type": ["number", "null"], "minimum": 0 },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 }
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceVersion",
+        "evidenceId",
+        "tenantId",
+        "sourceSystem",
+        "sourceType",
+        "tags",
+        "start",
+        "end",
+        "timezone",
+        "retrievalMode",
+        "aggregation",
+        "calculationVersion",
+        "queryId",
+        "retrievedAt",
+        "dataQuality"
+      ],
+      "properties": {
+        "evidenceVersion": { "const": "0.1" },
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "sourceSystem": { "type": "string", "minLength": 1 },
+        "sourceType": { "enum": ["industrial-api", "document", "page-context"] },
+        "assetId": { "type": ["string", "null"] },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "retrievalMode": {
+          "enum": ["current", "recorded", "interpolated", "document", "context"]
+        },
+        "aggregation": { "type": ["string", "null"] },
+        "calculationVersion": { "type": "string", "minLength": 1 },
+        "connectorVersion": { "type": "string", "minLength": 1 },
+        "queryId": { "type": "string", "minLength": 1 },
+        "retrievedAt": { "type": "string", "format": "date-time" },
+        "dataQuality": { "$ref": "#/$defs/DataQuality" },
+        "citation": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "documentId": { "type": "string" },
+            "title": { "type": "string" },
+            "section": { "type": ["string", "null"] },
+            "uri": { "type": ["string", "null"], "format": "uri" }
+          }
+        }
+      }
+    },
+    "SeriesSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "count", "min", "max", "average", "stdDev", "rateOfChange"],
+      "properties": {
+        "tag": { "type": "string", "minLength": 1 },
+        "count": { "type": "integer", "minimum": 0 },
+        "min": { "type": ["number", "null"] },
+        "max": { "type": ["number", "null"] },
+        "average": { "type": ["number", "null"] },
+        "stdDev": { "type": ["number", "null"] },
+        "rateOfChange": { "type": ["number", "null"] },
+        "rateUnit": { "type": ["string", "null"] }
+      }
+    },
+    "AnalysisResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analysisVersion",
+        "analysisId",
+        "tenantId",
+        "kind",
+        "summaries",
+        "evidence"
+      ],
+      "properties": {
+        "analysisVersion": { "const": "0.1" },
+        "analysisId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["current", "summary", "comparison", "basic-anomaly"] },
+        "summaries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SeriesSummary" }
+        },
+        "comparison": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "leftTag": { "type": "string" },
+            "rightTag": { "type": "string" },
+            "meanDifference": { "type": ["number", "null"] },
+            "maxAbsoluteDifference": { "type": ["number", "null"] },
+            "maxDifferenceAt": { "type": ["string", "null"], "format": "date-time" }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Evidence" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "Widget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "title", "evidenceRefs", "config"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+        "type": {
+          "enum": ["timeseries", "kpi", "status", "table", "asset", "evidence"]
+        },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "config": {
+          "type": "object",
+          "maxProperties": 30,
+          "propertyNames": {
+            "not": {
+              "pattern": "^(script|Script|SCRIPT|on[A-Za-z]+|html|HTML|javascript|JavaScript|srcdoc)$"
+            }
+          },
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null", "array", "object"]
+          }
+        }
+      }
+    },
+    "ViewSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "viewId",
+        "tenantId",
+        "title",
+        "layout",
+        "widgets",
+        "createdAt"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "0.1" },
+        "viewId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "layout": { "enum": ["grid", "stack"] },
+        "widgets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/Widget" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Evidence" }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AuditEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventVersion",
+        "eventId",
+        "occurredAt",
+        "tenantId",
+        "actorId",
+        "action",
+        "outcome",
+        "traceId",
+        "contractVersion"
+      ],
+      "properties": {
+        "eventVersion": { "const": "0.1" },
+        "eventId": { "type": "string", "minLength": 1 },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "actorId": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "resourceType": { "type": ["string", "null"] },
+        "resourceId": { "type": ["string", "null"] },
+        "outcome": { "enum": ["allowed", "denied", "failed"] },
+        "reasonCode": { "type": ["string", "null"] },
+        "traceId": { "type": "string", "minLength": 1 },
+        "contractVersion": { "type": "string", "minLength": 1 },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      }
+    },
+    "ConnectorCapabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "connectorId",
+        "connectorVersion",
+        "readOnly",
+        "operations",
+        "limits"
+      ],
+      "properties": {
+        "protocolVersion": { "const": "0.1" },
+        "connectorId": { "type": "string", "minLength": 1 },
+        "connectorVersion": { "type": "string", "minLength": 1 },
+        "readOnly": { "const": true },
+        "operations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "health",
+              "list-tags",
+              "current",
+              "recorded",
+              "interpolated",
+              "list-assets",
+              "resolve-asset"
+            ]
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxRangeSeconds", "maxPoints", "timeoutMs"],
+          "properties": {
+            "maxRangeSeconds": { "type": "integer", "minimum": 1 },
+            "maxPoints": { "type": "integer", "minimum": 1 },
+            "timeoutMs": { "type": "integer", "minimum": 100 }
+          }
+        }
+      }
+    },
+    "AgentStreamEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventVersion", "eventId", "traceId", "type", "occurredAt", "payload"],
+      "properties": {
+        "eventVersion": { "const": "0.1" },
+        "eventId": { "type": "string", "minLength": 1 },
+        "traceId": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": [
+            "context",
+            "tool-start",
+            "tool-result",
+            "evidence",
+            "text-delta",
+            "view-spec",
+            "complete",
+            "error"
+          ]
+        },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "payload": { "type": "object" }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "TagName": "CDT158",
+  "Descriptor": null,
+  "Record": [
+    {
+      "TriggerTime": "2026-07-18T10:10:14.0351403+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 82.01496
+    },
+    {
+      "TriggerTime": "2026-07-18T10:13:21+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 77.56243
+    },
+    {
+      "TriggerTime": "2026-07-18T10:14:21+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 83.1313858
+    },
+    {
+      "TriggerTime": "2026-07-18T10:25:51+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 84.274826
+    },
+    {
+      "TriggerTime": "2026-07-18T10:27:51+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 78.43834
+    },
+    {
+      "TriggerTime": "2026-07-18T10:31:51+08:00",
+      "StringTime": null,
+      "ValueType": null,
+      "Value": 79.2292
+    }
+  ],
+  "TriggerTime": "0001-01-01T00:00:00",
+  "StringTime": null,
+  "ValueType": "System.Single",
+  "Value": null
+}
