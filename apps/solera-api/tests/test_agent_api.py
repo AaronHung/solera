@@ -139,6 +139,81 @@ def test_compare_stream_contains_deterministic_analysis_and_evidence() -> None:
     assert "deterministic analytics" in text
 
 
+def test_pi_vision_context_question_does_not_require_a_tag() -> None:
+    context = page_context("pivision.iiotfab.com:8443")
+    context["page"]["systemType"] = "pi-vision"
+    context["page"]["viewType"] = "display:29"
+    context["page"]["title"] = "Tank Details"
+    context["page"]["urlPattern"] = "https://pivision.iiotfab.com:8443/PIVision/#/Displays/*"
+    context["candidateAssets"] = [
+        {
+            "assetId": "display:tank-details",
+            "label": "Tank Details",
+            "confidence": 0.92,
+            "source": "adapter",
+            "confirmed": True,
+        }
+    ]
+    with make_client() as client:
+        with client.stream(
+            "POST",
+            "/v1/agent/chat",
+            headers={"Authorization": "Bearer dev:tenant-demo:user-1:viewer"},
+            json={
+                "question": "這個畫面在做什麼？",
+                "pageContext": context,
+                "tags": [],
+            },
+        ) as response:
+            events = parse_events(response)
+
+    assert response.status_code == 200
+    assert not [event for event in events if event["type"] == "tool-start"]
+    text = next(event["payload"]["text"] for event in events if event["type"] == "text-delta")
+    assert "Tank Details" in text
+    assert "不從圖形猜測工業數值" in text
+    complete = next(event for event in events if event["type"] == "complete")
+    assert complete["payload"]["canvasAvailable"] is False
+
+
+def test_pi_vision_context_fallback_prioritizes_display_purpose() -> None:
+    context = page_context("pivision.iiotfab.com:8443")
+    context["page"]["systemType"] = "pi-vision"
+    context["page"]["viewType"] = "display:29"
+    context["page"]["title"] = "Tank Details"
+    context["page"]["visibleTextDigest"] = (
+        "Windows authorization is required to access data on this page. "
+        "Tank Volume 1,468.8 US gal Level 3.3093 ft Pressure 56.01 kPa."
+    )
+    context["candidateAssets"] = [
+        {
+            "assetId": "display:tank-details",
+            "label": "Tank Details",
+            "confidence": 0.92,
+            "source": "adapter",
+            "confirmed": True,
+        }
+    ]
+    with make_client() as client:
+        with client.stream(
+            "POST",
+            "/v1/agent/chat",
+            headers={"Authorization": "Bearer dev:tenant-demo:user-1:viewer"},
+            json={
+                "question": "這個畫面在做什麼？",
+                "pageContext": context,
+                "tags": [],
+            },
+        ) as response:
+            events = parse_events(response)
+
+    assert response.status_code == 200
+    text = next(event["payload"]["text"] for event in events if event["type"] == "text-delta")
+    assert text.startswith("這個畫面是 pi-vision 的「Tank Details」")
+    assert "槽體幾何與容量" in text
+    assert text.index("資料新鮮度提醒") > text.index("這個畫面是")
+
+
 def test_unapproved_domain_fails_closed_in_stream() -> None:
     with make_client() as client:
         with client.stream(

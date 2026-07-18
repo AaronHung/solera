@@ -114,7 +114,9 @@ INFO:     Application startup complete.
 - 網址改成 `edge://extensions`，其餘相同
 
 > 只需要載入一次。之後每次打開瀏覽器，extension 都會自動出現。  
-> 更新了程式碼後，重新 `npm run build`，然後在 extensions 頁按刷新圖示即可。
+> 更新了程式碼後，重新 `npm run build`，在 extensions 頁按刷新圖示，
+> **再重新載入目前的 Easy PI／PI Vision 分頁**。Content script 不會自動
+> 注入到 extension 更新前已經開啟的頁面。
 
 ---
 
@@ -147,6 +149,7 @@ INFO:     Application startup complete.
 8. Agent 回傳帶 Evidence 的答案
 9. 點「**Add to Canvas**」→ 彈出趨勢圖 overlay
 10. 按 **Esc** 或 X 關閉 Canvas，畫面完全復原
+11. 在 textarea 按 **Control+Enter**，等同點擊 **Send**
 
 > 這個 `dev:` token 只適用於本機 `.env` 的 development mode，
 > 不要拿到 production 或客戶環境使用。正式環境會改用 OIDC bearer token。
@@ -193,7 +196,9 @@ SOLERA_MODEL_API_KEY=sk-or-v1-...（真實 key）
 ### Q5：PI Vision 頁面顯示候選 Asset，但信心只有 45% 或 80%
 **原因：** PI Vision 的 display URL／DOM 只能提供候選 context，Solera 不會從圖形
 目測或猜測設備數值。  
-**解法：** 打開 **Context** 分頁，確認候選 Asset；確認後，在 Chat 中輸入
+**解法：** 如果只是問「這個畫面在做什麼」，不需要先確認 Asset；
+page-first Agent 可以直接使用頁面 context。只有要執行 asset-scoped
+connector 數值分析時，才打開 **Context** 分頁確認候選 Asset，再輸入
 該 display 對應的已核准 PI Tag。PI Vision 提供 display context，Easy PI/API
 才是 v0.1 的數值權威來源。
 
@@ -202,6 +207,7 @@ SOLERA_MODEL_API_KEY=sk-or-v1-...（真實 key）
 ```bash
 npm run build
 # 然後去 brave://extensions，點 Solera Sidecar 的刷新圖示
+# 再回到 Easy PI / PI Vision 分頁按 Cmd+R 或 Control+R
 ```
 
 ### Q7：Easy PI 資料查不到

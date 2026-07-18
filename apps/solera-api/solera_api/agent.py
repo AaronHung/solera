@@ -127,6 +127,27 @@ class SoleraOrchestrator:
         )
 
         tags = self._resolve_tags(request)
+        if not tags:
+            yield _event(
+                trace_id,
+                "text-delta",
+                {
+                    "text": await self._explain_page_context(
+                        request.question,
+                        request.page_context,
+                    )
+                },
+            )
+            yield _event(
+                trace_id,
+                "complete",
+                {
+                    "analysis": None,
+                    "canvasAvailable": False,
+                    "requestedCanvas": request.add_to_canvas,
+                },
+            )
+            return
         current_intent = self._is_current_intent(request.question) and len(tags) == 1
         series: list[TagSeries] = []
         evidence = []
@@ -321,10 +342,7 @@ class SoleraOrchestrator:
         ]
         resolved = list(dict.fromkeys([*explicit, *from_question, *from_context]))
         if not resolved:
-            raise AgentInputError(
-                "TAG_REQUIRED",
-                "Select or name an approved PI Tag before running an analysis",
-            )
+            return []
         return resolved[:4]
 
     @staticmethod
@@ -338,6 +356,155 @@ class SoleraOrchestrator:
                 r"\b(manual|sop|failure|maintenance|document)\b|手冊|故障|維修|文件|程序",
                 question,
                 re.I,
+            )
+        )
+
+    @staticmethod
+    def _is_context_intent(question: str) -> bool:
+        return bool(
+            re.search(
+                r"\b(what does this (screen|display|page) do|explain this (screen|display|page)|"
+                r"summarize this (screen|display|page))\b|"
+                r"這個(畫面|頁面|display)(在做什麼|是什麼|顯示什麼)|"
+                r"說明這個(畫面|頁面|display)",
+                question,
+                re.I,
+            )
+        )
+
+    @staticmethod
+    def _context_explanation(context: PageContext) -> str:
+        candidate = context.candidate_assets[0] if context.candidate_assets else None
+        visible_text = context.page.visible_text_digest or ""
+        overlays = SoleraOrchestrator._detect_blocking_overlays(visible_text)
+        signal_families = SoleraOrchestrator._detect_signal_families(visible_text)
+        title = context.page.title or "目前頁面"
+        lines = [
+            f"這個畫面是 {context.page.system_type} 的「{title}」顯示頁面，"
+            "用途是讓操作人員查看工業資產的狀態與相關製程資訊。",
+        ]
+        if signal_families:
+            lines.append(f"可辨識的監控面向：{'、'.join(signal_families)}。")
+        if not SoleraOrchestrator._has_numeric_observations(visible_text):
+            lines.append("目前擷取的 context 未提供可核實的 numeric readings。")
+        if candidate:
+            lines.append(
+                f"目前候選 Asset 為 {candidate.label}（信心 {candidate.confidence:.0%}"
+                f"{'，已確認' if candidate.confirmed else '，尚未確認'}）"
+            )
+        lines.append(
+            f"時間範圍為 {context.time_context.start} 至 {context.time_context.end}。"
+        )
+        lines.append(
+            "目前回答只使用已擷取的頁面 context；不從圖形猜測工業數值，"
+            "也不會從畫面外推測未提供的數值。"
+        )
+        if overlays:
+            lines.append(
+                f"資料新鮮度提醒：頁面同時出現 {', '.join(overlays)}。"
+                "這可能影響即時資料更新；如需確認最新數值，請先完成授權後重新整理 context。"
+            )
+        return "\n".join(lines)
+
+    async def _explain_page_context(self, question: str, context: PageContext) -> str:
+        visible_text = context.page.visible_text_digest or ""
+        signal_families = self._detect_signal_families(visible_text)
+        numeric_observations = self._has_numeric_observations(visible_text)
+        payload: dict[str, object] = {
+            "mode": "page-context",
+            "page": {
+                "systemType": context.page.system_type,
+                "viewType": context.page.view_type,
+                "title": context.page.title,
+                "selectedText": context.page.selected_text,
+                "blockingOverlays": self._detect_blocking_overlays(visible_text),
+                "purposeHint": (
+                    "industrial asset monitoring display"
+                    if context.page.system_type == "pi-vision"
+                    else "browser-based industrial system page"
+                ),
+                "observedSignalFamilies": signal_families,
+                "numericObservationsCaptured": numeric_observations,
+            },
+            "responseGuidance": [
+                "Answer the screen's industrial purpose before discussing UI overlays.",
+                "For capacity questions, organize geometry, level, forecast, limits, "
+                "and data quality.",
+                "Treat visible dialog text as a freshness or access caveat, not the "
+                "main purpose of the display.",
+            ],
+            "candidateAssets": [
+                item.model_dump(by_alias=True, mode="json")
+                for item in context.candidate_assets
+            ],
+            "timeContext": context.time_context.model_dump(by_alias=True, mode="json"),
+        }
+        if self.settings.model_data_policy in {"sampled", "raw"}:
+            # Keep the page-first sample bounded by the contract while
+            # preserving lower-page measurements such as tank volume.
+            payload["visiblePageText"] = visible_text[:8000]
+
+        if not self.policy.model_allowed(self.settings.model_name):
+            return self._context_explanation(context)
+        try:
+            generated = await self.model_gateway.explain(
+                question=question,
+                analysis_payload=payload,
+            )
+        except ModelGatewayError:
+            generated = None
+        if generated:
+            self.metrics.record_model_usage(
+                input_tokens=generated.input_tokens,
+                output_tokens=generated.output_tokens,
+                estimated_cost_usd=generated.estimated_cost_usd,
+            )
+            return generated.text
+        return self._context_explanation(context)
+
+    @staticmethod
+    def _detect_blocking_overlays(visible_text: str) -> list[str]:
+        """Return conservative UI overlay signals for page-first explanations."""
+        signals: list[str] = []
+        normalized = visible_text.casefold()
+        if (
+            "windows authorization is required" in normalized
+            or "windows authentication is required" in normalized
+            or "enter windows credentials" in normalized
+        ):
+            signals.append("windows-authentication-dialog")
+        if "calculation editor" in normalized and "unsaved" in normalized:
+            signals.append("unsaved-calculation-editor")
+        if "event search" in normalized:
+            signals.append("event-search-panel")
+        return signals
+
+    @staticmethod
+    def _detect_signal_families(visible_text: str) -> list[str]:
+        """Detect broad industrial signal families without extracting values."""
+        normalized = visible_text.casefold()
+        families: list[tuple[str, tuple[str, ...]]] = [
+            ("槽體幾何與容量", ("tank volume", "tank capacity", "diameter", "height")),
+            ("液位與填充率", ("level", "fill level", "liquid level")),
+            ("溫度", ("temperature", "internal temp", "external temp")),
+            ("壓力", ("pressure",)),
+            ("預測與趨勢", ("forecast", "trend", "historical")),
+            ("密度與物料", ("density", "volume")),
+        ]
+        return [
+            label
+            for label, markers in families
+            if any(marker in normalized for marker in markers)
+        ]
+
+    @staticmethod
+    def _has_numeric_observations(visible_text: str) -> bool:
+        normalized = visible_text.casefold()
+        return bool(
+            re.search(
+                r"(level|pressure|temperature|density|volume|forecast)"
+                r"[^0-9]{0,80}\d+(?:\.\d+)?",
+                normalized,
             )
         )
 

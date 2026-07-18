@@ -20,6 +20,9 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
   requires low-confidence asset confirmation, and streams safe Agent events.
 - Deterministic summary/comparison/quality/anomaly/downsampling and complete
   Evidence are implemented outside the model.
+- Page-first PI Vision explanations prioritize the display's industrial purpose
+  and treat authentication overlays as secondary freshness caveats; a
+  regression test covers this behavior.
 - Tool Registry contains zero write/control tools; policy enforces tenant,
   role, asset, domain, range, points, rate, and kill switches.
 - Canvas has six trusted Widgets, tenant save/open, static ViewSpec validation,
@@ -27,7 +30,7 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
 - OIDC RS256, development-token production guard, audit/trace replay, model
   gateway, latency/cost counters, knowledge citations, feedback/eval, nightly
   aggregate, and retention Flow seams are implemented.
-- Final local verification: 25 Python tests, 10 TypeScript tests, two Playwright
+- Final local verification: 26 Python tests, 10 TypeScript tests, two Playwright
   browser/package tests, TypeScript builds/typechecks, Ruff, and IDE lints pass.
 - Chromium MV3 runtime starts the service worker and renders Sidecar under the
   strict CSP. Chrome/Edge managed-package contract passes.
@@ -41,6 +44,19 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
 - No local implementation backlog item is in progress.
 - External environment onboarding and the 5–10 user Pilot remain product
   acceptance work, not code that can be truthfully simulated locally.
+
+## Recorded post-v0.1 direction
+
+- A proposed Skill System is documented in
+  `docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md`.
+- The product comparison and current quality gaps are recorded in
+  `docs/architecture/SOLERA_VS_GPT_SIDECAR.md`.
+- The implementation work is decomposed into
+  `docs/backlog/V0_2_SKILL_BACKLOG.md`, with stable `SOL-V02-*` IDs.
+- ADR-0004 proposes composable Skills with Auto, Manual, and Hybrid routing,
+  while preserving the v0.1 single-orchestrator and read-only boundaries.
+- No v0.2 runtime implementation has started. The v0.1 Pilot acceptance gate
+  remains the prerequisite for beginning the Skill Registry slice.
 
 ## Not yet verified
 
@@ -62,6 +78,7 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
 - ADR-0001: cloud control plane with a future outbound-only Bridge seam.
 - ADR-0002: read-only tools, Evidence-first answers, trusted rendering.
 - ADR-0003: modular monolith with one Agent orchestrator.
+- ADR-0004: proposed post-v0.1 composable Skills with hybrid routing.
 
 ## Blockers
 
@@ -74,8 +91,11 @@ container platform, and named Pilot users.
 Run Pilot onboarding from `docs/runbooks/PILOT.md`: configure customer OIDC and
 secrets, install the managed extension in branded Chrome and Edge, validate the
 live PI Vision adapter, run the golden set and load test, then begin the 5–10
-user instrumented Pilot. Do not start v0.2 Bridge/Portal/Scene work before these
-v0.1 acceptance results are recorded.
+user instrumented Pilot. After acceptance is recorded, start the first slice
+in `docs/backlog/V0_2_SKILL_BACKLOG.md`: SkillManifest → Registry → Hybrid
+selection → Page Understanding → PI Vision Industrial Analysis → Tank
+Capacity. Do not start Bridge/Portal/Scene work before these v0.1 acceptance
+results are recorded.
 
 ## Session handoff checklist
 
