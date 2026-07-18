@@ -38,6 +38,21 @@ steps read-only and safe.
 Return concise plain text or valid Markdown; keep all emphasis markers
 balanced and use standard table syntax; do not return HTML or JavaScript."""
 
+SUPPORTED_OPENROUTER_MODELS = frozenset(
+    {
+        "deepseek/deepseek-v4-pro",
+        "openai/gpt-5.6-luna",
+        "anthropic/claude-sonnet-4.6",
+        "anthropic/claude-opus-4.8",
+        "deepseek/deepseek-v4-flash",
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "xiaomi/mimo-v2.5",
+        "minimax/minimax-m3",
+        "tencent/hy3:free",
+        "z-ai/glm-5.2",
+    }
+)
+
 
 class ModelGatewayError(RuntimeError):
     pass
@@ -57,6 +72,7 @@ class ModelGateway(Protocol):
         *,
         question: str,
         analysis_payload: dict[str, Any],
+        model: str | None = None,
     ) -> ModelExplanation | None: ...
 
 
@@ -66,6 +82,7 @@ class DisabledModelGateway:
         *,
         question: str,
         analysis_payload: dict[str, Any],
+        model: str | None = None,
     ) -> ModelExplanation | None:
         return None
 
@@ -95,11 +112,12 @@ class ChatCompletionsGateway:
         *,
         question: str,
         analysis_payload: dict[str, Any],
+        model: str | None = None,
     ) -> ModelExplanation | None:
         if self.settings.model_data_policy == "none":
             return None
         payload = {
-            "model": self.settings.model_name,
+            "model": model or self.settings.model_name,
             "messages": [
                 {"role": "system", "content": SYSTEM_INSTRUCTIONS},
                 {
@@ -173,11 +191,12 @@ class OpenAIResponsesGateway:
         *,
         question: str,
         analysis_payload: dict[str, Any],
+        model: str | None = None,
     ) -> ModelExplanation | None:
         if self.settings.model_data_policy == "none":
             return None
         payload = {
-            "model": self.settings.model_name,
+            "model": model or self.settings.model_name,
             "instructions": SYSTEM_INSTRUCTIONS,
             "input": [
                 {

@@ -16,6 +16,7 @@ export interface ChatInput {
   tags?: string[];
   maxPoints?: number;
   addToCanvas?: boolean;
+  model?: string;
 }
 
 export class SoleraApiError extends Error {

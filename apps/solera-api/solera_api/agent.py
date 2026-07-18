@@ -26,7 +26,11 @@ from .evidence import (
     create_timeseries_evidence,
     current_as_series,
 )
-from .model_gateway import ModelGateway, ModelGatewayError
+from .model_gateway import (
+    SUPPORTED_OPENROUTER_MODELS,
+    ModelGateway,
+    ModelGatewayError,
+)
 from .observability import MetricsRegistry
 from .policy import PolicyEngine
 from .storage import KnowledgeHit
@@ -68,6 +72,7 @@ class ChatRequest(ContractModel):
     tags: list[str] = Field(default_factory=list, max_length=4)
     max_points: int = Field(default=1000, ge=1)
     add_to_canvas: bool = False
+    model: str | None = Field(default=None, max_length=120)
 
 
 def _event(trace_id: str, event_type: str, payload: dict[str, object]) -> AgentStreamEvent:
@@ -111,6 +116,7 @@ class SoleraOrchestrator:
     ) -> AsyncIterator[AgentStreamEvent]:
         trace_id = trace_id or f"trace-{uuid4()}"
         self.policy.validate_page_context(principal, request.page_context)
+        selected_model = self._resolve_model(request.model)
         yield _event(
             trace_id,
             "context",
@@ -135,6 +141,7 @@ class SoleraOrchestrator:
                     "text": await self._explain_page_context(
                         request.question,
                         request.page_context,
+                        model=selected_model,
                     )
                 },
             )
@@ -301,7 +308,11 @@ class SoleraOrchestrator:
             "analytics",
             (perf_counter() - analytics_started) * 1000,
         )
-        explanation = await self._explain(request.question, analysis)
+        explanation = await self._explain(
+            request.question,
+            analysis,
+            model=selected_model,
+        )
         yield _event(trace_id, "text-delta", {"text": explanation})
         view_spec = compose_analysis_view(
             analysis=analysis,
@@ -372,6 +383,15 @@ class SoleraOrchestrator:
             )
         )
 
+    def _resolve_model(self, requested_model: str | None) -> str:
+        selected = requested_model or self.settings.model_name
+        if selected != self.settings.model_name and selected not in SUPPORTED_OPENROUTER_MODELS:
+            raise AgentInputError(
+                "MODEL_NOT_ALLOWED",
+                "The selected model is not enabled for this Solera environment",
+            )
+        return selected
+
     @staticmethod
     def _context_explanation(context: PageContext) -> str:
         candidate = context.candidate_assets[0] if context.candidate_assets else None
@@ -406,7 +426,13 @@ class SoleraOrchestrator:
             )
         return "\n".join(lines)
 
-    async def _explain_page_context(self, question: str, context: PageContext) -> str:
+    async def _explain_page_context(
+        self,
+        question: str,
+        context: PageContext,
+        *,
+        model: str,
+    ) -> str:
         visible_text = context.page.visible_text_digest or ""
         signal_families = self._detect_signal_families(visible_text)
         numeric_observations = self._has_numeric_observations(visible_text)
@@ -444,12 +470,13 @@ class SoleraOrchestrator:
             # preserving lower-page measurements such as tank volume.
             payload["visiblePageText"] = visible_text[:8000]
 
-        if not self.policy.model_allowed(self.settings.model_name):
+        if not self.policy.model_allowed(model):
             return self._context_explanation(context)
         try:
             generated = await self.model_gateway.explain(
                 question=question,
                 analysis_payload=payload,
+                model=model,
             )
         except ModelGatewayError:
             generated = None
@@ -543,15 +570,22 @@ class SoleraOrchestrator:
             warnings=list(dict.fromkeys(warnings)),
         )
 
-    async def _explain(self, question: str, analysis: AnalysisResult) -> str:
+    async def _explain(
+        self,
+        question: str,
+        analysis: AnalysisResult,
+        *,
+        model: str,
+    ) -> str:
         payload = analysis.model_dump(by_alias=True, mode="json")
-        if not self.policy.model_allowed(self.settings.model_name):
+        if not self.policy.model_allowed(model):
             return self._deterministic_explanation(question, analysis)
         model_started = perf_counter()
         try:
             generated = await self.model_gateway.explain(
                 question=question,
                 analysis_payload=payload,
+                model=model,
             )
         except ModelGatewayError:
             generated = None

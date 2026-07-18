@@ -15,15 +15,34 @@ interface SidecarSettings {
   bearerToken: string;
   tenantId: string;
   timezone: string;
+  modelName: string;
 }
 
 const LOCAL_DEMO_TOKEN = "dev:tenant-demo:demo-user:viewer";
+
+const OPENROUTER_MODELS = [
+  { id: "deepseek/deepseek-v4-pro", label: "DeepSeek V4 Pro" },
+  { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna" },
+  { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+  { id: "anthropic/claude-opus-4.8", label: "Claude Opus 4.8" },
+  { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash" },
+  {
+    id: "nvidia/nemotron-3-ultra-550b-a55b:free",
+    label: "Nemotron 3 Ultra",
+  },
+  { id: "xiaomi/mimo-v2.5", label: "Mimo V2.5" },
+  { id: "minimax/minimax-m3", label: "Minimax M3" },
+  { id: "tencent/hy3:free", label: "Tencent HY3" },
+  { id: "z-ai/glm-5.2", label: "GLM 5.2" },
+] as const;
+const DEFAULT_MODEL = OPENROUTER_MODELS[0].id;
 
 const DEFAULT_SETTINGS: SidecarSettings = {
   apiBaseUrl: "http://localhost:8000",
   bearerToken: "",
   tenantId: "tenant-demo",
   timezone: "Asia/Taipei",
+  modelName: DEFAULT_MODEL,
 };
 
 const EASY_PI_DEMO_TAGS = ["CDT158", "CDT159", "SINUSOID"];
@@ -57,14 +76,28 @@ interface TabSession {
   durationMs: number | null;
   submittedAt: number | null;
   feedback: Feedback;
+  attachments: Attachment[];
+}
+
+interface Attachment {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
 }
 
 async function loadSettings(): Promise<SidecarSettings> {
   const stored = await chrome.storage.local.get("soleraSettings");
+  const storedSettings = stored.soleraSettings as Partial<SidecarSettings> | undefined;
   const settings = {
     ...DEFAULT_SETTINGS,
-    ...(stored.soleraSettings as Partial<SidecarSettings>),
+    ...storedSettings,
   };
+  if (settings.modelName === "openai/gpt-5.6-luna") {
+    settings.modelName = DEFAULT_MODEL;
+  } else if (!OPENROUTER_MODELS.some((model) => model.id === settings.modelName)) {
+    settings.modelName = DEFAULT_MODEL;
+  }
   if (!settings.bearerToken && settings.apiBaseUrl.startsWith("http://localhost")) {
     settings.bearerToken = LOCAL_DEMO_TOKEN;
   }
@@ -387,6 +420,7 @@ export function App() {
   const [conversation, setConversation] = useState<ConversationTurn[]>([]);
   const [lastSubmittedQuestion, setLastSubmittedQuestion] = useState("");
   const [submittedAt, setSubmittedAt] = useState<number | null>(null);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [answer, setAnswer] = useState("");
   const [thoughts, setThoughts] = useState<string[]>([]);
   const [durationMs, setDurationMs] = useState<number | null>(null);
@@ -399,6 +433,7 @@ export function App() {
   const [running, setRunning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const startedAtRef = useRef<number | null>(null);
+  const attachmentInputRef = useRef<HTMLInputElement | null>(null);
   const tabSessionsRef = useRef(new Map<number, TabSession>());
   const activeTabIdRef = useRef<number | null>(null);
   const sessionsLoadedRef = useRef(false);
@@ -416,6 +451,7 @@ export function App() {
     thoughts: [],
     durationMs: null,
     feedback: null,
+    attachments: [],
   });
   sessionStateRef.current = {
     tab,
@@ -431,6 +467,7 @@ export function App() {
     thoughts,
     durationMs,
     feedback,
+    attachments,
   };
 
   const refreshContext = useCallback(async (nextSettings: SidecarSettings) => {
@@ -471,6 +508,7 @@ export function App() {
     setError(null);
     setStatus("Ready");
     setFeedback(null);
+    setAttachments([]);
   };
 
   const refreshActiveTab = useCallback(async (reset = false) => {
@@ -513,6 +551,7 @@ export function App() {
       setThoughts(savedSession.thoughts);
       setDurationMs(savedSession.durationMs);
       setFeedback(savedSession.feedback);
+      setAttachments(savedSession.attachments ?? []);
     } else {
       resetAnalysis();
     }
@@ -562,6 +601,7 @@ export function App() {
     error,
     evidence,
     feedback,
+    attachments,
     lastSubmittedQuestion,
     running,
     status,
@@ -717,6 +757,7 @@ export function App() {
           pageContext: context,
           tags,
           maxPoints: 1000,
+          model: settings.modelName,
         },
         (event) => {
           if (event.type === "tool-start") {
@@ -1020,6 +1061,50 @@ export function App() {
               void submit();
             }}
           >
+            <input
+              ref={attachmentInputRef}
+              className="attachment-input"
+              type="file"
+              multiple
+              accept=".csv,.json,.txt,.md,.pdf,.png,.jpg,.jpeg"
+              onChange={(event) => {
+                const selected = Array.from(event.target.files ?? []).map((file) => ({
+                  id: `${file.name}-${file.size}-${file.lastModified}`,
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                }));
+                setAttachments((current) => [
+                  ...current,
+                  ...selected.filter(
+                    (file) => !current.some((item) => item.id === file.id),
+                  ),
+                ]);
+                event.currentTarget.value = "";
+              }}
+            />
+            {attachments.length > 0 && (
+              <div className="attachment-list" aria-label="Selected attachments">
+                {attachments.map((file) => (
+                  <span className="attachment-chip" key={file.id}>
+                    {file.name}
+                    <button
+                      type="button"
+                      title={`Remove ${file.name}`}
+                      aria-label={`Remove ${file.name}`}
+                      onClick={() =>
+                        setAttachments((current) =>
+                          current.filter((item) => item.id !== file.id),
+                        )
+                      }
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <span className="attachment-note">metadata only · not uploaded</span>
+              </div>
+            )}
             <textarea
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
@@ -1038,19 +1123,62 @@ export function App() {
               }
               rows={3}
             />
-            {running ? (
+            <div className="composer-toolbar">
+              <select
+                className="model-select"
+                aria-label="Select model"
+                title={
+                  OPENROUTER_MODELS.find((model) => model.id === settings.modelName)?.label ??
+                  settings.modelName
+                }
+                value={settings.modelName}
+                onChange={(event) => {
+                  const nextSettings = {
+                    ...settings,
+                    modelName: event.target.value,
+                  };
+                  setSettings(nextSettings);
+                  void chrome.storage.local.set({ soleraSettings: nextSettings });
+                }}
+              >
+                {OPENROUTER_MODELS.map((model) => (
+                  <option value={model.id} key={model.id}>
+                    {model.label}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
-                className="stop"
-                onClick={() => abortRef.current?.abort()}
+                className="attach-button"
+                title="Attach files (local selection only)"
+                aria-label="Attach files"
+                onClick={() => attachmentInputRef.current?.click()}
               >
-                Stop
+                <span aria-hidden="true">📎</span>
               </button>
-            ) : (
-              <button className="send" type="submit" disabled={!context || !question.trim()}>
-                Send
-              </button>
-            )}
+              <span className="composer-spacer" />
+              {running ? (
+                <button
+                  type="button"
+                  className="stop"
+                  title="Stop"
+                  aria-label="Stop"
+                  onClick={() => abortRef.current?.abort()}
+                >
+                  ■
+                </button>
+              ) : (
+                <button
+                  className="send"
+                  type="submit"
+                  title="Send"
+                  aria-label="Send"
+                  disabled={!context || !question.trim()}
+                >
+                  ↑
+                </button>
+              )}
+            </div>
           </form>
         </main>
       )}
