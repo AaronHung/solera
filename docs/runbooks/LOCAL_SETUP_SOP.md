@@ -70,11 +70,22 @@ npm run build
 
 ### 步驟 1：啟動後端 API（開一個終端機，維持開著）
 
-在 `solera` 根目錄執行：
+在 `solera` 根目錄執行（**推薦**，一行搞定）：
 
 ```bash
-uv run uvicorn solera_api.main:app --reload --app-dir apps/solera-api
+npm run dev:api
 ```
+
+或者手動完整版（等效）：
+
+```bash
+PYTHONPATH=connectors/easy-pi:flows uv run uvicorn solera_api.main:app --reload --app-dir apps/solera-api
+```
+
+> **為什麼要加 `PYTHONPATH`？**
+> `easy_pi` 模組在 `connectors/easy-pi/` 資料夾，
+> uvicorn 本身不知道這個路徑，必須手動告訴 Python 去哪裡找。
+> `npm run dev:api` 已經幫你把這個路徑設好了。
 
 **成功的標誌：**
 ```

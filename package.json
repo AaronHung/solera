@@ -12,6 +12,7 @@
     "check": "npm run build && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "dev:api": "PYTHONPATH=connectors/easy-pi:flows uv run uvicorn solera_api.main:app --reload --app-dir apps/solera-api",
     "lint:python": "uv run ruff check apps/solera-api connectors/easy-pi flows",
     "test:python": "uv run pytest",
     "test:browser": "npm run build && playwright test",
