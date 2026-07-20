@@ -21,6 +21,7 @@
     "react-dom": "^19.2.7"
   },
   "dependencies": {
-    "@solera/contracts": "0.1.0"
+    "@solera/contracts": "0.1.0",
+    "lucide-react": "^1.25.0"
   }
 }

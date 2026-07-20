@@ -162,6 +162,164 @@ INFO:     Application startup complete.
 
 ---
 
+## Part 2-A：Experience Demo 操作 SOP
+
+Experience Demo 位於 **Canvas → Experience Demo**。它是目前
+`experiment/canvas-experience` branch 上的 visualization concept，使用
+bundle 內固定的 mock industrial data；不會讀取或修改 PI、SCADA、MES、ERP
+資料，也不會把 mock data 當成 production Evidence。
+
+### 開啟 Experience
+
+1. 在 Sidecar 點 **Canvas**。
+2. 在 **Experience Demo** 選擇角色：
+   - `Executive`
+   - `Shift Supervisor`
+   - `Operator`
+   - `Reliability Engineer`
+   - `IT / Data`
+3. 點 **Open full-screen Experience**。
+4. Experience 會在目前 browser tab 上方開啟 full-viewport overlay。
+5. 點右上角 **Home**、**Sites**、**Maintenance** 等頁籤，或由
+   Portfolio 的 Site card 進入 Site Operations / Asset Detail。
+
+Experience 是 read-only overlay。關閉後，原本的 Easy PI、PI Vision 或
+SCADA 頁面應完整恢復；它不會改寫 host page 的 HTML、資料或操作狀態。
+
+### `1 秒`、`5 秒`、`15 秒`分別是什麼？
+
+畫面上的 `LIVE SIMULATION` 是一個 multi-rate mock simulator：
+
+- **每 1 秒**：更新快速 process telemetry，例如 grid frequency、net
+  output、inverter temperature、hydrogen pressure，以及相關即時
+  sparklines。
+- **每 5 秒**：建立新的 trend snapshot。曲線保留上一版虛線，最新一版
+  以實線重新繪製，讓使用者看得出資料正在刷新。
+- **每 15 秒**：更新 availability、health、hourly/financial 等較慢變的
+  operational indicator，避免所有數字一起快速跳動。
+- 數值由固定 dataset 加上 deterministic sine/drift 計算，不是隨機亂跳，
+  也不是呼叫 Easy PI 或 PI Vision。
+- simulation 不會改寫原始 mock fixture；每一個時間點都可重現。
+- 數值在宣告的合理範圍內 bounded，不會因為開很久而無限增加。
+- Grid frequency、temperature、pressure、forecast deviation 等訊號依
+  threshold 變成綠色、黃色或紅色，並同時顯示 `Stable`、`Watch band`、
+  `Frequency excursion` 等文字，不能只靠顏色判斷。
+- `Pause` 會停止所有 cadence；`Resume` 會從目前狀態繼續。
+- `Reset` 會將 fast tick、trend snapshot 和慢變指標全部回到初始狀態。
+
+因此，這些更新週期不是：
+
+- API 每 1/5/15 秒查詢一次；
+- PI historian 的 real-time subscription；
+- 生產環境的 alarm polling；
+- 真實設備或製程的控制週期。
+
+這些 production data binding 和 historian streaming 尚未屬於本 Demo。
+
+### `10 秒`或`10 分鐘`是什麼？
+
+目前產品沒有獨立的「每 10 秒」機制。計畫與驗收中提到的是
+**連續運作 10 分鐘**，不是 10 秒：
+
+```bash
+SOLERA_CHROMIUM_EXECUTABLE="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
+SOLERA_BROWSER_HEADLESS=true \
+SOLERA_EXPERIENCE_LONGEVITY_MINUTES=10 \
+npx playwright test --grep "Chromium loads"
+```
+
+這是開發者用來驗證 overlay longevity 的測試命令。它會在 10 分鐘內確認：
+
+- Experience root 還存在；
+- 1 秒 telemetry、5 秒 trends 和 15 秒 health 仍然更新；
+- 沒有 browser page error；
+- overlay 沒有自行消失或失效。
+
+一般 Demo 不需要執行這個 10 分鐘測試。一般使用者只要在 Experience 中
+停留 5 分鐘或 10 分鐘，畫面仍會依 1/5/15 秒 cadence 更新；不會因為
+到達 5 或 10 分鐘而自動重啟、清除或切換頁面。
+
+### 停留 5 分鐘、10 分鐘會發生什麼？
+
+- **5 分鐘**：約 300 次 fast telemetry updates、60 個 trend snapshots、
+  20 次 slow health updates。頁面、角色、目前選取的 Site/Asset 不會
+  自動重置。
+- **10 分鐘**：約 600 次 fast updates、120 個 trend snapshots、40 次
+  slow updates。數值仍由固定 fixture 計算並受 bounds 限制，不會無限漂移。
+- **Pause 後停留 5/10 分鐘**：數值維持不變，因為 interval 已停止。
+- **關閉後重新開啟**：新的 simulator session 從 tick 0 開始；這是預期
+  行為，因為目前沒有正式 persistence。
+- **重新整理 host page 或重新載入 extension**：目前 overlay 會消失，
+  需要重新整理頁面並從 Sidecar 再開啟 Experience。
+
+### 什麼是 clear？
+
+在本 Demo 中，`clear` 不是清除 PI、SCADA、browser database 或客戶資料。
+它通常指以下其中一種安全的本機操作：
+
+1. **關閉 Experience overlay**：按 `Esc` 或右上角 `×`。這會移除
+   `#solera-experience-root`、React root、keyboard listener 和 simulator
+   interval。
+2. **Reset simulator**：按 Experience 上方的 `Reset`。這只把 in-memory
+   mock tick 回到 0，不刪除檔案，也不影響 host page。
+3. **重新整理 host page**：當 content script 狀態異常時，按
+   `Cmd+R`／`Ctrl+R`。這會清掉目前 tab 的 overlay DOM，重新注入
+   content script。
+4. **重新載入 extension**：在 `brave://extensions`、`chrome://extensions`
+   或 `edge://extensions` 對 Solera 按 reload。這會重新載入 extension
+   bundle；之後也要重新整理已經開啟的 host page。
+
+目前 Experience 沒有把 mock data 寫入 `localStorage`、`chrome.storage`、
+資料庫或 backend，所以通常不需要手動刪除任何 mock data。
+
+### 不 clear 會怎樣？
+
+正常情況下，按 `Esc` 或 `×` 已經會自動 cleanup，不需要額外 clear。
+如果只是停留在頁面而沒有關閉：
+
+- overlay 會繼續存在；
+- simulator 會繼續依 1/5/15 秒 cadence 更新；
+- mock data 只存在記憶體，不會累積到磁碟或 PI；
+- host page 不會被修改。
+
+若發生異常而 overlay 沒有被正常關閉，可能留下畫面上的
+`#solera-experience-root` 或持續中的 timer。這時請依序：
+
+1. 按 `Esc`；
+2. 若無效，重新整理 host page；
+3. 若仍無效，從 browser extensions 頁 reload Solera，再重新整理 host page；
+4. 最後才重啟 API；Experience mock simulator 本身不依賴 API。
+
+### 什麼時候需要重啟？
+
+**不需要重啟的情況：**
+
+- 只是停留 5 分鐘或 10 分鐘；
+- 想讓 mock 數值回到初始狀態：按 `Reset` 即可；
+- 只想停止 mock 更新：按 `Pause` 即可；
+- 只關閉 Experience：按 `Esc` 或 `×` 即可；
+- 只切換 Site、Asset 或角色：直接操作頁面即可。
+
+**需要重啟或 reload 的情況：**
+
+- 修改了 Python API、`.env`、`apps/solera-api` 或 connector：
+  回到 API 終端機按 `Ctrl+C`，再執行 `npm run dev:api`。
+- 修改了 TypeScript、React、CSS、content script 或 Experience：
+  執行 `npm run build`，在 extensions 頁 reload Solera，再重新整理 host
+  page。只 reload extension 而不 reload 已開啟的頁面，可能會看到
+  `Receiving end does not exist`。
+- Sidecar 顯示 API connection error：先確認 API 終端機仍在執行；必要時
+  重啟 API，然後在 Sidecar 點 **Save and reconnect**。
+- Experience overlay 卡住、Esc 沒有反應或畫面與 bundle 不一致：
+  reload extension + reload host page。
+- 看到 Python traceback、`ModuleNotFoundError` 或 settings parsing error：
+  停止 API、修正 `.env`/依賴/命令，再重新執行 `npm run dev:api`。
+
+重啟 API 不會重啟 Experience 的 mock simulator；兩者是不同程序。只有
+重新開啟 Experience 或重新整理 host page，才會建立新的 simulator session。
+
+---
+
 ## Part 3：關機流程
 
 1. 回到啟動 API 的終端機

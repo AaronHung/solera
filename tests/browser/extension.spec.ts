@@ -5,8 +5,12 @@ import path from "node:path";
 import { chromium, expect, test } from "@playwright/test";
 
 const extensionPath = path.resolve("apps/sidecar-extension/dist");
+const longevityMinutes = Number(
+  process.env.SOLERA_EXPERIENCE_LONGEVITY_MINUTES ?? "0",
+);
 
-test("Chromium loads the managed MV3 Sidecar", async () => {
+test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
+  test.setTimeout(Math.max(30_000, longevityMinutes * 60_000 + 60_000));
   expect(fs.existsSync(path.join(extensionPath, "manifest.json"))).toBe(true);
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "solera-browser-"));
   const context = await chromium.launchPersistentContext(profile, {
@@ -29,12 +33,242 @@ test("Chromium loads the managed MV3 Sidecar", async () => {
     expect(pageErrors).toEqual([]);
     await expect(page.getByText("Solera", { exact: true })).toBeVisible();
     await expect(page.getByText("What should we verify?")).toBeVisible();
+    await page.getByRole("button", { name: "Canvas" }).click();
+    await expect(page.getByRole("heading", { name: "Experience Demo" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Open full-screen Experience/ }),
+    ).toBeVisible();
     const manifest = await page.evaluate(() => chrome.runtime.getManifest());
     expect(manifest.manifest_version).toBe(3);
     expect(manifest.permissions).not.toContain("<all_urls>");
     expect(manifest.content_security_policy?.extension_pages).not.toContain(
       "'unsafe-eval'",
     );
+
+    const hostPage = await context.newPage();
+    const hostErrors: string[] = [];
+    hostPage.on("pageerror", (error) => hostErrors.push(error.message));
+    await hostPage.route("http://203.146.71.23/**", async (route) => {
+      await route.fulfill({
+        contentType: "text/html",
+        body: "<!doctype html><html><body><main id='scada'>Approved SCADA host</main></body></html>",
+      });
+    });
+    await hostPage.setViewportSize({ width: 1440, height: 900 });
+    await hostPage.goto("http://203.146.71.23/demo");
+    await hostPage.waitForTimeout(250);
+
+    const launchResult = await page.evaluate(async () => {
+      const tabs = await chrome.tabs.query({});
+      const hostTab = tabs.find((tab) =>
+        tab.url?.startsWith("http://203.146.71.23/"),
+      );
+      if (!hostTab?.id) {
+        return { ok: false, error: "Approved host tab not found" };
+      }
+      return chrome.tabs.sendMessage(hostTab.id, {
+        type: "SOLERA_MOUNT_EXPERIENCE",
+        role: "reliability",
+      });
+    });
+    expect(launchResult).toEqual({ ok: true });
+
+    const experience = hostPage.locator("#solera-experience-root");
+    await expect(experience).toHaveCount(1);
+    await expect(
+      experience.getByRole("heading", {
+        name: "Maintenance readiness",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(experience.getByText("LIVE SIMULATION")).toBeVisible();
+    await expect(experience.getByText("LIVE TELEMETRY")).toBeVisible();
+    const gridFrequency = experience
+      .locator(".exp-live-metric")
+      .filter({ hasText: "Grid frequency" })
+      .locator("strong")
+      .first();
+    const initialFrequency = await gridFrequency.textContent();
+    await expect
+      .poll(() => gridFrequency.textContent(), { timeout: 4_000 })
+      .not.toBe(initialFrequency);
+    await expect(
+      experience.locator(".exp-live-metric.exp-tone-critical").first(),
+    ).toBeVisible({ timeout: 5_000 });
+    if (longevityMinutes > 0) {
+      const updateTime = experience.locator(".exp-live-controls time");
+      const startUpdate = await updateTime.textContent();
+      for (let minute = 0; minute < longevityMinutes; minute += 1) {
+        await hostPage.waitForTimeout(60_000);
+        await expect(experience).toHaveCount(1);
+        expect(hostErrors).toEqual([]);
+      }
+      expect(await updateTime.textContent()).not.toBe(startUpdate);
+    }
+
+    await experience
+      .getByRole("button", { name: "Sites", exact: true })
+      .click();
+    await experience
+      .getByRole("button", { name: "Open Clark Mountain Solar Plant" })
+      .click();
+    await expect(
+      experience.getByRole("heading", { name: "Clark Mountain Solar Plant" }),
+    ).toBeVisible();
+    await experience
+      .getByRole("button", { name: "Open Solar Block 1" })
+      .click();
+    await expect(
+      experience.getByRole("heading", {
+        name: "Solar Block 1",
+        exact: true,
+      }),
+    ).toBeVisible();
+
+    await experience.getByTitle("Create").click();
+    await expect(
+      experience.getByRole("heading", {
+        name: "Compose a role-specific workspace",
+      }),
+    ).toBeVisible();
+    await experience.getByRole("button", { name: "Add Gauge" }).click();
+    await experience.getByRole("button", { name: "Preview" }).click();
+    await expect(
+      experience.getByText("Preview ready — this is a simulated workflow"),
+    ).toBeVisible();
+
+    const screenshotPath = path.resolve(
+      "artifacts/experience-demo/solera-experience-1440x900.png",
+    );
+    fs.mkdirSync(path.dirname(screenshotPath), { recursive: true });
+    await hostPage.screenshot({ path: screenshotPath });
+    await testInfo.attach("Solera Experience 1440x900", {
+      path: screenshotPath,
+      contentType: "image/png",
+    });
+
+    await experience
+      .getByRole("button", { name: "Home", exact: true })
+      .click();
+    await hostPage.setViewportSize({ width: 1920, height: 1080 });
+    const homeScreenshotPath = path.resolve(
+      "artifacts/experience-demo/solera-experience-home-1920x1080.png",
+    );
+    await hostPage.screenshot({ path: homeScreenshotPath });
+    await testInfo.attach("Solera Experience Home 1920x1080", {
+      path: homeScreenshotPath,
+      contentType: "image/png",
+    });
+
+    for (const pageCheck of [
+      {
+        nav: "Map",
+        heading: "Connected industrial portfolio",
+        visual: ".exp-map-panel",
+      },
+      {
+        nav: "Sites",
+        heading: "Operations across the portfolio",
+        visual: ".exp-site-grid",
+      },
+      {
+        nav: "Maintenance",
+        heading: "Maintenance readiness",
+        visual: ".exp-concept-grid",
+      },
+      {
+        nav: "Forecasting",
+        heading: "Production forecasting",
+        visual: ".exp-concept-grid",
+      },
+      {
+        nav: "Revenue",
+        heading: "Turn operating signal into value",
+        visual: ".exp-donut-chart",
+      },
+      {
+        nav: "Collaboration",
+        heading: "Keep the shift in sync",
+        visual: ".exp-spectrum-chart",
+      },
+      {
+        nav: "HSE",
+        heading: "Make safe work visible",
+        visual: ".exp-radar-chart",
+      },
+      {
+        nav: "Activities",
+        heading: "See the system behind the signal",
+        visual: ".exp-activity-visuals",
+      },
+    ]) {
+      await experience
+        .getByRole("button", { name: pageCheck.nav, exact: true })
+        .click();
+      await expect(
+        experience.getByRole("heading", {
+          name: pageCheck.heading,
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(experience.locator(pageCheck.visual)).toBeVisible();
+      await hostPage.screenshot({
+        path: path.resolve(
+          `artifacts/experience-demo/solera-experience-${pageCheck.nav.toLowerCase()}.png`,
+        ),
+      });
+    }
+
+    await experience
+      .getByRole("button", { name: "Sites", exact: true })
+      .click();
+    await experience
+      .getByRole("button", { name: "Open Clark Mountain Solar Plant" })
+      .click();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-site-operations.png",
+      ),
+    });
+    await experience
+      .getByRole("button", { name: "Open Solar Block 1" })
+      .click();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-asset-detail.png",
+      ),
+    });
+    await experience
+      .getByRole("button", { name: "Create workspace shortcut" })
+      .click();
+    await expect(
+      experience.getByRole("heading", {
+        name: "Compose a role-specific workspace",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-create.png",
+      ),
+    });
+
+    await experience.getByRole("button", { name: "Home", exact: true }).click();
+    expect(
+      await experience.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      ),
+    ).toBe(true);
+    await hostPage.setViewportSize({ width: 1024, height: 768 });
+    expect(
+      await experience.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth,
+      ),
+    ).toBe(true);
+    expect(hostErrors).toEqual([]);
+    await hostPage.keyboard.press("Escape");
+    await expect(hostPage.locator("#solera-experience-root")).toHaveCount(0);
+    await expect(hostPage.locator("#scada")).toHaveText("Approved SCADA host");
   } finally {
     await context.close();
     fs.rmSync(profile, { recursive: true, force: true });
