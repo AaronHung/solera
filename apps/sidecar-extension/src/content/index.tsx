@@ -1,7 +1,10 @@
 import type { ViewSpec } from "@solera/contracts";
 import {
   mountCanvasOverlay,
+  mountExperienceOverlay,
   type CanvasHandle,
+  type ExperienceHandle,
+  type ExperienceRole,
 } from "@solera/canvas-renderer";
 
 import { capturePageContext } from "../adapters";
@@ -22,7 +25,29 @@ interface CloseCanvasMessage {
   type: "SOLERA_CLOSE_CANVAS";
 }
 
-type SoleraMessage = CaptureMessage | MountCanvasMessage | CloseCanvasMessage;
+interface MountExperienceMessage {
+  type: "SOLERA_MOUNT_EXPERIENCE";
+  role?: ExperienceRole;
+}
+
+interface CloseExperienceMessage {
+  type: "SOLERA_CLOSE_EXPERIENCE";
+}
+
+type SoleraMessage =
+  | CaptureMessage
+  | MountCanvasMessage
+  | CloseCanvasMessage
+  | MountExperienceMessage
+  | CloseExperienceMessage;
+
+const EXPERIENCE_ROLES = new Set<ExperienceRole>([
+  "executive",
+  "shift-supervisor",
+  "operator",
+  "reliability",
+  "it-data",
+]);
 
 function isSoleraMessage(message: unknown): message is SoleraMessage {
   if (!message || typeof message !== "object") {
@@ -32,10 +57,13 @@ function isSoleraMessage(message: unknown): message is SoleraMessage {
     "SOLERA_CAPTURE_CONTEXT",
     "SOLERA_MOUNT_CANVAS",
     "SOLERA_CLOSE_CANVAS",
+    "SOLERA_MOUNT_EXPERIENCE",
+    "SOLERA_CLOSE_EXPERIENCE",
   ].includes((message as { type?: string }).type ?? "");
 }
 
 let canvasHandle: CanvasHandle | null = null;
+let experienceHandle: ExperienceHandle | null = null;
 
 chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
   if (!isSoleraMessage(message)) {
@@ -55,6 +83,8 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
       });
       sendResponse({ ok: true, context });
     } else if (message.type === "SOLERA_MOUNT_CANVAS") {
+      experienceHandle?.dispose();
+      experienceHandle = null;
       canvasHandle?.dispose();
       canvasHandle = mountCanvasOverlay({
         spec: message.viewSpec,
@@ -64,9 +94,28 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
         },
       });
       sendResponse({ ok: true });
-    } else {
+    } else if (message.type === "SOLERA_CLOSE_CANVAS") {
       canvasHandle?.dispose();
       canvasHandle = null;
+      sendResponse({ ok: true });
+    } else if (message.type === "SOLERA_MOUNT_EXPERIENCE") {
+      if (message.role && !EXPERIENCE_ROLES.has(message.role)) {
+        throw new Error("Unsupported Experience role");
+      }
+      canvasHandle?.dispose();
+      canvasHandle = null;
+      experienceHandle?.dispose();
+      experienceHandle = mountExperienceOverlay({
+        document,
+        ...(message.role ? { initialRole: message.role } : {}),
+        onClose: () => {
+          experienceHandle = null;
+        },
+      });
+      sendResponse({ ok: true });
+    } else {
+      experienceHandle?.dispose();
+      experienceHandle = null;
       sendResponse({ ok: true });
     }
   } catch (error) {

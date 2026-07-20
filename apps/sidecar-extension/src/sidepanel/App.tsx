@@ -50,6 +50,20 @@ const TAB_SESSIONS_STORAGE_KEY = "soleraTabSessions";
 
 type Tab = "chat" | "context" | "evidence" | "canvas";
 type Feedback = "positive" | "negative" | null;
+type ExperienceRole =
+  | "executive"
+  | "shift-supervisor"
+  | "operator"
+  | "reliability"
+  | "it-data";
+
+const EXPERIENCE_ROLES: Array<{ id: ExperienceRole; label: string }> = [
+  { id: "executive", label: "Executive" },
+  { id: "shift-supervisor", label: "Shift Supervisor" },
+  { id: "operator", label: "Operator" },
+  { id: "reliability", label: "Reliability Engineer" },
+  { id: "it-data", label: "IT / Data" },
+];
 
 interface ConversationTurn {
   id: string;
@@ -156,6 +170,20 @@ async function openCanvas(viewSpec: ViewSpec): Promise<void> {
   })) as { ok: boolean; error?: string };
   if (!response.ok) {
     throw new Error(response.error ?? "Canvas could not be opened");
+  }
+}
+
+async function openExperience(role: ExperienceRole): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    throw new Error("No active browser tab is available");
+  }
+  const response = (await chrome.tabs.sendMessage(tab.id, {
+    type: "SOLERA_MOUNT_EXPERIENCE",
+    role,
+  })) as { ok: boolean; error?: string };
+  if (!response.ok) {
+    throw new Error(response.error ?? "Experience Demo could not be opened");
   }
 }
 
@@ -429,6 +457,8 @@ export function App() {
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [viewSpec, setViewSpec] = useState<ViewSpec | null>(null);
   const [savedCanvases, setSavedCanvases] = useState<ViewSpec[]>([]);
+  const [experienceRole, setExperienceRole] =
+    useState<ExperienceRole>("executive");
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -1266,7 +1296,58 @@ export function App() {
 
       {tab === "canvas" && (
         <main className="detail-panel">
-          <p className="eyebrow">TENANT-SCOPED WORKSPACES</p>
+          <p className="eyebrow">SOLERA EXPERIENCE LAB</p>
+          <h2>Experience Demo</h2>
+          <article className="experience-launcher">
+            <div className="experience-preview" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <strong>S</strong>
+            </div>
+            <p>
+              Explore role-specific industrial dashboards, trusted visualization
+              components and a concept workspace builder.
+            </p>
+            <label>
+              Start as
+              <select
+                value={experienceRole}
+                onChange={(event) =>
+                  setExperienceRole(event.target.value as ExperienceRole)
+                }
+              >
+                {EXPERIENCE_ROLES.map((role) => (
+                  <option value={role.id} key={role.id}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="experience-open"
+              onClick={() =>
+                void openExperience(experienceRole).catch(
+                  (experienceError) =>
+                    setError(
+                      experienceError instanceof Error
+                        ? experienceError.message
+                        : "Experience Demo failed",
+                    ),
+                )
+              }
+            >
+              Open full-screen Experience
+              <span>↗</span>
+            </button>
+            <small>
+              SIMULATED DATA · 1s telemetry · 5s trends · Press Esc to close
+            </small>
+          </article>
+
+          <p className="eyebrow saved-canvas-eyebrow">
+            TENANT-SCOPED WORKSPACES
+          </p>
           <h2>Saved Canvas</h2>
           {savedCanvases.length === 0 && (
             <p>No saved Canvas yet. Complete an analysis and choose Save.</p>

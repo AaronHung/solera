@@ -2,7 +2,8 @@
 
 Last updated: 2026-07-20
 Contract: `docs/contracts/SOLERA_V0_1.md` v0.1.0  
-Current gate: Local implementation complete — external Pilot acceptance pending
+Current gate: v0.1 stable on `main`; Experience Demo implemented on the
+`experiment/canvas-experience` branch; external Pilot acceptance pending
 
 ## Verified
 
@@ -30,13 +31,33 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
   role, asset, domain, range, points, rate, and kill switches.
 - Canvas has six trusted Widgets, tenant save/open, static ViewSpec validation,
   and tested Shadow DOM mount/unmount with host body unchanged.
+- The experimental Solera Experience Demo adds a separate trusted
+  full-viewport Shadow DOM surface with role-oriented Portfolio, Sites, Site
+  Operations, Asset Detail, concept pages, and a Create workspace prototype.
+  It uses an internal typed spec and never changes the v0.1 ViewSpec schema.
+- Experience mock Site/Asset hierarchy, trends, alerts, financial/HSE
+  indicators, and multi-rate updates are deterministic and visibly labeled
+  `LIVE SIMULATION`: one-second process telemetry, five-second trend snapshots,
+  and fifteen-second health/availability. Previous trends remain dashed,
+  current trends redraw solid, and bounded amber/red threshold states include
+  explicit status text. Pause/resume/reset and unmount timer cleanup are tested.
+- Sidecar messages accept only an allowlisted Experience role. Canvas and
+  Experience are mutually exclusive singletons; both preserve the host body
+  and reject arbitrary HTML or executable configuration.
 - OIDC RS256, development-token production guard, audit/trace replay, model
   gateway, latency/cost counters, knowledge citations, feedback/eval, nightly
   aggregate, and retention Flow seams are implemented.
-- Final local verification: 28 Python tests, 10 TypeScript tests, TypeScript
-  builds/typechecks, Ruff, and IDE lints pass. MV3 smoke and the managed-package
-  contract both pass when Playwright uses the installed Brave executable.
+- Final local verification on the Experience branch: 28 Python tests and 19
+  TypeScript tests pass; TypeScript builds/typechecks, Ruff, and IDE lints
+  pass. The Brave MV3 E2E and managed-package contract both pass, including
+  Experience launch, role/page/Create interactions, Escape cleanup, host
+  restoration, 1024px horizontal-overflow assertion, and retained local
+  screenshots at 1440×900 and 1920×1080 under ignored `artifacts/`.
   The default Playwright Chromium executable is not installed.
+- The opt-in Brave longevity check ran for 10.1 real minutes on 2026-07-20.
+  The Experience root remained mounted, simulated updates continued, no page
+  error occurred, and the test completed navigation, Create, responsive, and
+  Escape cleanup assertions.
 - The MV3 manifest includes Easy PI, PI Vision, and the first approved SCADA
   test origin. Strict-CSP and managed-package checks remain covered by the
   browser/package test suite.
@@ -69,8 +90,10 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
   2.5D/Scene-ready Canvas contracts.
 - ADR-0004 proposes composable Skills with Auto, Manual, and Hybrid routing,
   while preserving the v0.1 single-orchestrator and read-only boundaries.
-- No v0.2 runtime implementation has started. The v0.1 Pilot acceptance gate
-  remains the prerequisite for beginning the Skill Registry slice.
+- No v0.2 Skill System runtime implementation has started. The Experience
+  branch is an isolated visualization concept using mock data, not the Skill
+  Registry or production Data Flywheel. The v0.1 Pilot acceptance gate remains
+  the prerequisite for beginning the Skill Registry slice.
 
 ## Not yet verified
 
@@ -88,6 +111,9 @@ Current gate: Local implementation complete — external Pilot acceptance pendin
 - First-text and full-analysis p95 under Pilot load; one live request is not a
   percentile.
 - Context resolution at least 95% and 5–10 user adoption/outcome metrics.
+- Production Experience data binding, workspace persistence, permissions,
+  multi-user collaboration, and customer-approved dashboard templates. The
+  current Create/Save/Preview flow is intentionally session-only mock behavior.
 
 ## Current decisions
 

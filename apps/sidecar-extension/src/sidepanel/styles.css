@@ -775,3 +775,128 @@ button {
   gap: 5px;
   margin: 10px 0;
 }
+
+.experience-launcher {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  margin: 14px 0 26px;
+  padding: 17px;
+  border: 1px solid rgba(200, 121, 49, 0.3);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 88% 4%, rgba(200, 121, 49, 0.18), transparent 35%),
+    #161815;
+}
+
+.experience-launcher p {
+  margin: 0;
+  color: #b9bcb5;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.experience-preview {
+  position: relative;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    #0c0f10;
+  background-size: 12px 12px;
+}
+
+.experience-preview strong {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #c87931;
+  border-radius: 50%;
+  background: #251a10;
+  color: #e7a75c;
+  box-shadow: 0 0 24px rgba(200, 121, 49, 0.25);
+}
+
+.experience-preview i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 1px;
+  transform-origin: left;
+  background: linear-gradient(90deg, #c87931, transparent);
+}
+
+.experience-preview i:nth-child(1) {
+  transform: rotate(-25deg);
+}
+
+.experience-preview i:nth-child(2) {
+  transform: rotate(155deg);
+}
+
+.experience-preview i:nth-child(3) {
+  transform: rotate(72deg);
+}
+
+.experience-launcher label {
+  display: grid;
+  gap: 5px;
+  color: #777e78;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.experience-launcher select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  outline: none;
+  background: #0e110f;
+  color: #e0e1da;
+  font-size: 11px;
+}
+
+.experience-open {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid #c87931;
+  border-radius: 7px;
+  background: #c87931;
+  color: #17130f;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.experience-open:hover {
+  filter: brightness(1.08);
+}
+
+.experience-open span {
+  font-size: 14px;
+}
+
+.experience-launcher small {
+  color: #6f756f;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+.saved-canvas-eyebrow {
+  margin-top: 0;
+}

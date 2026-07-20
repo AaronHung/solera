@@ -31,6 +31,57 @@ Open Sidecar settings and enter:
 - Bearer token: `dev:tenant-demo:demo-engineer:engineer`
 - Tenant: `tenant-demo`
 
+## Solera Experience Demo — five-minute concept flow
+
+The Experience Demo is implemented only on `experiment/canvas-experience`.
+It is a trusted visualization concept, not production Evidence and not a
+replacement for the v0.1 Canvas.
+
+1. Open an approved Easy PI, PI Vision, or SCADA page and open the Sidecar.
+2. Choose **Canvas** in the Sidecar navigation.
+3. In **Experience Demo**, select a starting role:
+   Executive, Shift Supervisor, Operator, Reliability Engineer, or IT / Data.
+4. Choose **Open full-screen Experience**. The Experience appears in an
+   isolated full-viewport Shadow DOM overlay on the current host page.
+5. On **Home**, explain that role selection changes KPI priority and alert
+   density. Point out `LIVE SIMULATION`: one-second process telemetry,
+   five-second trend snapshots, and fifteen-second health indicators.
+   Previous trend snapshots remain dashed while the current snapshot is solid.
+6. Open **Sites**, choose **Clark Mountain Solar Plant**, then open
+   **Solar Block 1** to move from portfolio to site operations and asset
+   reliability context.
+7. Use **Pause** and **Resume** to demonstrate controlled deterministic
+   updates. No host or historian value is changed.
+8. Open **Create workspace**. Click or drag a KPI, Gauge, Line/Column chart,
+   Status, Asset, or Process Flow component into the grid. Use **Preview** and
+   **Save demo** to show the future composition workflow.
+9. Navigate briefly through Forecasting, Revenue, Collaboration, HSE, and
+   Activities to show the consistent concept-page shell.
+10. Press Escape or use the upper-right Close button. Verify that the host
+    page is unchanged and `#solera-experience-root` no longer exists.
+
+Recommended demo viewports are 1440×900 and 1920×1080; 1024px is the minimum
+supported width. The Brave E2E test writes visual-review images to the ignored
+local directory `artifacts/experience-demo/`.
+
+### Experience Demo data and behavior boundaries
+
+- Every number, alert, Site, Asset, trend, and forecast is deterministic mock
+  data. It must never be represented as live customer or PI data.
+- Fast telemetry updates every second, trend snapshots every five seconds, and
+  health/availability every fifteen seconds within bounded declared ranges.
+  Pause, resume, and reset affect only the in-memory demo simulator.
+- Selected telemetry crosses deterministic warning/critical thresholds so the
+  UI demonstrates amber/red states with explicit status text, not color alone.
+- **Save demo** is session-only feedback. It does not persist a workspace,
+  modify the host page, write to PI/SCADA/MES/ERP, or create production
+  Evidence.
+- The Create palette uses only bundle-owned trusted React/CSS/SVG components.
+  Messages accept an allowlisted role preset, never arbitrary HTML, JavaScript,
+  or executable configuration.
+- Canvas and Experience are mutually exclusive overlays. The original v0.1
+  Canvas save/open contract remains unchanged.
+
 ## Scripted vertical slice
 
 1. Open Easy PI Swagger and select `CDT158`.
