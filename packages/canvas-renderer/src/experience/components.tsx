@@ -157,6 +157,158 @@ export function Gauge({
   );
 }
 
+export interface ChartSegment {
+  label: string;
+  value: number;
+  color: string;
+}
+
+export function DonutChart({
+  segments,
+  centerValue,
+  centerLabel,
+  label,
+}: {
+  segments: ChartSegment[];
+  centerValue: string;
+  centerLabel: string;
+  label: string;
+}) {
+  const total = Math.max(segments.reduce((sum, segment) => sum + segment.value, 0), 1);
+  const circumference = 2 * Math.PI * 42;
+  let offset = 0;
+  return (
+    <div className="exp-donut-chart">
+      <svg viewBox="0 0 120 120" role="img" aria-label={label}>
+        <circle cx="60" cy="60" r="42" className="exp-donut-track" />
+        {segments.map((segment) => {
+          const length = (segment.value / total) * circumference;
+          const currentOffset = offset;
+          offset += length;
+          return (
+            <circle
+              cx="60"
+              cy="60"
+              r="42"
+              className="exp-donut-segment"
+              key={segment.label}
+              style={{
+                stroke: segment.color,
+                strokeDasharray: `${length} ${circumference - length}`,
+                strokeDashoffset: -currentOffset,
+              }}
+            />
+          );
+        })}
+      </svg>
+      <strong>{centerValue}</strong>
+      <span>{centerLabel}</span>
+      <div className="exp-donut-legend">
+        {segments.map((segment) => (
+          <span key={segment.label}>
+            <i style={{ background: segment.color }} />
+            {segment.label}<b>{Math.round((segment.value / total) * 100)}%</b>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function SpectrumChart({
+  values,
+  labels,
+  title,
+  tone = "cyan",
+}: {
+  values: number[];
+  labels?: string[];
+  title: string;
+  tone?: "cyan" | "amber" | "magenta";
+}) {
+  const maximum = Math.max(...values, 1);
+  return (
+    <div className={`exp-spectrum-chart exp-spectrum-${tone}`}>
+      <div className="exp-spectrum-bars" role="img" aria-label={title}>
+        {values.map((value, index) => (
+          <i
+            key={index}
+            style={{ height: `${Math.max(5, (value / maximum) * 100)}%` }}
+            title={`${labels?.[index] ?? index + 1}: ${value.toFixed(1)}`}
+          />
+        ))}
+      </div>
+      {labels && (
+        <div className="exp-spectrum-labels">
+          {labels.map((label) => <span key={label}>{label}</span>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function RadarChart({
+  axes,
+  title,
+}: {
+  axes: Array<{ label: string; value: number; color?: string }>;
+  title: string;
+}) {
+  const center = 100;
+  const radius = 70;
+  const angleFor = (index: number) =>
+    -Math.PI / 2 + (index / axes.length) * Math.PI * 2;
+  const polygon = (scale: number) =>
+    axes
+      .map((_, index) => {
+        const angle = angleFor(index);
+        return `${center + Math.cos(angle) * radius * scale},${
+          center + Math.sin(angle) * radius * scale
+        }`;
+      })
+      .join(" ");
+  const values = axes
+    .map((axis, index) => {
+      const angle = angleFor(index);
+      const value = Math.min(100, Math.max(0, axis.value)) / 100;
+      return `${center + Math.cos(angle) * radius * value},${
+        center + Math.sin(angle) * radius * value
+      }`;
+    })
+    .join(" ");
+  return (
+    <div className="exp-radar-chart">
+      <svg viewBox="0 0 200 200" role="img" aria-label={title}>
+        {[0.25, 0.5, 0.75, 1].map((scale) => (
+          <polygon points={polygon(scale)} className="exp-radar-grid" key={scale} />
+        ))}
+        {axes.map((axis, index) => {
+          const angle = angleFor(index);
+          return (
+            <line
+              key={axis.label}
+              x1={center}
+              y1={center}
+              x2={center + Math.cos(angle) * radius}
+              y2={center + Math.sin(angle) * radius}
+              className="exp-radar-axis"
+            />
+          );
+        })}
+        <polygon points={values} className="exp-radar-value" />
+      </svg>
+      <div className="exp-radar-labels">
+        {axes.map((axis) => (
+          <span key={axis.label}>
+            <b>{axis.value.toFixed(0)}</b>
+            {axis.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Sparkline({
   values,
   tone = "healthy",
@@ -381,8 +533,8 @@ export function SiteCard({
       </div>
       <dl>
         <div><dt>Capacity</dt><dd>{site.capacityMw} MW</dd></div>
-        <div><dt>Production</dt><dd>{site.productionMwh.toFixed(0)} MWh</dd></div>
-        <div><dt>Health</dt><dd>{site.health}%</dd></div>
+        <div><dt>Production today</dt><dd>{site.productionMwh.toFixed(1)} MWh</dd></div>
+        <div><dt>Health</dt><dd>{site.health.toFixed(1)}%</dd></div>
       </dl>
     </button>
   );

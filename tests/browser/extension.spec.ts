@@ -160,6 +160,100 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       contentType: "image/png",
     });
 
+    for (const pageCheck of [
+      {
+        nav: "Map",
+        heading: "Connected industrial portfolio",
+        visual: ".exp-map-panel",
+      },
+      {
+        nav: "Sites",
+        heading: "Operations across the portfolio",
+        visual: ".exp-site-grid",
+      },
+      {
+        nav: "Maintenance",
+        heading: "Maintenance readiness",
+        visual: ".exp-concept-grid",
+      },
+      {
+        nav: "Forecasting",
+        heading: "Production forecasting",
+        visual: ".exp-concept-grid",
+      },
+      {
+        nav: "Revenue",
+        heading: "Turn operating signal into value",
+        visual: ".exp-donut-chart",
+      },
+      {
+        nav: "Collaboration",
+        heading: "Keep the shift in sync",
+        visual: ".exp-spectrum-chart",
+      },
+      {
+        nav: "HSE",
+        heading: "Make safe work visible",
+        visual: ".exp-radar-chart",
+      },
+      {
+        nav: "Activities",
+        heading: "See the system behind the signal",
+        visual: ".exp-activity-visuals",
+      },
+    ]) {
+      await experience
+        .getByRole("button", { name: pageCheck.nav, exact: true })
+        .click();
+      await expect(
+        experience.getByRole("heading", {
+          name: pageCheck.heading,
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(experience.locator(pageCheck.visual)).toBeVisible();
+      await hostPage.screenshot({
+        path: path.resolve(
+          `artifacts/experience-demo/solera-experience-${pageCheck.nav.toLowerCase()}.png`,
+        ),
+      });
+    }
+
+    await experience
+      .getByRole("button", { name: "Sites", exact: true })
+      .click();
+    await experience
+      .getByRole("button", { name: "Open Clark Mountain Solar Plant" })
+      .click();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-site-operations.png",
+      ),
+    });
+    await experience
+      .getByRole("button", { name: "Open Solar Block 1" })
+      .click();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-asset-detail.png",
+      ),
+    });
+    await experience
+      .getByRole("button", { name: "Create workspace shortcut" })
+      .click();
+    await expect(
+      experience.getByRole("heading", {
+        name: "Compose a role-specific workspace",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-experience-create.png",
+      ),
+    });
+
+    await experience.getByRole("button", { name: "Home", exact: true }).click();
     expect(
       await experience.evaluate(
         (element) => element.scrollWidth <= element.clientWidth,

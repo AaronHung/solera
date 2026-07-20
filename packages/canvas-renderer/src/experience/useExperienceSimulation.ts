@@ -141,6 +141,20 @@ function liveMetrics(fastTick: number): ExperienceLiveMetric[] {
   });
 }
 
+function siteTone(
+  originalTone: ExperienceTone,
+  availability: number,
+  health: number,
+): ExperienceTone {
+  if (health < 78 || availability < 88) {
+    return "critical";
+  }
+  if (originalTone === "warning" || health < 88 || availability < 93) {
+    return "warning";
+  }
+  return "healthy";
+}
+
 function snapshot(fastTick: number): ExperienceDataset {
   const trendTick = Math.floor(fastTick / TREND_CADENCE_SECONDS);
   const slowTick = Math.floor(fastTick / SLOW_CADENCE_SECONDS);
@@ -177,15 +191,33 @@ function snapshot(fastTick: number): ExperienceDataset {
     sites: EXPERIENCE_DATASET.sites.map((site, siteIndex) => ({
       ...site,
       productionMwh: Number(
-        perturb(site.productionMwh, fastTick, siteIndex + 1, site.productionMwh * 0.0012).toFixed(
-          1,
-        ),
+        (
+          site.productionMwh +
+          slowTick * site.capacityMw * 0.0025 +
+          perturb(0, slowTick, siteIndex + 1, site.capacityMw * 0.004)
+        ).toFixed(1),
       ),
-      availability: Number(
-        bounded(perturb(site.availability, slowTick, siteIndex + 3, 0.11), 82, 99.9).toFixed(
-          1,
-        ),
-      ),
+      ...(() => {
+        const availability = Number(
+          bounded(
+            perturb(site.availability, slowTick, siteIndex + 3, 0.28),
+            82,
+            99.9,
+          ).toFixed(1),
+        );
+        const health = Number(
+          bounded(
+            perturb(site.health, slowTick, siteIndex + 6, 1.35),
+            60,
+            99.9,
+          ).toFixed(1),
+        );
+        return {
+          availability,
+          health,
+          tone: siteTone(site.tone, availability, health),
+        };
+      })(),
       assets: site.assets.map((asset, assetIndex) => {
         const outputMw = Number(
           bounded(
@@ -194,16 +226,26 @@ function snapshot(fastTick: number): ExperienceDataset {
             asset.capacityMw,
           ).toFixed(1),
         );
+        const availability = Number(
+          bounded(
+            perturb(asset.availability, slowTick, assetIndex + 7, 0.3),
+            75,
+            99.9,
+          ).toFixed(1),
+        );
+        const health = Number(
+          bounded(
+            perturb(asset.health, slowTick, assetIndex + 10, 1.1),
+            55,
+            99.9,
+          ).toFixed(1),
+        );
         return {
           ...asset,
           outputMw,
-          availability: Number(
-            bounded(
-              perturb(asset.availability, slowTick, assetIndex + 7, 0.16),
-              75,
-              99.9,
-            ).toFixed(1),
-          ),
+          availability,
+          health,
+          tone: siteTone(asset.tone, availability, health),
           trend: asset.trend.map((value, index) =>
             index === asset.trend.length - 1
               ? outputMw

@@ -50,14 +50,20 @@ replacement for the v0.1 Canvas.
 6. Open **Sites**, choose **Clark Mountain Solar Plant**, then open
    **Solar Block 1** to move from portfolio to site operations and asset
    reliability context.
-7. Use **Pause** and **Resume** to demonstrate controlled deterministic
+7. Open **Map** and **Sites**. Site production today accumulates gradually;
+   availability and health move on the slower operating cadence and may show
+   explicit amber/critical states when a bounded threshold is crossed.
+8. Open **Revenue**, **Collaboration**, **HSE**, and **Activities**. Each page
+   has its own operational panels: value mix, shift handover, safety controls,
+   and connector/activity health.
+9. Use **Pause** and **Resume** to demonstrate controlled deterministic
    updates. No host or historian value is changed.
-8. Open **Create workspace**. Click or drag a KPI, Gauge, Line/Column chart,
+10. Open **Create workspace**. Click or drag a KPI, Gauge, Line/Column chart,
    Status, Asset, or Process Flow component into the grid. Use **Preview** and
    **Save demo** to show the future composition workflow.
-9. Navigate briefly through Forecasting, Revenue, Collaboration, HSE, and
-   Activities to show the consistent concept-page shell.
-10. Press Escape or use the upper-right Close button. Verify that the host
+11. Navigate briefly through Forecasting to show the remaining concept-page
+    shell.
+12. Press Escape or use the upper-right Close button. Verify that the host
     page is unchanged and `#solera-experience-root` no longer exists.
 
 Recommended demo viewports are 1440×900 and 1920×1080; 1024px is the minimum

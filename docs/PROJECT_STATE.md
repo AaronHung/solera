@@ -41,13 +41,17 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
   and fifteen-second health/availability. Previous trends remain dashed,
   current trends redraw solid, and bounded amber/red threshold states include
   explicit status text. Pause/resume/reset and unmount timer cleanup are tested.
+- Map and Sites now show bounded live operational movement: production-today
+  accumulates gradually while availability, health, and site status move on
+  the slow cadence. Revenue, Collaboration, HSE, and Activities each have
+  distinct role-oriented panels instead of a shared static concept screen.
 - Sidecar messages accept only an allowlisted Experience role. Canvas and
   Experience are mutually exclusive singletons; both preserve the host body
   and reject arbitrary HTML or executable configuration.
 - OIDC RS256, development-token production guard, audit/trace replay, model
   gateway, latency/cost counters, knowledge citations, feedback/eval, nightly
   aggregate, and retention Flow seams are implemented.
-- Final local verification on the Experience branch: 28 Python tests and 19
+- Final local verification on the Experience branch: 28 Python tests and 21
   TypeScript tests pass; TypeScript builds/typechecks, Ruff, and IDE lints
   pass. The Brave MV3 E2E and managed-package contract both pass, including
   Experience launch, role/page/Create interactions, Escape cleanup, host
