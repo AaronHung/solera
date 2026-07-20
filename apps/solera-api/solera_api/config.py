@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         default_factory=lambda: [
             "easypi.iiotfab.com",
             "pivision.iiotfab.com",
+            "203.146.71.23",
         ]
     )
     easy_pi_base_url: str = "https://easypi.iiotfab.com"

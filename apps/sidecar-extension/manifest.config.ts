@@ -15,6 +15,7 @@ export default defineManifest({
   host_permissions: [
     "https://easypi.iiotfab.com/*",
     "https://pivision.iiotfab.com:8443/*",
+    "http://203.146.71.23/*",
     "http://localhost/*",
     "http://127.0.0.1/*",
   ],
@@ -38,6 +39,7 @@ export default defineManifest({
       matches: [
         "https://easypi.iiotfab.com/*",
         "https://pivision.iiotfab.com:8443/*",
+        "http://203.146.71.23/*",
       ],
       js: ["src/content/index.tsx"],
       run_at: "document_idle",

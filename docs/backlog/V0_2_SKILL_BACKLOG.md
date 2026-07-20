@@ -15,6 +15,41 @@ updated evaluation evidence, and an update to `docs/PROJECT_STATE.md`.
   - Done when: named Pilot users, supported displays, golden results, and
     unresolved limitations are recorded.
 
+## Gate 0A — Approved Site onboarding and domain policy
+
+The v0.1 SCADA test exception
+`http://203.146.71.23/*` is intentionally static and local to the Pilot.
+Future customers need governed onboarding instead of manual manifest edits.
+
+- **SOL-V02-BL-005** Define a tenant-scoped `ApprovedSite` contract for
+  origins, schemes, ports, host patterns, adapter, data policy, owner,
+  expiry, and enabled/disabled state.
+  - Requirement: `SOL-V02-SITE-001`.
+  - Done when: the same approved-site record can drive extension injection,
+    backend domain policy, adapter selection, and audit metadata.
+
+- **SOL-V02-BL-006** Implement Approved Site onboarding and configuration
+  distribution.
+  - Requirement: `SOL-V02-SITE-002`.
+  - Done when: an authorized tenant administrator can approve a SCADA, MES,
+    ERP, or PI site without hand-editing source code, while production
+    defaults remain deny-by-default and HTTP exceptions require explicit
+    approval.
+
+- **SOL-V02-BL-007** Add a content-script handshake and recovery flow for
+  approved sites.
+  - Requirement: `SOL-V02-SITE-003`.
+  - Done when: Sidecar distinguishes “site not approved”, “content script not
+    injected”, and “page receiver unavailable”, then offers a safe,
+    auditable recovery path without unrestricted all-site injection.
+
+- **SOL-V02-BL-008** Validate generic industrial PageContext on the first
+  approved SCADA site.
+  - Requirement: `SOL-V02-SITE-004`.
+  - Done when: the site captures bounded visible context, excludes passwords
+    and secrets, passes backend tenant/domain policy, and has golden tests for
+    login, refresh, SPA navigation, and stale-tab recovery.
+
 ## Gate 1 — Skill contracts and registry
 
 - **SOL-V02-BL-001** Define `SkillManifest` JSON Schema and TypeScript/Python

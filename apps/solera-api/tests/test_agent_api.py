@@ -92,7 +92,11 @@ def page_context(host: str = "easypi.iiotfab.com") -> dict[str, object]:
 
 def make_client(requests_per_minute: int = 30) -> TestClient:
     settings = Settings(
-        allowed_domains=["easypi.iiotfab.com", "pivision.iiotfab.com"],
+        allowed_domains=[
+            "easypi.iiotfab.com",
+            "pivision.iiotfab.com",
+            "203.146.71.23",
+        ],
         easy_pi_timeout_ms=1000,
         database_url="sqlite+aiosqlite:///:memory:",
         tenant_requests_per_minute=requests_per_minute,
@@ -174,6 +178,34 @@ def test_pi_vision_context_question_does_not_require_a_tag() -> None:
     assert "不從圖形猜測工業數值" in text
     complete = next(event for event in events if event["type"] == "complete")
     assert complete["payload"]["canvasAvailable"] is False
+
+
+def test_approved_scada_page_context_is_allowed_without_numeric_tags() -> None:
+    context = page_context("203.146.71.23:8080")
+    context["page"]["url"] = "http://203.146.71.23:8080/CloudSCADA/"
+    context["page"]["urlPattern"] = "http://203.146.71.23/*"
+    context["page"]["systemType"] = "generic"
+    context["page"]["viewType"] = "unknown"
+    context["page"]["title"] = "OCS Overview"
+    context["page"]["visibleTextDigest"] = "OCS Overview Production Order Weaving"
+
+    with make_client() as client:
+        with client.stream(
+            "POST",
+            "/v1/agent/chat",
+            headers={"Authorization": "Bearer dev:tenant-demo:user-1:viewer"},
+            json={
+                "question": "這個頁面在做什麼？",
+                "pageContext": context,
+                "tags": [],
+            },
+        ) as response:
+            events = parse_events(response)
+
+    assert response.status_code == 200
+    assert not [event for event in events if event["type"] == "tool-start"]
+    text = next(event["payload"]["text"] for event in events if event["type"] == "text-delta")
+    assert "OCS Overview" in text
 
 
 def test_pi_vision_context_fallback_prioritizes_display_purpose() -> None:

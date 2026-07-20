@@ -336,3 +336,34 @@ define a stable spatial and asset contract for:
 Canvas remains the trusted renderer. Scene is a future renderer over the same
 validated Site/Asset, Evidence, and ViewSpec contracts. The Agent may propose a
 spatial view, but it cannot inject arbitrary executable scene code.
+
+## 17. Approved Site onboarding and content-script injection
+
+The first SCADA test site is currently enabled by a static v0.1 exception:
+`http://203.146.71.23/*`. This is a development/Pilot configuration, not a
+general permission to inject Solera into every website.
+
+The v0.2 platform must introduce a governed `ApprovedSite` contract containing:
+
+- tenant and site identity
+- allowed origin, scheme, host pattern, and port
+- selected Site Adapter and PageContext policy
+- data-egress and sensitivity policy
+- owner, approval time, expiry, enabled/disabled state, and audit references
+
+Approved Site onboarding must update extension injection configuration and
+backend domain policy as one auditable operation. It must distinguish:
+
+- site not approved
+- approved site but content script not injected
+- injected content script with an unavailable or stale receiver
+- injected content script with valid PageContext
+
+Production defaults remain deny-by-default. Plain HTTP, IP-address origins,
+wildcard hosts, and customer-specific exceptions require explicit tenant
+approval, expiry, and security review. The platform must not solve onboarding
+by injecting into all websites.
+
+The recovery flow must support SPA navigation, browser restart, extension
+reload, stale tabs, and content-script handshake health without reading
+password fields, cookies, host request traffic, or local-storage tokens.

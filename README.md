@@ -13,14 +13,15 @@ Read these files in order before changing code:
 
 1. [v0.1 Product Contract](docs/contracts/SOLERA_V0_1.md)
 2. [Current Project State](docs/PROJECT_STATE.md)
-3. [System Architecture](docs/architecture/SYSTEM.md)
-4. [Architecture Decisions](docs/adr/)
-5. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
-6. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
-7. [Threat Model](docs/security/THREAT_MODEL.md)
-8. [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
-9. [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
-10. [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
+3. [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
+4. [System Architecture](docs/architecture/SYSTEM.md)
+5. [Architecture Decisions](docs/adr/)
+6. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
+7. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
+8. [Threat Model](docs/security/THREAT_MODEL.md)
+9. [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
+10. [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
+11. [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
 
 The contract is authoritative. Scope changes require an ADR and a contract
 changelog entry. Every implementation change must reference a requirement or
@@ -80,16 +81,16 @@ POSTGRES_PASSWORD=solera-test docker compose config --quiet
 npm run package:extension
 ```
 
-The browser smoke uses Playwright Chromium because current branded Chrome
-blocks command-line unpacked extension loading. The same managed-package
-contract is checked for Chrome and Edge; final branded-browser acceptance runs
-through enterprise extension management.
+The browser smoke can use Playwright Chromium or the installed Brave executable;
+the same managed-package contract is checked for Chrome and Edge. Final
+branded-browser acceptance runs through enterprise extension management.
 
 Operational and demo procedures:
 
 - [Demo runbook](docs/runbooks/DEMO.md)
 - [Pilot runbook](docs/runbooks/PILOT.md)
 - [Deployment](docs/runbooks/DEPLOYMENT.md)
+- [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
 - [Data retention](docs/security/DATA_RETENTION.md)
 
 Post-v0.1 product direction:

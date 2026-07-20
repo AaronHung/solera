@@ -113,6 +113,12 @@ INFO:     Application startup complete.
 **Edge：**
 - 網址改成 `edge://extensions`，其餘相同
 
+**目前已核准的 SCADA 測試站點：**
+- `http://203.146.71.23/*`
+- 這是明文 HTTP 的開發／測試站點，只限於本機 Pilot；不要將此例外直接延伸到 production。
+- 更新 manifest 後必須重新執行 `npm run build`，在 extensions 頁重新載入 Solera，
+  再重新整理 SCADA 分頁，content script 才會注入。
+
 > 只需要載入一次。之後每次打開瀏覽器，extension 都會自動出現。  
 > 更新了程式碼後，重新 `npm run build`，在 extensions 頁按刷新圖示，
 > **再重新載入目前的 Easy PI／PI Vision 分頁**。Content script 不會自動
@@ -132,7 +138,7 @@ INFO:     Application startup complete.
 
 ### 步驟 4：啟動 Sidecar 進行 Demo
 
-1. 確認你在 Easy PI 或 PI Vision 的頁面上
+1. 確認你在 Easy PI、PI Vision 或已核准的 SCADA 頁面上
 2. 點右上角工具列的 **Solera S logo**
 3. 點 Sidecar 右上角的 ⚙ **Connection settings**
 4. 填入：
@@ -254,6 +260,7 @@ npm run build
 | Easy PI Swagger | https://easypi.iiotfab.com/swagger/ui/index | 無需帳號 |
 | PI Vision | https://pivision.iiotfab.com:8443/PIVision | administrator / iiotfab@1qaz@WSX |
 | PI Vision Tank Display | https://pivision.iiotfab.com:8443/PIVision/#/Displays/29/Tank_Details | 同上登入後 |
+| SCADA 測試站點 | http://203.146.71.23:8080/CloudSCADA/ | 使用站點既有登入 |
 | Solera API（本機）| http://localhost:8000 | Dev token（自動） |
 | Solera API docs | http://localhost:8000/docs | 同上 |
 | OpenRouter | https://openrouter.ai | 已在 .env 設定 |

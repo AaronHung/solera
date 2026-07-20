@@ -49,6 +49,8 @@ test("Chrome and Edge managed-package contract is compatible", () => {
   expect(manifest.side_panel.default_path).toBe("sidepanel.html");
   expect(manifest.background.type).toBe("module");
   expect(manifest.host_permissions).not.toContain("<all_urls>");
+  expect(manifest.host_permissions).toContain("http://203.146.71.23/*");
+  expect(manifest.content_scripts[0].matches).toContain("http://203.146.71.23/*");
   expect(manifest.permissions).toEqual(
     expect.arrayContaining(["activeTab", "sidePanel", "storage"]),
   );
