@@ -12,17 +12,32 @@ from easy_pi import ConnectorError, ConnectorLimits, EasyPiConnector
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from loop1_simulator import Loop1ScenarioEngine
+from solera_flows import run_loop1_replay, run_loop1_seed
+from synthetic_pi import SyntheticPiConnector
 
 from .agent import AgentInputError, ChatRequest, SoleraOrchestrator
-from .api_models import FeedbackRequest, KillSwitchRequest, KnowledgeDocumentRequest
+from .api_models import (
+    FeedbackRequest,
+    KillSwitchRequest,
+    KnowledgeDocumentRequest,
+    Loop1ApprovalDecisionRequest,
+    Loop1ControlRequest,
+)
 from .auth import PrincipalDependency
 from .config import Settings, get_settings
 from .contracts import AgentStreamEvent, PageContext, ViewSpec
+from .data_hub import DataHubRepository
 from .model_gateway import ModelGateway, create_model_gateway
 from .observability import MetricsRegistry
 from .oidc import OidcVerifier
 from .policy import PolicyDenied, PolicyEngine
+from .productization import (
+    enforce_productization_gates,
+    evaluate_productization_gates,
+)
 from .rate_limit import SlidingWindowRateLimiter
+from .skills.loop1 import LOOP1_SKILLS, Loop1Investigator, Loop1ReadOnlyTools
 from .storage import (
     AuditRepository,
     CanvasRepository,
@@ -71,6 +86,8 @@ def create_app(
     oidc_verifier: OidcVerifier | None = None,
 ) -> FastAPI:
     resolved_settings = settings or get_settings()
+    productization_gates = evaluate_productization_gates(resolved_settings)
+    enforce_productization_gates(productization_gates)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -105,6 +122,31 @@ def create_app(
         app.state.kill_switches = kill_switches
         app.state.knowledge = KnowledgeRepository(runtime_database)
         app.state.flows = FlowRepository(runtime_database)
+        app.state.data_hub = DataHubRepository(runtime_database)
+        app.state.loop1_productization_gates = productization_gates
+        app.state.loop1_investigator = Loop1Investigator(
+            Loop1ReadOnlyTools(
+                data_hub=app.state.data_hub,
+                knowledge=app.state.knowledge,
+            )
+        )
+        app.state.loop1_engine = None
+        app.state.loop1_connector = None
+        if resolved_settings.loop1_enabled:
+            app.state.loop1_engine = Loop1ScenarioEngine()
+            app.state.loop1_connector = SyntheticPiConnector(
+                engine=app.state.loop1_engine
+            )
+            await run_loop1_seed(
+                repository=app.state.data_hub,
+                knowledge=app.state.knowledge,
+                manifest=app.state.loop1_engine.manifest,
+            )
+            await run_loop1_replay(
+                repository=app.state.data_hub,
+                engine=app.state.loop1_engine,
+                to_tick=resolved_settings.loop1_start_tick,
+            )
         app.state.metrics = metrics
         app.state.rate_limiter = SlidingWindowRateLimiter(
             resolved_settings.tenant_requests_per_minute
@@ -467,6 +509,251 @@ def create_app(
             }
             for item in hits
         ]
+
+    @app.get(f"{resolved_settings.api_prefix}/loop1/catalog")
+    async def loop1_catalog(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None:
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_DISABLED"})
+        if principal.tenant_id != engine.manifest.tenant_id:
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        return {
+            "synthetic": True,
+            "manifest": engine.manifest.model_dump(by_alias=True, mode="json"),
+            "truthDisclosure": {
+                "claim": "Synthetic Agent validation environment",
+                "notA": "customer plant Digital Twin or safety system",
+            },
+        }
+
+    @app.get(f"{resolved_settings.api_prefix}/loop1/productization-gates")
+    async def loop1_productization_gate_report(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        if app.state.loop1_engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        return app.state.loop1_productization_gates.model_dump(
+            by_alias=True,
+            mode="json",
+        )
+
+    @app.get(f"{resolved_settings.api_prefix}/loop1/snapshot")
+    async def loop1_snapshot(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        snapshot = await app.state.data_hub.snapshot(
+            principal.tenant_id,
+            engine.run.run_id,
+        )
+        if snapshot is None:
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_RUN_NOT_FOUND"})
+        snapshot["pulse"] = await app.state.data_hub.update_pulse(
+            tenant_id=principal.tenant_id,
+            connector_id="synthetic-pi",
+            run_id=engine.run.run_id,
+        )
+        return snapshot
+
+    @app.post(f"{resolved_settings.api_prefix}/loop1/control")
+    async def loop1_control(
+        control: Loop1ControlRequest,
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        _require_role(principal.roles, {"admin", "engineer", "operator", "viewer"})
+        if control.action == "pause":
+            engine.pause()
+            await app.state.data_hub.ingest_frame(engine.step(0))
+        elif control.action == "resume":
+            engine.resume()
+            await app.state.data_hub.ingest_frame(engine.step(0))
+        elif control.action == "reset":
+            await app.state.data_hub.reset_run(
+                principal.tenant_id,
+                engine.run.run_id,
+            )
+            await app.state.data_hub.ingest_frame(engine.reset())
+        elif control.action in {"jump-to-fault", "replay"}:
+            to_tick = control.to_tick
+            if control.action == "jump-to-fault":
+                to_tick = min(fault.inject_at_tick for fault in engine.manifest.faults)
+            if to_tick is None:
+                raise HTTPException(
+                    status_code=422,
+                    detail={"code": "LOOP1_REPLAY_TICK_REQUIRED"},
+                )
+            await run_loop1_replay(
+                repository=app.state.data_hub,
+                engine=engine,
+                to_tick=to_tick,
+            )
+        else:
+            for _ in range(control.count):
+                await app.state.data_hub.ingest_frame(engine.step())
+        snapshot = await app.state.data_hub.snapshot(
+            principal.tenant_id,
+            engine.run.run_id,
+        )
+        return snapshot or {
+            "synthetic": True,
+            "run": engine.run.model_dump(by_alias=True, mode="json"),
+            "observations": [],
+            "alarms": [],
+        }
+
+    @app.get(f"{resolved_settings.api_prefix}/loop1/skills")
+    async def loop1_skills(
+        principal: PrincipalDependency,
+    ) -> list[dict[str, object]]:
+        if app.state.loop1_engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        return [
+            skill.model_dump(by_alias=True, mode="json") for skill in LOOP1_SKILLS
+        ]
+
+    @app.post(f"{resolved_settings.api_prefix}/loop1/investigate")
+    async def loop1_investigate(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        result = await app.state.loop1_investigator.investigate(
+            tenant_id=principal.tenant_id,
+            run_id=engine.run.run_id,
+        )
+        return result.model_dump(by_alias=True, mode="json")
+
+    @app.post(f"{resolved_settings.api_prefix}/loop1/approvals")
+    async def loop1_request_approval(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        _require_role(principal.roles, {"admin", "engineer", "operator", "supervisor"})
+        investigation = await app.state.loop1_investigator.investigate(
+            tenant_id=principal.tenant_id,
+            run_id=engine.run.run_id,
+        )
+        if investigation.action_draft is None:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "LOOP1_ACTION_NOT_SUPPORTED"},
+            )
+        approval_id = f"approval-{investigation.investigation_id}"
+        approval = await app.state.data_hub.request_approval(
+            approval_id=approval_id,
+            tenant_id=principal.tenant_id,
+            run_id=engine.run.run_id,
+            action_type=investigation.action_draft.action_type,
+            requested_by=principal.actor_id,
+            draft=investigation.action_draft.model_dump(
+                by_alias=True,
+                mode="json",
+            ),
+        )
+        await app.state.audit.record(
+            event_id=f"audit-{uuid4()}",
+            tenant_id=principal.tenant_id,
+            actor_id=principal.actor_id,
+            action="loop1.approval.request",
+            outcome="requested",
+            trace_id=investigation.investigation_id,
+            resource_type="approval",
+            resource_id=approval_id,
+            metadata={"synthetic": True, "execution": "draft-only"},
+        )
+        return approval
+
+    @app.post(
+        f"{resolved_settings.api_prefix}/loop1/approvals/{{approval_id}}/decision"
+    )
+    async def loop1_decide_approval(
+        approval_id: str,
+        decision: Loop1ApprovalDecisionRequest,
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        if app.state.loop1_engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        _require_role(principal.roles, {"admin", "operator", "supervisor"})
+        try:
+            approval = await app.state.data_hub.decide_approval(
+                approval_id=approval_id,
+                tenant_id=principal.tenant_id,
+                decided_by=principal.actor_id,
+                decision=decision.decision,
+                rationale=decision.rationale,
+            )
+        except KeyError as error:
+            raise HTTPException(
+                status_code=404,
+                detail={"code": "LOOP1_APPROVAL_NOT_FOUND"},
+            ) from error
+        except ValueError as error:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "LOOP1_APPROVAL_ALREADY_DECIDED"},
+            ) from error
+        await app.state.audit.record(
+            event_id=f"audit-{uuid4()}",
+            tenant_id=principal.tenant_id,
+            actor_id=principal.actor_id,
+            action="loop1.approval.decision",
+            outcome=decision.decision,
+            trace_id=approval_id,
+            resource_type="approval",
+            resource_id=approval_id,
+            metadata={
+                "synthetic": True,
+                "execution": "draft-only",
+                "externalWrite": False,
+            },
+        )
+        return approval
+
+    @app.get(f"{resolved_settings.api_prefix}/loop1/pulse")
+    async def loop1_pulse(
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        return await app.state.data_hub.update_pulse(
+            tenant_id=principal.tenant_id,
+            connector_id="synthetic-pi",
+            run_id=engine.run.run_id,
+        )
+
+    @app.get(
+        f"{resolved_settings.api_prefix}/loop1/thread/{{entity_kind}}/{{entity_id}}"
+    )
+    async def loop1_thread(
+        entity_kind: str,
+        entity_id: str,
+        principal: PrincipalDependency,
+    ) -> dict[str, object]:
+        if app.state.loop1_engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        if entity_kind not in {"asset", "tag", "document", "case", "alarm"}:
+            raise HTTPException(status_code=422, detail={"code": "INVALID_ENTITY_KIND"})
+        edges = await app.state.data_hub.thread(
+            principal.tenant_id,
+            entity_kind,
+            entity_id,
+        )
+        return {
+            "synthetic": True,
+            "entity": {"kind": entity_kind, "id": entity_id},
+            "edges": edges,
+        }
 
     return app
 

@@ -1,0 +1,58 @@
+[
+  {
+    "documentId": "sop-r101-cooling-rev4",
+    "title": "SOP-R101-04 Reactor Cooling Deviation — Revision 4",
+    "uri": "solera://loop1/documents/sop-r101-cooling-rev4",
+    "assetIds": ["equipment-reactor", "component-cooling-valve"],
+    "content": "Synthetic training document. Effective 2025-10-01. Revision 4 supersedes Revision 3. For a reactor cooling deviation, verify alarm validity, compare controller command with independent valve position feedback, confirm cooling-water flow and utility availability, and notify the shift supervisor. Follow the approved plant procedure and field verification process. Do not bypass interlocks or change a setpoint based on this demo document."
+  },
+  {
+    "documentId": "pid-loop1-area-12-rev7",
+    "title": "P&ID LOOP1 Area 12 — Revision 7",
+    "uri": "solera://loop1/documents/pid-loop1-area-12-rev7",
+    "assetIds": ["unit-reactor-loop", "equipment-reactor", "component-cooling-valve"],
+    "content": "Synthetic P&ID index. R-101 cooling jacket is supplied through FV-101. Command signal FIC-101-OUT and position feedback FV-101-POS are independent Tags. Cooling flow FT-101 is downstream of FV-101. Revision 7 adds the independent position transmitter reference."
+  },
+  {
+    "documentId": "manual-fv101-rev2",
+    "title": "FV-101 Control Valve Maintenance Manual — Revision 2",
+    "uri": "solera://loop1/documents/manual-fv101-rev2",
+    "assetIds": ["component-cooling-valve"],
+    "content": "Synthetic maintenance guidance. Position-command mismatch with reduced downstream flow can indicate stiction, actuator supply restriction, linkage wear, or feedback calibration error. A qualified technician must inspect and test the valve under the approved isolation and permit process."
+  },
+  {
+    "documentId": "moc-loop1-2025-014",
+    "title": "MOC-2025-014 FV-101 Position Feedback Upgrade",
+    "uri": "solera://loop1/documents/moc-loop1-2025-014",
+    "assetIds": ["component-cooling-valve"],
+    "content": "Synthetic MOC record. Added independent valve position feedback and updated P&ID Revision 7. No controller tuning or process safety limit was changed. Commissioned 2025-09-15."
+  },
+  {
+    "documentId": "eptw-loop1-2025-221",
+    "title": "ePTW-2025-221 Cooling Header Inspection",
+    "uri": "solera://loop1/documents/eptw-loop1-2025-221",
+    "assetIds": ["component-reactor-jacket"],
+    "content": "Synthetic closed permit. Cooling header inspection completed 2025-12-11. No active isolation remains. This record is historical context and is not an authorization to perform work."
+  },
+  {
+    "documentId": "shift-log-loop1-2025-12-31",
+    "title": "LOOP-1 Night Shift Handover 2025-12-31",
+    "uri": "solera://loop1/documents/shift-log-loop1-2025-12-31",
+    "assetIds": ["unit-reactor-loop", "component-cooling-valve"],
+    "content": "Synthetic handover. Operator observed a brief FV-101 position hesitation during a routine throughput change. No process alarm occurred. Maintenance notification MN-8841 was opened for review."
+  },
+  {
+    "documentId": "alarm-philosophy-rev5",
+    "title": "LOOP-1 Alarm Philosophy — Revision 5",
+    "uri": "solera://loop1/documents/alarm-philosophy-rev5",
+    "assetIds": ["unit-reactor-loop"],
+    "content": "Synthetic alarm philosophy. Alarm floods are analyzed as related event groups. A primary equipment deviation and its dependent process alarms should not be presented as independent root causes. Safety-critical alarms remain visible and are never suppressed by the Agent."
+  },
+  {
+    "documentId": "work-history-fv101-2025",
+    "title": "FV-101 Maintenance History 2025",
+    "uri": "solera://loop1/documents/work-history-fv101-2025",
+    "assetIds": ["component-cooling-valve"],
+    "content": "Synthetic history. WO-7702 replaced packing in March. WO-8128 calibrated the position transmitter in September. MN-8841 reports intermittent hesitation and remains planned, not completed."
+  }
+]

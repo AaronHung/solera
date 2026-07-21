@@ -34,6 +34,10 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     await expect(page.getByText("Solera", { exact: true })).toBeVisible();
     await expect(page.getByText("What should we verify?")).toBeVisible();
     await page.getByRole("button", { name: "Canvas" }).click();
+    await expect(page.getByRole("heading", { name: "LOOP-1 Agent Lab" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Open LOOP-1 Experience/ }),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "Experience Demo" })).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Open full-screen Experience/ }),
@@ -268,6 +272,102 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     expect(hostErrors).toEqual([]);
     await hostPage.keyboard.press("Escape");
     await expect(hostPage.locator("#solera-experience-root")).toHaveCount(0);
+    await hostPage.setViewportSize({ width: 1440, height: 900 });
+
+    await context.route("http://localhost:8000/v1/loop1/**", async (route) => {
+      const pathName = new URL(route.request().url()).pathname;
+      const payload = pathName.endsWith("/investigate")
+        ? {
+            investigationId: "inv-browser",
+            runId: "run-browser",
+            scenarioState: "normal",
+            status: "safe-decline",
+            summary: "Collecting sufficient synthetic signal history.",
+            alarmClusters: [],
+            hypotheses: [],
+            evidence: [],
+            documents: [],
+            similarCases: [],
+            recommendations: ["Continue read-only monitoring."],
+            missingData: ["fewer than 20 replay observations"],
+            skillTrace: [],
+            actionDraft: null,
+            safetyNotice: "Synthetic, read-only investigation.",
+          }
+        : {
+            synthetic: true,
+            run: {
+              runId: "run-browser",
+              scenarioId: "loop1-reactor-cooling",
+              state: "normal",
+              tick: 20,
+              simulationTime: "2026-01-01T00:00:20Z",
+              activeFaults: [],
+            },
+            observations: [],
+            alarms: [],
+            pulse: {
+              connectorId: "synthetic-pi",
+              status: "healthy",
+              lagSeconds: 0,
+              quality: { good: 60, bad: 0, questionable: 0, missing: 0 },
+              details: {
+                clockMode: "synthetic-replay",
+                scenarioState: "normal",
+                tick: 20,
+                synthetic: true,
+              },
+            },
+          };
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify(payload),
+      });
+    });
+    const loop1Launch = await page.evaluate(async () => {
+      const tabs = await chrome.tabs.query({});
+      const hostTab = tabs.find((tab) =>
+        tab.url?.startsWith("http://203.146.71.23/"),
+      );
+      if (!hostTab?.id) {
+        return { ok: false, error: "Approved host tab not found" };
+      }
+      return chrome.tabs.sendMessage(hostTab.id, {
+        type: "SOLERA_MOUNT_EXPERIENCE",
+        mode: "loop1",
+        loop1: {
+          apiBaseUrl: "http://localhost:8000",
+          bearerToken: "dev:tenant-demo:browser:viewer",
+        },
+      });
+    });
+    expect(loop1Launch).toEqual({ ok: true });
+    const loop1Experience = hostPage.locator("#solera-experience-root");
+    await expect(
+      loop1Experience.getByRole("heading", { name: "Live Unit Overview" }),
+    ).toBeVisible();
+    await expect(
+      loop1Experience.getByText("SYNTHETIC · READ-ONLY · NOT A SAFETY SYSTEM"),
+    ).toBeVisible();
+    await expect(
+      loop1Experience.getByRole("button", { name: /Run Hero scenario/ }),
+    ).toBeVisible();
+    await loop1Experience.getByRole("button", { name: "Timeline" }).click();
+    await expect(
+      loop1Experience.getByRole("heading", { name: "Causal Alarm Timeline" }),
+    ).toBeVisible();
+    await loop1Experience.getByRole("button", { name: "Investigation" }).click();
+    await expect(
+      loop1Experience.getByText("Synthetic, read-only investigation."),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-loop1-investigation.png",
+      ),
+    });
+    await hostPage.keyboard.press("Escape");
+    await expect(hostPage.locator("#solera-experience-root")).toHaveCount(0);
+    expect(hostErrors).toEqual([]);
     await expect(hostPage.locator("#scada")).toHaveText("Approved SCADA host");
   } finally {
     await context.close();

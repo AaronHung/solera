@@ -68,7 +68,11 @@ fs.writeFileSync(
       archive: archiveName,
       sha256: digest,
       hostPermissions: manifest.host_permissions,
-      compatibleBrowsers: ["Google Chrome", "Microsoft Edge"],
+      compatibleBrowsers: [
+        "Brave",
+        "Google Chrome",
+        "Microsoft Edge",
+      ],
     },
     null,
     2,

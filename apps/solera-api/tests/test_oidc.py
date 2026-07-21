@@ -51,7 +51,9 @@ async def test_oidc_verifier_enforces_signature_tenant_roles_and_asset_scope() -
     assert identity.roles == frozenset({"engineer"})
     assert identity.asset_scopes == frozenset({"mixing-tank-1"})
 
-    invalid = f"{token[:-1]}x"
+    header, payload, signature = token.split(".")
+    replacement = "A" if signature[0] != "A" else "B"
+    invalid = f"{header}.{payload}.{replacement}{signature[1:]}"
     with pytest.raises(OidcVerificationError):
         await verifier.verify(invalid)
     await client.aclose()

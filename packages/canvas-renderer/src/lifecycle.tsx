@@ -9,6 +9,8 @@ import type {
   ExperienceHandle,
   ExperienceMountOptions,
 } from "./experience/types";
+import { Loop1Experience } from "./loop1/Loop1Experience";
+import { loop1Styles } from "./loop1/styles";
 import { CANVAS_STYLES } from "./styles";
 
 export const SOLERA_CANVAS_ROOT_ID = "solera-canvas-root";
@@ -104,7 +106,7 @@ export function mountExperienceOverlay(
   const shadowRoot = host.attachShadow({ mode: "open" });
   const style = ownerDocument.createElement("style");
   style.dataset.soleraOwned = "experience-style";
-  style.textContent = experienceStyles;
+  style.textContent = options.mode === "loop1" ? loop1Styles : experienceStyles;
   const container = ownerDocument.createElement("div");
   container.dataset.soleraOwned = "experience-container";
   container.style.setProperty("width", "100%");
@@ -134,12 +136,20 @@ export function mountExperienceOverlay(
     }
   };
   ownerDocument.defaultView?.addEventListener("keydown", onKeyDown);
-  root.render(
-    <ExperienceView
-      {...(options.initialRole ? { initialRole: options.initialRole } : {})}
-      onClose={close}
-    />,
-  );
+  if (options.mode === "loop1") {
+    if (!options.loop1) {
+      dispose();
+      throw new Error("LOOP-1 Experience requires API configuration");
+    }
+    root.render(<Loop1Experience {...options.loop1} onClose={close} />);
+  } else {
+    root.render(
+      <ExperienceView
+        {...(options.initialRole ? { initialRole: options.initialRole } : {})}
+        onClose={close}
+      />,
+    );
+  }
 
   return {
     host,

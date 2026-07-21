@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     max_range_seconds: int = 7 * 24 * 60 * 60
     max_points: int = 5000
     allowed_tags: list[str] = Field(default_factory=lambda: ["CDT158", "CDT159", "SINUSOID"])
+    loop1_enabled: bool = True
+    loop1_start_tick: int = Field(default=1, ge=1, le=600)
+    loop1_pi_mirror_enabled: bool = False
+    loop1_pi_omf_endpoint: str | None = None
+    loop1_pi_namespace: str | None = None
+    loop1_dwsim_opcua_enabled: bool = False
+    loop1_multimodal_enabled: bool = False
+    loop1_external_event_bus: str = "in-process"
 
     model_provider: str = "disabled"
     model_endpoint: str = "https://api.openai.com/v1/responses"
@@ -73,6 +81,18 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_identity(self) -> Settings:
+        if self.loop1_pi_mirror_enabled and not (
+            self.loop1_pi_omf_endpoint and self.loop1_pi_namespace
+        ):
+            raise ValueError(
+                "LOOP-1 PI mirror requires an OMF endpoint and isolated namespace"
+            )
+        if self.loop1_external_event_bus not in {
+            "in-process",
+            "nats-jetstream",
+            "redpanda",
+        }:
+            raise ValueError("invalid LOOP-1 event bus")
         if self.environment == "production":
             if self.dev_auth_enabled:
                 raise ValueError("development authentication is forbidden in production")

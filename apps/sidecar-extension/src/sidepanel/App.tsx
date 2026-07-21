@@ -187,6 +187,24 @@ async function openExperience(role: ExperienceRole): Promise<void> {
   }
 }
 
+async function openLoop1(settings: SidecarSettings): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    throw new Error("No active browser tab is available");
+  }
+  const response = (await chrome.tabs.sendMessage(tab.id, {
+    type: "SOLERA_MOUNT_EXPERIENCE",
+    mode: "loop1",
+    loop1: {
+      apiBaseUrl: settings.apiBaseUrl,
+      bearerToken: settings.bearerToken,
+    },
+  })) as { ok: boolean; error?: string };
+  if (!response.ok) {
+    throw new Error(response.error ?? "LOOP-1 Experience could not be opened");
+  }
+}
+
 function assetNeedsConfirmation(context: PageContext | null): boolean {
   return Boolean(
     context?.candidateAssets.some(
@@ -1297,6 +1315,40 @@ export function App() {
       {tab === "canvas" && (
         <main className="detail-panel">
           <p className="eyebrow">SOLERA EXPERIENCE LAB</p>
+          <h2>LOOP-1 Agent Lab</h2>
+          <article className="experience-launcher">
+            <div className="experience-preview" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <strong>L1</strong>
+            </div>
+            <p>
+              Run the deterministic reactor-cooling Hero scenario with shared
+              backend telemetry, alarm timeline, Agent hypotheses, Evidence,
+              cases and approval-gated drafts.
+            </p>
+            <button
+              className="experience-open"
+              onClick={() =>
+                void openLoop1(settings).catch((loop1Error) =>
+                  setError(
+                    loop1Error instanceof Error
+                      ? loop1Error.message
+                      : "LOOP-1 Experience failed",
+                  ),
+                )
+              }
+            >
+              Open LOOP-1 Experience
+              <span>↗</span>
+            </button>
+            <small>
+              SYNTHETIC · READ-ONLY · REPLAYABLE · Press Esc to close
+            </small>
+          </article>
+
+          <p className="eyebrow saved-canvas-eyebrow">PORTFOLIO CONCEPT</p>
           <h2>Experience Demo</h2>
           <article className="experience-launcher">
             <div className="experience-preview" aria-hidden="true">

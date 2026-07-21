@@ -24,6 +24,11 @@ export type ExperienceTone = "healthy" | "warning" | "critical" | "neutral";
 export interface ExperienceMountOptions {
   document?: Document;
   initialRole?: ExperienceRole;
+  mode?: "portfolio" | "loop1";
+  loop1?: {
+    apiBaseUrl: string;
+    bearerToken: string;
+  };
   onClose?: () => void;
 }
 

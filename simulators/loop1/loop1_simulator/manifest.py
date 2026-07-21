@@ -1,0 +1,542 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from solera_api.industrial_contracts import (
+    FaultDefinition,
+    IndustrialAlias,
+    IndustrialAsset,
+    KpiDefinition,
+    ScenarioManifest,
+    SignalLimits,
+    SignalTag,
+)
+
+TENANT_ID = "tenant-demo"
+
+
+def _asset(
+    asset_id: str,
+    kind: str,
+    name: str,
+    parent_id: str | None,
+    *,
+    equipment_class: str | None = None,
+) -> IndustrialAsset:
+    attributes: dict[str, str | bool] = {"synthetic": True}
+    if equipment_class:
+        attributes["equipmentClass"] = equipment_class
+    return IndustrialAsset(
+        asset_id=asset_id,
+        tenant_id=TENANT_ID,
+        kind=kind,  # type: ignore[arg-type]
+        name=name,
+        parent_id=parent_id,
+        aliases=[IndustrialAlias(system="solera", value=asset_id)],
+        attributes=attributes,
+    )
+
+
+ASSETS = [
+    _asset("site-loop1", "site", "LOOP-1 Synthetic Chemical Site", None),
+    _asset("area-process", "area", "Process Area", "site-loop1"),
+    _asset("unit-reactor-loop", "process-unit", "Reactor Cooling Loop", "area-process"),
+    _asset(
+        "equipment-reactor",
+        "equipment",
+        "R-101 Reactor",
+        "unit-reactor-loop",
+        equipment_class="reactor",
+    ),
+    _asset(
+        "equipment-condenser",
+        "equipment",
+        "E-101 Condenser",
+        "unit-reactor-loop",
+        equipment_class="heat-exchanger",
+    ),
+    _asset(
+        "equipment-separator",
+        "equipment",
+        "V-101 Separator",
+        "unit-reactor-loop",
+        equipment_class="separator",
+    ),
+    _asset(
+        "equipment-compressor",
+        "equipment",
+        "K-101 Recycle Compressor",
+        "unit-reactor-loop",
+        equipment_class="compressor",
+    ),
+    _asset(
+        "equipment-stripper",
+        "equipment",
+        "T-101 Stripper",
+        "unit-reactor-loop",
+        equipment_class="column",
+    ),
+    _asset(
+        "component-cooling-valve",
+        "component",
+        "FV-101 Cooling-water Control Valve",
+        "equipment-reactor",
+        equipment_class="control-valve",
+    ),
+    _asset(
+        "component-reactor-jacket",
+        "component",
+        "R-101 Cooling Jacket",
+        "equipment-reactor",
+        equipment_class="jacket",
+    ),
+]
+
+
+TAG_DEFINITIONS: list[tuple[str, str, str, str, SignalLimits | None]] = [
+    (
+        "cooling-valve-command",
+        "component-cooling-valve",
+        "Cooling valve command",
+        "%",
+        SignalLimits(lo=0, hi=100),
+    ),
+    (
+        "cooling-valve-position",
+        "component-cooling-valve",
+        "Cooling valve position",
+        "%",
+        SignalLimits(lo=0, hi=100),
+    ),
+    (
+        "cooling-water-flow",
+        "component-reactor-jacket",
+        "Cooling-water flow",
+        "m3/h",
+        SignalLimits(lo=70, lo_lo=55, hi=125),
+    ),
+    (
+        "cooling-water-inlet-temp",
+        "component-reactor-jacket",
+        "Cooling-water inlet temperature",
+        "degC",
+        SignalLimits(hi=34, hi_hi=38),
+    ),
+    (
+        "cooling-water-outlet-temp",
+        "component-reactor-jacket",
+        "Cooling-water outlet temperature",
+        "degC",
+        SignalLimits(hi=48, hi_hi=54),
+    ),
+    (
+        "reactor-temperature",
+        "equipment-reactor",
+        "Reactor temperature",
+        "degC",
+        SignalLimits(lo=112, hi=128, hi_hi=132),
+    ),
+    (
+        "reactor-pressure",
+        "equipment-reactor",
+        "Reactor pressure",
+        "MPa",
+        SignalLimits(lo=2.1, hi=3.05, hi_hi=3.3),
+    ),
+    (
+        "reactor-level",
+        "equipment-reactor",
+        "Reactor level",
+        "%",
+        SignalLimits(lo=35, hi=75, hi_hi=85),
+    ),
+    (
+        "reactor-feed-flow",
+        "equipment-reactor",
+        "Reactor feed flow",
+        "t/h",
+        SignalLimits(lo=82, hi=108),
+    ),
+    (
+        "reactor-agitator-current",
+        "equipment-reactor",
+        "Agitator current",
+        "A",
+        SignalLimits(lo=68, hi=94, hi_hi=105),
+    ),
+    (
+        "reactor-heat-duty",
+        "equipment-reactor",
+        "Reactor heat duty",
+        "MW",
+        SignalLimits(lo=7.5, hi=11.5),
+    ),
+    (
+        "reactor-ph-proxy",
+        "equipment-reactor",
+        "Reactor pH proxy",
+        "pH",
+        SignalLimits(lo=6.5, hi=7.8),
+    ),
+    ("condenser-duty", "equipment-condenser", "Condenser duty", "MW", SignalLimits(lo=4.0, hi=7.5)),
+    (
+        "condenser-outlet-temp",
+        "equipment-condenser",
+        "Condenser outlet temperature",
+        "degC",
+        SignalLimits(hi=46, hi_hi=52),
+    ),
+    (
+        "condenser-cooling-flow",
+        "equipment-condenser",
+        "Condenser cooling flow",
+        "m3/h",
+        SignalLimits(lo=90, hi=140),
+    ),
+    (
+        "separator-level",
+        "equipment-separator",
+        "Separator level",
+        "%",
+        SignalLimits(lo=30, hi=72, hi_hi=82),
+    ),
+    (
+        "separator-pressure",
+        "equipment-separator",
+        "Separator pressure",
+        "MPa",
+        SignalLimits(hi=2.75, hi_hi=3.0),
+    ),
+    (
+        "separator-temperature",
+        "equipment-separator",
+        "Separator temperature",
+        "degC",
+        SignalLimits(hi=74, hi_hi=80),
+    ),
+    (
+        "separator-overhead-flow",
+        "equipment-separator",
+        "Separator overhead flow",
+        "t/h",
+        SignalLimits(lo=28, hi=48),
+    ),
+    (
+        "separator-bottoms-flow",
+        "equipment-separator",
+        "Separator bottoms flow",
+        "t/h",
+        SignalLimits(lo=42, hi=64),
+    ),
+    (
+        "compressor-load",
+        "equipment-compressor",
+        "Recycle compressor load",
+        "%",
+        SignalLimits(hi=88, hi_hi=95),
+    ),
+    (
+        "compressor-vibration-de",
+        "equipment-compressor",
+        "Compressor DE vibration",
+        "mm/s",
+        SignalLimits(hi=4.5, hi_hi=7.1),
+    ),
+    (
+        "compressor-vibration-nde",
+        "equipment-compressor",
+        "Compressor NDE vibration",
+        "mm/s",
+        SignalLimits(hi=4.5, hi_hi=7.1),
+    ),
+    (
+        "compressor-bearing-temp-de",
+        "equipment-compressor",
+        "Compressor DE bearing temperature",
+        "degC",
+        SignalLimits(hi=82, hi_hi=92),
+    ),
+    (
+        "compressor-bearing-temp-nde",
+        "equipment-compressor",
+        "Compressor NDE bearing temperature",
+        "degC",
+        SignalLimits(hi=82, hi_hi=92),
+    ),
+    (
+        "compressor-suction-pressure",
+        "equipment-compressor",
+        "Compressor suction pressure",
+        "MPa",
+        SignalLimits(lo=1.5, hi=2.2),
+    ),
+    (
+        "compressor-discharge-pressure",
+        "equipment-compressor",
+        "Compressor discharge pressure",
+        "MPa",
+        SignalLimits(hi=3.6, hi_hi=3.9),
+    ),
+    (
+        "compressor-speed",
+        "equipment-compressor",
+        "Compressor speed",
+        "rpm",
+        SignalLimits(lo=3200, hi=3900),
+    ),
+    (
+        "compressor-surge-margin",
+        "equipment-compressor",
+        "Compressor surge margin",
+        "%",
+        SignalLimits(lo=12, lo_lo=8),
+    ),
+    (
+        "stripper-temperature-top",
+        "equipment-stripper",
+        "Stripper top temperature",
+        "degC",
+        SignalLimits(hi=108, hi_hi=114),
+    ),
+    (
+        "stripper-temperature-bottom",
+        "equipment-stripper",
+        "Stripper bottom temperature",
+        "degC",
+        SignalLimits(hi=142, hi_hi=150),
+    ),
+    (
+        "stripper-pressure",
+        "equipment-stripper",
+        "Stripper pressure",
+        "MPa",
+        SignalLimits(hi=1.9, hi_hi=2.1),
+    ),
+    (
+        "stripper-reboiler-duty",
+        "equipment-stripper",
+        "Stripper reboiler duty",
+        "MW",
+        SignalLimits(lo=3.2, hi=5.8),
+    ),
+    (
+        "stripper-reflux-flow",
+        "equipment-stripper",
+        "Stripper reflux flow",
+        "t/h",
+        SignalLimits(lo=12, hi=24),
+    ),
+    (
+        "stripper-product-flow",
+        "equipment-stripper",
+        "Stripper product flow",
+        "t/h",
+        SignalLimits(lo=36, hi=52),
+    ),
+    (
+        "product-quality-proxy",
+        "equipment-stripper",
+        "Product quality proxy",
+        "%",
+        SignalLimits(lo=94, lo_lo=90),
+    ),
+    (
+        "product-moisture-proxy",
+        "equipment-stripper",
+        "Product moisture proxy",
+        "ppm",
+        SignalLimits(hi=450, hi_hi=650),
+    ),
+    (
+        "feed-composition-a",
+        "equipment-reactor",
+        "Feed component A",
+        "%",
+        SignalLimits(lo=42, hi=48),
+    ),
+    (
+        "feed-composition-b",
+        "equipment-reactor",
+        "Feed component B",
+        "%",
+        SignalLimits(lo=27, hi=33),
+    ),
+    (
+        "feed-temperature",
+        "equipment-reactor",
+        "Feed temperature",
+        "degC",
+        SignalLimits(lo=35, hi=46),
+    ),
+    ("feed-pressure", "equipment-reactor", "Feed pressure", "MPa", SignalLimits(lo=3.0, hi=3.8)),
+    (
+        "utility-steam-flow",
+        "unit-reactor-loop",
+        "Utility steam flow",
+        "t/h",
+        SignalLimits(lo=18, hi=32),
+    ),
+    (
+        "utility-electric-load",
+        "unit-reactor-loop",
+        "Unit electric load",
+        "MW",
+        SignalLimits(hi=5.8, hi_hi=6.4),
+    ),
+    (
+        "utility-cooling-load",
+        "unit-reactor-loop",
+        "Unit cooling load",
+        "MW",
+        SignalLimits(hi=14.5, hi_hi=16.0),
+    ),
+    (
+        "flare-flow-proxy",
+        "unit-reactor-loop",
+        "Flare flow proxy",
+        "kg/h",
+        SignalLimits(hi=25, hi_hi=60),
+    ),
+    (
+        "voc-emission-proxy",
+        "unit-reactor-loop",
+        "VOC emission proxy",
+        "ppm",
+        SignalLimits(hi=35, hi_hi=50),
+    ),
+    ("unit-throughput", "unit-reactor-loop", "Unit throughput", "t/h", SignalLimits(lo=88, hi=108)),
+    (
+        "unit-energy-intensity",
+        "unit-reactor-loop",
+        "Energy intensity",
+        "GJ/t",
+        SignalLimits(hi=2.8, hi_hi=3.2),
+    ),
+    (
+        "unit-on-spec-rate",
+        "unit-reactor-loop",
+        "On-spec production rate",
+        "%",
+        SignalLimits(lo=95, lo_lo=90),
+    ),
+    (
+        "unit-alarm-rate",
+        "unit-reactor-loop",
+        "Alarm rate",
+        "alarms/10min",
+        SignalLimits(hi=10, hi_hi=20),
+    ),
+    ("ambient-temperature", "site-loop1", "Ambient temperature", "degC", SignalLimits(lo=5, hi=42)),
+    ("ambient-humidity", "site-loop1", "Ambient humidity", "%", SignalLimits(lo=20, hi=95)),
+    (
+        "site-electric-demand",
+        "site-loop1",
+        "Site electric demand",
+        "MW",
+        SignalLimits(hi=28, hi_hi=32),
+    ),
+    (
+        "site-steam-demand",
+        "site-loop1",
+        "Site steam demand",
+        "t/h",
+        SignalLimits(hi=120, hi_hi=135),
+    ),
+    (
+        "site-water-demand",
+        "site-loop1",
+        "Site water demand",
+        "m3/h",
+        SignalLimits(hi=520, hi_hi=600),
+    ),
+    (
+        "site-production-rate",
+        "site-loop1",
+        "Site production rate",
+        "t/h",
+        SignalLimits(lo=260, hi=340),
+    ),
+    (
+        "site-energy-intensity",
+        "site-loop1",
+        "Site energy intensity",
+        "GJ/t",
+        SignalLimits(hi=3.1, hi_hi=3.5),
+    ),
+    ("site-on-spec-rate", "site-loop1", "Site on-spec rate", "%", SignalLimits(lo=94, lo_lo=90)),
+    (
+        "site-open-work-orders",
+        "site-loop1",
+        "Open maintenance work orders",
+        "count",
+        SignalLimits(hi=24, hi_hi=32),
+    ),
+    (
+        "site-safety-events",
+        "site-loop1",
+        "Open safety observations",
+        "count",
+        SignalLimits(hi=4, hi_hi=7),
+    ),
+]
+
+
+def build_manifest(*, seed: int = 1701) -> ScenarioManifest:
+    tags = [
+        SignalTag(
+            tag_id=tag_id,
+            tenant_id=TENANT_ID,
+            asset_id=asset_id,
+            name=name,
+            unit=unit,
+            data_type="number",
+            cadence_seconds=1,
+            limits=limits,
+            aliases=[
+                IndustrialAlias(
+                    system="pi",
+                    value=f"LOOP1.{tag_id.replace('-', '_').upper()}",
+                )
+            ],
+        )
+        for tag_id, asset_id, name, unit, limits in TAG_DEFINITIONS
+    ]
+    return ScenarioManifest(
+        scenario_id="loop1-reactor-cooling",
+        tenant_id=TENANT_ID,
+        name="LOOP-1 Reactor Cooling Valve Stiction",
+        seed=seed,
+        timezone="UTC",
+        tick_seconds=1,
+        starts_at=datetime(2026, 1, 1, tzinfo=UTC),
+        assets=ASSETS,
+        tags=tags,
+        faults=[
+            FaultDefinition(
+                fault_id="cooling-valve-stiction",
+                kind="valve-stiction",
+                inject_at_tick=120,
+                asset_id="component-cooling-valve",
+                parameters={"severity": 0.72, "recoveryTick": 360},
+            )
+        ],
+        kpis=[
+            KpiDefinition(
+                kpi_id="alarm-compression",
+                name="Alarm compression ratio",
+                unit="ratio",
+                formula_version="alarm-compression@0.1.0",
+                assumptions={},
+            ),
+            KpiDefinition(
+                kpi_id="off-spec-exposure",
+                name="Synthetic off-spec exposure",
+                unit="USD",
+                formula_version="off-spec-exposure@0.1.0",
+                assumptions={
+                    "throughputPerMinute": 1.6,
+                    "unitContributionUsd": 145,
+                },
+            ),
+        ],
+    )

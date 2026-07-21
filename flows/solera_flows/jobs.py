@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Protocol
 from uuid import uuid4
 
 from easy_pi import TagSeries
 from solera_api.analytics import CALCULATION_VERSION, summarize
+from solera_api.data_hub import DataHubRepository
 from solera_api.evidence import create_timeseries_evidence
-from solera_api.storage import FlowRepository, RetentionRepository
+from solera_api.industrial_contracts import IndustrialCaseRecord, ScenarioManifest
+from solera_api.storage import FlowRepository, KnowledgeRepository, RetentionRepository
 
 
 class RecordedConnector(Protocol):
@@ -131,3 +136,170 @@ async def run_retention_cleanup(
         audit_days=audit_days,
         aggregate_days=aggregate_days,
     )
+
+
+LOOP1_FIXTURES = Path(__file__).resolve().parents[2] / "fixtures" / "loop1"
+
+
+async def run_loop1_seed(
+    *,
+    repository: DataHubRepository,
+    knowledge: KnowledgeRepository,
+    manifest: ScenarioManifest,
+    fixtures_path: Path = LOOP1_FIXTURES,
+) -> dict[str, object]:
+    documents_path = fixtures_path / "documents.json"
+    cases_path = fixtures_path / "cases.json"
+    documents = json.loads(documents_path.read_text())
+    cases_payload = json.loads(cases_path.read_text())
+    cases = [IndustrialCaseRecord.model_validate(payload) for payload in cases_payload]
+    fixture_checksum = hashlib.sha256(
+        documents_path.read_bytes() + cases_path.read_bytes()
+    ).hexdigest()
+
+    manifest_result = await repository.seed_manifest(manifest)
+    chunks = 0
+    for document in documents:
+        chunks += await knowledge.ingest(
+            tenant_id=manifest.tenant_id,
+            document_id=document["documentId"],
+            title=document["title"],
+            content=document["content"],
+            uri=document["uri"],
+        )
+    cases_created = await repository.save_cases(cases)
+
+    links_created = 0
+    for asset in manifest.assets:
+        if asset.parent_id:
+            links_created += int(
+                await repository.link(
+                    tenant_id=manifest.tenant_id,
+                    source_kind="asset",
+                    source_id=asset.asset_id,
+                    relation="part-of",
+                    target_kind="asset",
+                    target_id=asset.parent_id,
+                )
+            )
+    for tag in manifest.tags:
+        links_created += int(
+            await repository.link(
+                tenant_id=manifest.tenant_id,
+                source_kind="tag",
+                source_id=tag.tag_id,
+                relation="measures",
+                target_kind="asset",
+                target_id=tag.asset_id,
+            )
+        )
+    for document in documents:
+        for asset_id in document["assetIds"]:
+            links_created += int(
+                await repository.link(
+                    tenant_id=manifest.tenant_id,
+                    source_kind="document",
+                    source_id=document["documentId"],
+                    relation="describes",
+                    target_kind="asset",
+                    target_id=asset_id,
+                )
+            )
+    for case in cases:
+        for asset_id in case.asset_ids:
+            links_created += int(
+                await repository.link(
+                    tenant_id=manifest.tenant_id,
+                    source_kind="case",
+                    source_id=case.case_id,
+                    relation="involves",
+                    target_kind="asset",
+                    target_id=asset_id,
+                )
+            )
+        for tag_id in case.tag_ids:
+            links_created += int(
+                await repository.link(
+                    tenant_id=manifest.tenant_id,
+                    source_kind="case",
+                    source_id=case.case_id,
+                    relation="uses-signal",
+                    target_kind="tag",
+                    target_id=tag_id,
+                )
+            )
+        for document_id in case.document_ids:
+            links_created += int(
+                await repository.link(
+                    tenant_id=manifest.tenant_id,
+                    source_kind="case",
+                    source_id=case.case_id,
+                    relation="references",
+                    target_kind="document",
+                    target_id=document_id,
+                )
+            )
+
+    metrics = {
+        **manifest_result,
+        "documentsIndexed": len(documents),
+        "chunksIndexed": chunks,
+        "casesCreated": cases_created,
+        "linksCreated": links_created,
+    }
+    changed = await repository.complete_checkpoint(
+        tenant_id=manifest.tenant_id,
+        flow_key=f"loop1-seed:{manifest.scenario_id}:{manifest.manifest_version}",
+        checksum=hashlib.sha256(
+            f"{manifest_result['checksum']}:{fixture_checksum}".encode()
+        ).hexdigest(),
+        metrics=metrics,
+    )
+    return {"status": "completed", "changed": changed, **metrics}
+
+
+async def run_loop1_replay(
+    *,
+    repository: DataHubRepository,
+    engine,
+    to_tick: int,
+) -> dict[str, object]:
+    if to_tick < 1:
+        raise ValueError("LOOP-1 replay requires at least one tick")
+    engine.reset()
+    await repository.reset_run(
+        engine.manifest.tenant_id,
+        engine.run.run_id,
+    )
+    observations_created = 0
+    alarms_created = 0
+    for _ in range(to_tick):
+        frame = engine.step()
+        result = await repository.ingest_frame(frame)
+        observations_created += result["observationsCreated"]
+        alarms_created += result["alarmsCreated"]
+    pulse = await repository.update_pulse(
+        tenant_id=engine.manifest.tenant_id,
+        connector_id="synthetic-pi",
+        run_id=engine.run.run_id,
+    )
+    checksum = hashlib.sha256(engine.export_replay()).hexdigest()
+    metrics = {
+        "toTick": to_tick,
+        "observationsCreated": observations_created,
+        "alarmsCreated": alarms_created,
+        "pulseStatus": pulse["status"],
+    }
+    changed = await repository.complete_checkpoint(
+        tenant_id=engine.manifest.tenant_id,
+        flow_key=f"loop1-replay:{engine.run.run_id}:{to_tick}",
+        checksum=checksum,
+        metrics=metrics,
+    )
+    return {
+        "status": "completed",
+        "changed": changed,
+        "runId": engine.run.run_id,
+        "pulse": pulse,
+        **metrics,
+    }

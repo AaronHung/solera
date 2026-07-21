@@ -166,3 +166,4 @@ export {
   validatePageContext,
   validateViewSpec,
 } from "./validation";
+export * from "./industrial";

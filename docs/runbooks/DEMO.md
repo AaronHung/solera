@@ -14,7 +14,7 @@
 cp .env.example .env
 uv sync --frozen
 npm install
-PYTHONPATH=apps/solera-api:connectors/easy-pi:flows \
+PYTHONPATH=apps/solera-api:connectors/easy-pi:connectors/synthetic-pi:flows:simulators/loop1 \
   uv run uvicorn solera_api.main:app --reload
 ```
 
@@ -33,9 +33,13 @@ Open Sidecar settings and enter:
 
 ## Solera Experience Demo — five-minute concept flow
 
-The Experience Demo is implemented only on `experiment/canvas-experience`.
-It is a trusted visualization concept, not production Evidence and not a
-replacement for the v0.1 Canvas.
+The Experience Demo is now part of `main`. It remains a trusted visualization
+concept, not production Evidence and not a replacement for the v0.1 Canvas.
+
+For the backend-driven LOOP-1 scenario, use
+`docs/runbooks/LOOP1_DEMO_SOP.md`. LOOP-1 and the portfolio concept share the
+same trusted overlay lifecycle, but only LOOP-1 consumes backend scenario,
+Evidence, Pulse, and Agent contracts.
 
 1. Open an approved Easy PI, PI Vision, or SCADA page and open the Sidecar.
 2. Choose **Canvas** in the Sidecar navigation.

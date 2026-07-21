@@ -79,7 +79,7 @@ npm run dev:api
 或者手動完整版（等效）：
 
 ```bash
-PYTHONPATH=connectors/easy-pi:flows uv run uvicorn solera_api.main:app --reload --app-dir apps/solera-api
+PYTHONPATH=apps/solera-api:connectors/easy-pi:connectors/synthetic-pi:flows:simulators/loop1 uv run uvicorn solera_api.main:app --reload --app-dir apps/solera-api
 ```
 
 > **為什麼要加 `PYTHONPATH`？**
@@ -164,10 +164,14 @@ INFO:     Application startup complete.
 
 ## Part 2-A：Experience Demo 操作 SOP
 
-Experience Demo 位於 **Canvas → Experience Demo**。它是目前
-`experiment/canvas-experience` branch 上的 visualization concept，使用
-bundle 內固定的 mock industrial data；不會讀取或修改 PI、SCADA、MES、ERP
-資料，也不會把 mock data 當成 production Evidence。
+Experience Demo 位於 **Canvas → Experience Demo**，已合併到 `main`。它是
+portfolio visualization concept，使用 bundle 內固定的 mock industrial
+data；不會讀取或修改 PI、SCADA、MES、ERP 資料，也不會把 mock data 當成
+production Evidence。
+
+同一頁另有 **LOOP-1 Agent Lab**，它使用 backend deterministic scenario、
+Data Hub、Pulse、Thread 與 Evidence。完整操作請依
+`docs/runbooks/LOOP1_DEMO_SOP.md`；兩者不可混稱為 customer live data。
 
 ### 開啟 Experience
 

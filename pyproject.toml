@@ -28,12 +28,16 @@ asyncio_mode = "auto"
 pythonpath = [
   "apps/solera-api",
   "connectors/easy-pi",
+  "connectors/synthetic-pi",
   "flows",
+  "simulators/loop1",
 ]
 testpaths = [
   "apps/solera-api/tests",
   "connectors/easy-pi/tests",
+  "connectors/synthetic-pi/tests",
   "flows/tests",
+  "simulators/loop1/tests",
   "tests",
 ]
 

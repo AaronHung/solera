@@ -12,16 +12,24 @@ validated Canvas views without changing the host system's business data.
 Read these files in order before changing code:
 
 1. [v0.1 Product Contract](docs/contracts/SOLERA_V0_1.md)
-2. [Current Project State](docs/PROJECT_STATE.md)
-3. [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
-4. [System Architecture](docs/architecture/SYSTEM.md)
-5. [Architecture Decisions](docs/adr/)
-6. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
-7. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
-8. [Threat Model](docs/security/THREAT_MODEL.md)
-9. [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
-10. [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
-11. [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
+2. [LOOP-1 Synthetic Contract](docs/contracts/SOLERA_LOOP1_V0_1.md)
+3. [Current Project State](docs/PROJECT_STATE.md)
+4. [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
+5. [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
+6. [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
+7. [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
+8. [Customer Use Case Catalog](docs/pitch/SOLERA_CUSTOMER_USE_CASES.md)
+9. [Product, Presales, and Investor Pitch](docs/pitch/SOLERA_PRODUCT_PITCH.md)
+10. [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
+11. [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
+12. [System Architecture](docs/architecture/SYSTEM.md)
+13. [Architecture Decisions](docs/adr/)
+14. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
+15. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
+16. [Threat Model](docs/security/THREAT_MODEL.md)
+17. [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
+18. [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
+19. [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
 
 The contract is authoritative. Scope changes require an ADR and a contract
 changelog entry. Every implementation change must reference a requirement or
@@ -48,6 +56,11 @@ packages/
   canvas-renderer/     Trusted React Canvas renderer
 connectors/
   easy-pi/             Read-only Easy PI connector library
+  synthetic-pi/        Read-only LOOP-1 PI-shaped connector
+simulators/
+  loop1/               Deterministic synthetic chemical scenario engine
+fixtures/
+  loop1/               Synthetic documents, cases, and 40 golden evaluations
 flows/                 Idempotent aggregate, knowledge, and eval jobs
 docs/                  Product, architecture, security, evals, and runbooks
 ```
@@ -58,7 +71,7 @@ docs/                  Product, architecture, security, evals, and runbooks
 cp .env.example .env
 uv sync --frozen
 npm install
-PYTHONPATH=apps/solera-api:connectors/easy-pi:flows \
+PYTHONPATH=apps/solera-api:connectors/easy-pi:connectors/synthetic-pi:flows:simulators/loop1 \
   uv run uvicorn solera_api.main:app --reload
 ```
 
@@ -77,6 +90,9 @@ development only, configure bearer token
 ```bash
 npx playwright install chromium
 npm run verify
+npm run eval:loop1 -- --output artifacts/loop1-scoreboard.json
+npm run demo:loop1:preflight
+npm run demo:loop1:package
 POSTGRES_PASSWORD=solera-test docker compose config --quiet
 npm run package:extension
 ```
@@ -88,6 +104,13 @@ branded-browser acceptance runs through enterprise extension management.
 Operational and demo procedures:
 
 - [Demo runbook](docs/runbooks/DEMO.md)
+- [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
+- [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
+- [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
+- [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
+- [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
+- [Customer Use Case Catalog](docs/pitch/SOLERA_CUSTOMER_USE_CASES.md)
+- [Product, Presales, and Investor Pitch](docs/pitch/SOLERA_PRODUCT_PITCH.md)
 - [Pilot runbook](docs/runbooks/PILOT.md)
 - [Deployment](docs/runbooks/DEPLOYMENT.md)
 - [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
@@ -102,7 +125,8 @@ Post-v0.1 product direction:
 
 ## Development status
 
-The v0.1 vertical slice is implemented and locally verified. Live PI Vision,
-enterprise OIDC/model policy, managed Chrome/Edge distribution, and multi-user
-Pilot metrics remain environment acceptance work. See
+The v0.1 vertical slice and LOOP-1 synthetic Agent core are implemented and
+locally verified. LOOP-1 passed 40/40 golden cases and Brave MV3 E2E. Live PI
+Vision, enterprise OIDC/model policy, managed Chrome/Edge distribution, and
+multi-user Pilot metrics remain environment acceptance work. See
 [PROJECT_STATE.md](docs/PROJECT_STATE.md) for exact evidence and limitations.

@@ -1,5 +1,12 @@
 export { CanvasView } from "./CanvasView";
 export { ExperienceView } from "./experience/ExperienceView";
+export { Loop1Experience } from "./loop1/Loop1Experience";
+export type {
+  Loop1ApiOptions,
+  Loop1Investigation,
+  Loop1Page,
+  Loop1Snapshot,
+} from "./loop1/types";
 export type {
   ExperienceHandle,
   ExperienceMountOptions,

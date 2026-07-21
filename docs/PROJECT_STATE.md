@@ -1,9 +1,11 @@
 # Solera Project State
 
-Last updated: 2026-07-20
-Contract: `docs/contracts/SOLERA_V0_1.md` v0.1.0  
-Current gate: v0.1 stable on `main`; Experience Demo implemented on the
-`experiment/canvas-experience` branch; external Pilot acceptance pending
+Last updated: 2026-07-21
+Contracts: `docs/contracts/SOLERA_V0_1.md` v0.1.0 and
+`docs/contracts/SOLERA_LOOP1_V0_1.md` v0.1.0-preview
+Current gate: v0.1, Experience Demo, and the LOOP-1 synthetic Agent core are
+implemented on `main`; external Pilot and optional productization acceptance
+remain pending
 
 ## Verified
 
@@ -31,7 +33,7 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
   role, asset, domain, range, points, rate, and kill switches.
 - Canvas has six trusted Widgets, tenant save/open, static ViewSpec validation,
   and tested Shadow DOM mount/unmount with host body unchanged.
-- The experimental Solera Experience Demo adds a separate trusted
+- The Solera Experience Demo on `main` adds a separate trusted
   full-viewport Shadow DOM surface with role-oriented Portfolio, Sites, Site
   Operations, Asset Detail, concept pages, and a Create workspace prototype.
   It uses an internal typed spec and never changes the v0.1 ViewSpec schema.
@@ -51,13 +53,41 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
 - OIDC RS256, development-token production guard, audit/trace replay, model
   gateway, latency/cost counters, knowledge citations, feedback/eval, nightly
   aggregate, and retention Flow seams are implemented.
-- Final local verification on the Experience branch: 28 Python tests and 21
-  TypeScript tests pass; TypeScript builds/typechecks, Ruff, and IDE lints
-  pass. The Brave MV3 E2E and managed-package contract both pass, including
+- LOOP-1 adds an independent industrial JSON Schema plus TypeScript and Python
+  contracts for Asset, Tag, Observation, Alarm, Scenario, Case, and Approval.
+- The deterministic backend Scenario Engine provides 10 linked Assets, 60 Tags,
+  valve-stiction fault injection, causal delay, 18 alarms, replay, recovery,
+  explicit data-quality faults, invariant tests, and a read-only Synthetic PI
+  Connector.
+- Data Hub persists scenario manifests, telemetry, alarms, identity, Cases,
+  approvals, and typed Thread edges. Pulse reports replay-clock freshness and
+  quality. Idempotent Flow seeds 8 documents and 10 cases and can reset/replay
+  a run without PI.
+- Six bounded LOOP-1 Skills implement Alarm Triage, Process Context, Procedure
+  & Safety, Case Retrieval, Asset Integrity, and Shift Handover. Numerical
+  claims use deterministic Evidence; missing/questionable data safe-declines.
+  Action Rail approvals remain audited drafts and never execute an external
+  write or plant-control action.
+- LOOP-1 Experience consumes the backend snapshot and investigation contracts
+  for Unit, Timeline, Investigation, Evidence, replay controls, Pulse, and
+  Action Rail. The existing browser-local portfolio Experience remains a
+  separate concept.
+- The versioned golden dataset contains 40 cases. The full offline run passed
+  40/40: replay determinism 1.0, Top-3 truth 1.0, safe-decline accuracy 1.0,
+  document retrieval 1.0, Evidence completeness 1.0, unsupported-claim rate
+  0.0. The ignored local output is `artifacts/loop1-scoreboard.json`.
+- The customer-demo handoff includes a timed 10-minute talk track, Data Hub and
+  Agent Flow operations, value-validation method, acceptance checklist, live
+  normal/Hero/reset preflight commands, and a secret-excluding source/extension
+  package with SHA-256 checksum.
+- Final local verification: 46 Python tests and 25 TypeScript tests pass;
+  TypeScript builds/typechecks and Ruff pass. The Brave MV3 E2E and
+  managed-package contract both pass, including
   Experience launch, role/page/Create interactions, Escape cleanup, host
-  restoration, 1024px horizontal-overflow assertion, and retained local
-  screenshots at 1440×900 and 1920×1080 under ignored `artifacts/`.
-  The default Playwright Chromium executable is not installed.
+  restoration, LOOP-1 Unit/Timeline/Investigation navigation, synthetic
+  disclosure, 1024px horizontal-overflow assertion, and retained local
+  screenshots under ignored `artifacts/`. The default Playwright Chromium
+  executable is not installed; the test passed with local Brave.
 - The opt-in Brave longevity check ran for 10.1 real minutes on 2026-07-20.
   The Experience root remained mounted, simulated updates continued, no page
   error occurred, and the test completed navigation, Create, responsive, and
@@ -72,9 +102,10 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
 
 ## In progress
 
-- v0.1 completion cleanup is in progress: approved-site SCADA support is
-  configured locally, while live SCADA, PI Vision, browser, deployment, and
-  Pilot acceptance evidence are still being closed.
+- v0.1 and LOOP-1 local implementation are complete. Approved-site SCADA
+  support is configured locally, while live SCADA, PI Vision, deployment,
+  visual stakeholder review, and Pilot acceptance evidence are still being
+  closed.
 - External environment onboarding and the 5–10 user Pilot remain product
   acceptance work, not code that can be truthfully simulated locally.
 
@@ -94,10 +125,10 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
   2.5D/Scene-ready Canvas contracts.
 - ADR-0004 proposes composable Skills with Auto, Manual, and Hybrid routing,
   while preserving the v0.1 single-orchestrator and read-only boundaries.
-- No v0.2 Skill System runtime implementation has started. The Experience
-  branch is an isolated visualization concept using mock data, not the Skill
-  Registry or production Data Flywheel. The v0.1 Pilot acceptance gate remains
-  the prerequisite for beginning the Skill Registry slice.
+- LOOP-1 implements a bounded domain package with six fixed Skills, but not the
+  full customer-authorable v0.2 Skill Registry, marketplace, or generic Hybrid
+  Router. The portfolio Experience remains browser-local mock data; LOOP-1 is
+  the first backend-bound Experience and Data Hub/Flow vertical slice.
 
 ## Not yet verified
 
@@ -118,6 +149,11 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
 - Production Experience data binding, workspace persistence, permissions,
   multi-user collaboration, and customer-approved dashboard templates. The
   current Create/Save/Preview flow is intentionally session-only mock behavior.
+- PI OMF mirror permissions, isolated namespace, retention, cleanup, duplicate
+  replay, and rollback.
+- Domain-reviewed DWSIM/OPC UA model and VVUQ, multimodal privacy/confidence
+  evaluation, and external NATS/Redpanda load/durability operations. All are
+  deferred and fail-closed by ADR-0006.
 
 ## Current decisions
 
@@ -125,6 +161,10 @@ Current gate: v0.1 stable on `main`; Experience Demo implemented on the
 - ADR-0002: read-only tools, Evidence-first answers, trusted rendering.
 - ADR-0003: modular monolith with one Agent orchestrator.
 - ADR-0004: proposed post-v0.1 composable Skills with hybrid routing.
+- ADR-0005: Data Hub and server-side Scenario Engine are LOOP-1 truth; PI is an
+  optional mirror and Experience is a renderer.
+- ADR-0006: optional PI, DWSIM/OPC UA, multimodal, and external event-bus
+  productization is disabled until explicit evidence Gates pass.
 
 ## Blockers
 
@@ -134,18 +174,13 @@ container platform, and named Pilot users.
 
 ## Next safe step
 
-First close the local completion checklist: verify the approved SCADA page,
-install the missing Playwright Chromium executable or record the supported
-browser exception, and run the Easy PI, PI Vision, Canvas, and failure-path
-checks. Then run Pilot onboarding from `docs/runbooks/PILOT.md`: configure
-customer OIDC and secrets, install the managed extension in branded Chrome and
-Edge, validate the live PI Vision adapter, run the golden set and load test,
-then begin the 5–10 user instrumented Pilot. After acceptance is recorded,
-start the first slice in `docs/backlog/V0_2_SKILL_BACKLOG.md`:
-SkillManifest → Registry → Hybrid selection → Page Understanding → PI Vision
-Industrial Analysis → Tank Capacity → Historical Analysis → Data Flywheel
-fixture → Asset graph. Do not start Bridge/Portal/Scene runtime work before
-these v0.1 acceptance results are recorded.
+Run `docs/runbooks/LOOP1_HANDOFF_AND_TEST.md`, rehearse the timed customer flow
+in `docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md`, and record customer/stakeholder
+feedback against the 40-case baseline. In parallel, close the v0.1 Pilot
+checklist: verify live SCADA and PI Vision, configure customer OIDC/secrets,
+install managed Chrome/Edge, and measure load/p95. Enable no optional PI,
+DWSIM/OPC UA, multimodal, or external-broker capability until the machine Gate
+report and ADR-0006 evidence requirements pass.
 
 ## Session handoff checklist
 

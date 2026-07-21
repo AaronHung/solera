@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solera.example/contracts/v0.1/industrial.schema.json",
+  "title": "Solera Industrial Contracts",
+  "$defs": {
+    "Alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "value"],
+      "properties": {
+        "system": {
+          "type": "string",
+          "enum": ["solera", "pi", "dcs", "erp", "cmms", "pid", "document"]
+        },
+        "value": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "effectiveFrom": { "type": ["string", "null"], "format": "date-time" },
+        "effectiveTo": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "IndustrialAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "assetId",
+        "tenantId",
+        "kind",
+        "name",
+        "parentId",
+        "aliases",
+        "attributes"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "assetId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,127}$" },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["site", "area", "process-unit", "equipment", "component"]
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "parentId": { "type": ["string", "null"] },
+        "aliases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Alias" },
+          "maxItems": 32
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      }
+    },
+    "SignalLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "loLo": { "type": ["number", "null"] },
+        "lo": { "type": ["number", "null"] },
+        "hi": { "type": ["number", "null"] },
+        "hiHi": { "type": ["number", "null"] }
+      }
+    },
+    "SignalTag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "tagId",
+        "tenantId",
+        "assetId",
+        "name",
+        "unit",
+        "dataType",
+        "cadenceSeconds",
+        "aliases"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "tagId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,127}$" },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "assetId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "unit": { "type": "string", "maxLength": 32 },
+        "dataType": { "type": "string", "enum": ["number", "string", "boolean"] },
+        "cadenceSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "limits": { "$ref": "#/$defs/SignalLimits" },
+        "aliases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Alias" },
+          "maxItems": 32
+        }
+      }
+    },
+    "Observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "observationId",
+        "tenantId",
+        "runId",
+        "tagId",
+        "timestamp",
+        "value",
+        "quality",
+        "sequence",
+        "synthetic"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "observationId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "runId": { "type": "string", "minLength": 1 },
+        "tagId": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "value": { "type": ["number", "string", "boolean", "null"] },
+        "quality": {
+          "type": "string",
+          "enum": ["good", "bad", "questionable", "missing"]
+        },
+        "sequence": { "type": "integer", "minimum": 0 },
+        "synthetic": { "const": true }
+      }
+    },
+    "AlarmEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "alarmId",
+        "tenantId",
+        "runId",
+        "assetId",
+        "tagId",
+        "occurredAt",
+        "priority",
+        "state",
+        "message",
+        "causeEventId",
+        "synthetic"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "alarmId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "runId": { "type": "string", "minLength": 1 },
+        "assetId": { "type": "string", "minLength": 1 },
+        "tagId": { "type": ["string", "null"] },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "state": { "type": "string", "enum": ["active", "acknowledged", "cleared"] },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "causeEventId": { "type": ["string", "null"] },
+        "synthetic": { "const": true }
+      }
+    },
+    "FaultDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["faultId", "kind", "injectAtTick", "assetId", "parameters"],
+      "properties": {
+        "faultId": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["valve-stiction", "sensor-bias", "ingest-delay", "missing-data"]
+        },
+        "injectAtTick": { "type": "integer", "minimum": 0 },
+        "assetId": { "type": "string", "minLength": 1 },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean"] }
+        }
+      }
+    },
+    "KpiDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kpiId", "name", "unit", "formulaVersion", "assumptions"],
+      "properties": {
+        "kpiId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string" },
+        "formulaVersion": { "type": "string", "minLength": 1 },
+        "assumptions": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean"] }
+        }
+      }
+    },
+    "ScenarioManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestVersion",
+        "scenarioId",
+        "tenantId",
+        "name",
+        "seed",
+        "timezone",
+        "tickSeconds",
+        "startsAt",
+        "assets",
+        "tags",
+        "faults",
+        "kpis"
+      ],
+      "properties": {
+        "manifestVersion": { "const": "0.1" },
+        "scenarioId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,127}$" },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "seed": { "type": "integer", "minimum": 0 },
+        "timezone": { "type": "string", "minLength": 1 },
+        "tickSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "startsAt": { "type": "string", "format": "date-time" },
+        "assets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/IndustrialAsset" },
+          "minItems": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SignalTag" },
+          "minItems": 1
+        },
+        "faults": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FaultDefinition" }
+        },
+        "kpis": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/KpiDefinition" }
+        }
+      }
+    },
+    "ScenarioRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "runId",
+        "scenarioId",
+        "tenantId",
+        "seed",
+        "state",
+        "startedAt",
+        "simulationTime",
+        "tick",
+        "activeFaults",
+        "synthetic"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "runId": { "type": "string", "minLength": 1 },
+        "scenarioId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "seed": { "type": "integer", "minimum": 0 },
+        "state": {
+          "type": "string",
+          "enum": ["normal", "degrading", "alarm-flood", "investigation", "approval", "recovery", "paused"]
+        },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "simulationTime": { "type": "string", "format": "date-time" },
+        "tick": { "type": "integer", "minimum": 0 },
+        "activeFaults": { "type": "array", "items": { "type": "string" } },
+        "synthetic": { "const": true }
+      }
+    },
+    "CaseRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "caseId",
+        "tenantId",
+        "title",
+        "summary",
+        "assetIds",
+        "tagIds",
+        "documentIds",
+        "rootCause",
+        "outcome",
+        "occurredAt",
+        "synthetic"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "caseId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "assetIds": { "type": "array", "items": { "type": "string" } },
+        "tagIds": { "type": "array", "items": { "type": "string" } },
+        "documentIds": { "type": "array", "items": { "type": "string" } },
+        "rootCause": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "occurredAt": { "type": "string", "format": "date-time" },
+        "synthetic": { "const": true }
+      }
+    },
+    "ApprovalRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "approvalId",
+        "tenantId",
+        "runId",
+        "actionType",
+        "status",
+        "requestedAt",
+        "decidedAt",
+        "decidedBy",
+        "rationale"
+      ],
+      "properties": {
+        "contractVersion": { "const": "0.1" },
+        "approvalId": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string", "minLength": 1 },
+        "runId": { "type": "string", "minLength": 1 },
+        "actionType": {
+          "type": "string",
+          "enum": ["draft-inspection-work-order", "draft-shift-handover", "save-case"]
+        },
+        "status": { "type": "string", "enum": ["requested", "approved", "rejected"] },
+        "requestedAt": { "type": "string", "format": "date-time" },
+        "decidedAt": { "type": ["string", "null"], "format": "date-time" },
+        "decidedBy": { "type": ["string", "null"] },
+        "rationale": { "type": ["string", "null"], "maxLength": 2000 }
+      }
+    }
+  }
+}

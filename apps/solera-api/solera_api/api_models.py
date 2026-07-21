@@ -24,3 +24,21 @@ class KnowledgeDocumentRequest(ApiModel):
     title: str = Field(min_length=1, max_length=512)
     content: str = Field(min_length=1, max_length=1_000_000)
     uri: str | None = Field(default=None, max_length=2048)
+
+
+class Loop1ControlRequest(ApiModel):
+    action: Literal[
+        "step",
+        "pause",
+        "resume",
+        "reset",
+        "jump-to-fault",
+        "replay",
+    ]
+    count: int = Field(default=1, ge=1, le=600)
+    to_tick: int | None = Field(default=None, alias="toTick", ge=1, le=3_600)
+
+
+class Loop1ApprovalDecisionRequest(ApiModel):
+    decision: Literal["approved", "rejected"]
+    rationale: str | None = Field(default=None, max_length=2000)
