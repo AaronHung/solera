@@ -21,6 +21,16 @@ describe("AgentPlatformExperience", () => {
     expect(
       screen.getByRole("heading", { name: "一個可信平台，長出多種工業 Agent" }),
     ).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: /Chemical Process｜化學製程 Agent/,
+      }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: /Precision Manufacturing｜精密加工・金屬製程 Agent/,
+      }),
+    ).toBeTruthy();
     expect(screen.getByText("反應器冷卻偏差調查")).toBeTruthy();
     expect(screen.getByText("FCC 再生器後燃風險 Agent")).toBeTruthy();
     expect(screen.getByText("觸媒活性與 Run-length Agent")).toBeTruthy();

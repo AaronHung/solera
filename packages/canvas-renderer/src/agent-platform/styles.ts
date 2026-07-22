@@ -244,6 +244,26 @@ button { color: inherit; font: inherit; }
     rgba(14, 20, 23, .9);
   transition: border-color 160ms ease, transform 160ms ease;
 }
+.agent-card.accent-cyan { --ap-accent: #66d8d3; --ap-accent-rgb: 102, 216, 211; }
+.agent-card.accent-amber { --ap-accent: #eda94f; --ap-accent-rgb: 237, 169, 79; }
+.agent-card.accent-violet { --ap-accent: #a99af2; --ap-accent-rgb: 169, 154, 242; }
+.agent-card.accent-green { --ap-accent: #70d7a2; --ap-accent-rgb: 112, 215, 162; }
+.agent-card.accent-steel {
+  --ap-accent: #72bfe8;
+  --ap-accent-rgb: 114, 191, 232;
+  border-color: rgba(114, 191, 232, .3);
+  background:
+    linear-gradient(135deg, rgba(114, 191, 232, .16), transparent 48%),
+    rgba(12, 22, 28, .94);
+}
+.agent-card.accent-copper {
+  --ap-accent: #f28d52;
+  --ap-accent-rgb: 242, 141, 82;
+  border-color: rgba(242, 141, 82, .3);
+  background:
+    linear-gradient(135deg, rgba(242, 141, 82, .16), transparent 48%),
+    rgba(27, 17, 12, .94);
+}
 .agent-card:hover {
   transform: translateY(-2px);
   border-color: rgba(var(--ap-accent-rgb), .38);

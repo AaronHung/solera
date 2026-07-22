@@ -612,7 +612,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       .getByRole("button", { name: "Precision Gallery", exact: true })
       .click();
     await loop1Experience
-      .getByRole("button", { name: /Chemical Agents/ })
+      .getByRole("button", { name: /Chemical Process｜化學製程 Agent/ })
       .click();
     const loop1Card = loop1Experience.locator(".agent-card").filter({
       hasText: "LOOP-1",

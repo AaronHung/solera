@@ -155,7 +155,7 @@ function AgentGallery({
           <span><Sparkles /></span>
           <div>
             <strong>Solera Agent Platform</strong>
-            <small>Industrial Agent Gallery</small>
+            <small>Industrial Agent Gallery｜工業 Agent 圖庫</small>
           </div>
         </div>
         <div className="agent-platform-boundary">
@@ -174,8 +174,8 @@ function AgentGallery({
           <div>
             <span>
               {precision
-                ? "SOLERA AGENT FOUNDRY / PRECISION MANUFACTURING"
-                : "SOLERA AGENT FOUNDRY / CHEMICAL PORTFOLIO"}
+                ? "SOLERA AGENT FOUNDRY / PRECISION MANUFACTURING / 精密加工・金屬製程"
+                : "SOLERA AGENT FOUNDRY / CHEMICAL PROCESS / 化學製程"}
             </span>
             <h1>
               {precision
@@ -213,7 +213,7 @@ function AgentGallery({
             onClick={() => onPortfolioChange("chemical")}
           >
             <FlaskConical />
-            <span><small>GALLERY 01</small><strong>Chemical Agents</strong></span>
+            <span><small>GALLERY 01</small><strong>Chemical Process｜化學製程 Agent</strong></span>
             <em>LOOP-1–4</em>
           </button>
           <button
@@ -221,7 +221,7 @@ function AgentGallery({
             onClick={() => onPortfolioChange("precision")}
           >
             <Wrench />
-            <span><small>GALLERY 02</small><strong>Precision Manufacturing</strong></span>
+            <span><small>GALLERY 02</small><strong>Precision Manufacturing｜精密加工・金屬製程 Agent</strong></span>
             <em>FASTEN-1 · HEAT-1</em>
           </button>
         </nav>
