@@ -2,6 +2,10 @@ import type { ViewSpec } from "@solera/contracts";
 import { validateViewSpec } from "@solera/contracts";
 import { createRoot, type Root } from "react-dom/client";
 
+import { AgentPlatformExperience } from "./agent-platform/AgentPlatformExperience";
+import { agentPlatformStyles } from "./agent-platform/styles";
+import { fasten1Styles } from "./agent-platform/fasten1Styles";
+import { heat1Styles } from "./agent-platform/heat1Styles";
 import { CanvasView } from "./CanvasView";
 import { ExperienceView } from "./experience/ExperienceView";
 import { experienceStyles } from "./experience/styles";
@@ -106,7 +110,12 @@ export function mountExperienceOverlay(
   const shadowRoot = host.attachShadow({ mode: "open" });
   const style = ownerDocument.createElement("style");
   style.dataset.soleraOwned = "experience-style";
-  style.textContent = options.mode === "loop1" ? loop1Styles : experienceStyles;
+  style.textContent =
+    options.mode === "agent-platform"
+      ? `${agentPlatformStyles}\n${fasten1Styles}\n${heat1Styles}\n${loop1Styles}`
+      : options.mode === "loop1"
+        ? loop1Styles
+        : experienceStyles;
   const container = ownerDocument.createElement("div");
   container.dataset.soleraOwned = "experience-container";
   container.style.setProperty("width", "100%");
@@ -136,12 +145,18 @@ export function mountExperienceOverlay(
     }
   };
   ownerDocument.defaultView?.addEventListener("keydown", onKeyDown);
-  if (options.mode === "loop1") {
+  if (options.mode === "loop1" || options.mode === "agent-platform") {
     if (!options.loop1) {
       dispose();
-      throw new Error("LOOP-1 Experience requires API configuration");
+      throw new Error("Agent Platform requires LOOP-1 API configuration");
     }
-    root.render(<Loop1Experience {...options.loop1} onClose={close} />);
+    root.render(
+      options.mode === "agent-platform" ? (
+        <AgentPlatformExperience {...options.loop1} onClose={close} />
+      ) : (
+        <Loop1Experience {...options.loop1} onClose={close} />
+      ),
+    );
   } else {
     root.render(
       <ExperienceView

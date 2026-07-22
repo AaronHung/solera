@@ -169,9 +169,16 @@ portfolio visualization concept，使用 bundle 內固定的 mock industrial
 data；不會讀取或修改 PI、SCADA、MES、ERP 資料，也不會把 mock data 當成
 production Evidence。
 
-同一頁另有 **LOOP-1 Agent Lab**，它使用 backend deterministic scenario、
-Data Hub、Pulse、Thread 與 Evidence。完整操作請依
-`docs/runbooks/LOOP1_DEMO_SOP.md`；兩者不可混稱為 customer live data。
+同一頁另有 **Solera Agent Platform**：LOOP-1 使用 backend deterministic
+scenario、Data Hub、Pulse、Thread 與 Evidence；LOOP-2～4 是明確標示的
+interactive synthetic concept markup。`Precision Manufacturing` Gallery
+中的 FASTEN-1 是 steel-blue 六階段 RFQ-to-First-Good-Part workflow；
+HEAT-1 是 copper 六階段 Batch-to-Release Quality workflow，涵蓋 load/recipe、
+furnace journey、tray-level Soft Sensor、調查與 official lab reconciliation。
+完整操作請依
+`docs/runbooks/LOOP1_DEMO_SOP.md`；Concept Agent 不可說成已完成 runtime，
+任何 Soft Sensor 估算也不可說成 official lab result 或自動放行，
+所有 Concept data 不可混稱為 customer live data。
 
 ### 開啟 Experience
 

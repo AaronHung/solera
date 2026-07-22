@@ -35,10 +35,10 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     await expect(page.getByText("What should we verify?")).toBeVisible();
     await page.getByRole("button", { name: "Canvas" }).click();
     await expect(
-      page.getByRole("heading", { name: "LOOP-1 工業 Agent 實驗室" }),
+      page.getByRole("heading", { name: "Solera Agent Platform" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Open LOOP-1 Experience/ }),
+      page.getByRole("button", { name: /Open Agent Gallery/ }),
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: "Experience Demo" })).toBeVisible();
     await expect(
@@ -396,7 +396,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       }
       return chrome.tabs.sendMessage(hostTab.id, {
         type: "SOLERA_MOUNT_EXPERIENCE",
-        mode: "loop1",
+        mode: "agent-platform",
         loop1: {
           apiBaseUrl: "http://localhost:8000",
           bearerToken: "dev:tenant-demo:browser:viewer",
@@ -405,6 +405,225 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     });
     expect(loop1Launch).toEqual({ ok: true });
     const loop1Experience = hostPage.locator("#solera-experience-root");
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "一個可信平台，快速建置多種工業 Agent",
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-agent-gallery-1440x900.png",
+      ),
+    });
+    const loop2Card = loop1Experience.locator(".agent-card").filter({
+      hasText: "LOOP-2",
+    });
+    await loop2Card.getByRole("button", { name: /Explore Concept/ }).click();
+    await expect(
+      loop1Experience.getByText("SYNTHETIC CONCEPT · NOT FOR OPERATIONS"),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Run Afterburn Analysis" })
+      .click();
+    await expect(
+      loop1Experience.getByText("後燃風險指標高於 synthetic dynamic envelope"),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-loop2-afterburn-concept-1440x900.png",
+      ),
+    });
+    await loop1Experience.getByRole("button", { name: "Back to Gallery" }).click();
+    await loop1Experience
+      .getByRole("button", { name: /Precision Manufacturing/ })
+      .click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "從新品導入到熱處理品質，跨越多種製造決策",
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-precision-gallery-1440x900.png",
+      ),
+    });
+    const fastenCard = loop1Experience.locator(".agent-card").filter({
+      hasText: "FASTEN-1",
+    });
+    await expect(fastenCard).toHaveClass(/accent-steel/);
+    await fastenCard.getByRole("button", { name: /^Open Workflow$/ }).click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "建立 RFQ、交付需求與文件版本基準",
+      }),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Accept RFQ & Start Workflow" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: /Open Drawing Intelligence/ })
+      .click();
+    await loop1Experience.getByRole("button", { name: "Analyze Drawing" }).click();
+    await expect(loop1Experience.getByText("7 verified · 1 missing")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-drawing-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate A/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Search Similar Products" })
+      .click();
+    await expect(loop1Experience.getByText("P-008821 / Rev B")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-cases-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Use Case P-008821" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Build Manufacturing Plan" })
+      .click();
+    await expect(loop1Experience.getByText("New DIE-2047 required")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-planning-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate B/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Run Synthetic Trial" })
+      .click();
+    await expect(
+      loop1Experience.getByText("Second-station die radius / alignment"),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-trial-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Approve Inspection Order" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Generate First Article Package" })
+      .click();
+    await expect(loop1Experience.getByText("CONDITIONAL PASS")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-quality-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Complete FASTEN-1 Workflow" })
+      .click();
+    await expect(
+      loop1Experience.getByText("FASTEN-1 WORKFLOW COMPLETE"),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Precision Gallery", exact: true })
+      .click();
+    const heatCard = loop1Experience.locator(".agent-card").filter({
+      hasText: "HEAT-1",
+    });
+    await expect(heatCard).toHaveClass(/accent-copper/);
+    await heatCard.getByRole("button", { name: /^Open Workflow$/ }).click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "建立批次識別、製程條件與品質規格基準",
+      }),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Lock Batch Passport" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Open Load & Recipe" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Validate Load & Recipe" })
+      .click();
+    await expect(loop1Experience.getByText("TC coverage checked")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-load-recipe-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate A & Replay Journey/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Replay Furnace Journey" })
+      .click();
+    await expect(loop1Experience.getByText("3 deviations linked")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-furnace-journey-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Run Quality Soft Sensor" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Estimate Quality Distribution" })
+      .click();
+    await expect(
+      loop1Experience.getByText("T6 edge tray classified as HOLD candidate"),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-soft-sensor-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Investigate T6 Deviation" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Build Evidence Investigation" })
+      .click();
+    await expect(
+      loop1Experience.getByText(
+        "Zone 3 edge load + quench agitation interaction",
+      ),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-investigation-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Approve Sampling Plan" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Reconcile Official Lab" })
+      .click();
+    await expect(loop1Experience.getByText("PARTIAL HOLD")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-release-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Complete HEAT-1 Workflow" })
+      .click();
+    await expect(
+      loop1Experience.getByText("HEAT-1 WORKFLOW COMPLETE"),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Precision Gallery", exact: true })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: /Chemical Process｜化學製程 Agent/ })
+      .click();
+    const loop1Card = loop1Experience.locator(".agent-card").filter({
+      hasText: "LOOP-1",
+    });
+    await loop1Card.getByRole("button", { name: /Open Live Agent/ }).click();
     await expect(
       loop1Experience.getByRole("heading", { name: "即時單元總覽" }),
     ).toBeVisible();

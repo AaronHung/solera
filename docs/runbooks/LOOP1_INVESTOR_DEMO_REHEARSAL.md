@@ -168,8 +168,8 @@ dev:tenant-demo:demo-engineer:engineer
 ### Step 8｜確認入口畫面
 
 1. Sidecar 點 **Canvas**。
-2. 找到 **LOOP-1 工業 Agent 實驗室**。
-3. 先不要點 **Open LOOP-1 Experience**。
+2. 找到 **Solera Agent Platform**。
+3. 先不要點 **Open Agent Gallery**。
 
 這就是正式 Demo 的起始畫面。
 
@@ -184,7 +184,7 @@ dev:tenant-demo:demo-engineer:engineer
 你停在：
 
 ```text
-Sidecar → Canvas → LOOP-1 工業 Agent 實驗室
+Sidecar → Canvas → Solera Agent Platform
 ```
 
 你說：
@@ -211,8 +211,9 @@ Investor 應該記住：
 
 你點：
 
-1. **Open LOOP-1 Experience**
-2. 左側 **單元**
+1. **Open Agent Gallery**
+2. 在 LOOP-1 卡片點 **Open Live Agent**
+3. 左側 **單元**
 
 你指給觀眾看：
 
@@ -581,7 +582,7 @@ Investor 應該理解的商業路徑：
 
 1. Reload host page。
 2. 關閉再打開 Sidecar。
-3. 再點 **Open LOOP-1 Experience**。
+3. 再點 **Open Agent Gallery → Open Live Agent**。
 
 ### 畫面一打開已經是 fault
 
@@ -681,7 +682,7 @@ Browser：
 
 1. 按 `Esc` 關閉 Experience。
 2. 回 Sidecar **Canvas**。
-3. 重新點 **Open LOOP-1 Experience**。
+3. 重新點 **Open Agent Gallery → Open Live Agent**。
 4. Timer 歸零。
 
 不需要重新 `uv sync`、`npm install` 或 `npm run build`，除非 code 有變更。

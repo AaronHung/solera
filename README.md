@@ -24,13 +24,16 @@ Before changing code, read:
 For a LOOP-1 Demo, start here:
 
 1. [LOOP-1 Demo Playbook](docs/runbooks/LOOP1_DEMO_PLAYBOOK.md)
-2. [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
-3. [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
-4. [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
-5. [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
-6. [LOOP-1 Demo Mechanics and Product Evolution](docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md)
-7. [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
-8. [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
+2. [Agent Gallery Phase 1](docs/architecture/SOLERA_AGENT_GALLERY_PHASE1.md)
+3. [FASTEN-1 Concept Experience](docs/architecture/FASTEN1_CONCEPT_EXPERIENCE.md)
+4. [HEAT-1 Concept Experience](docs/architecture/HEAT1_CONCEPT_EXPERIENCE.md)
+5. [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
+6. [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
+7. [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
+8. [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
+9. [LOOP-1 Demo Mechanics and Product Evolution](docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md)
+9. [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
+10. [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
 
 Product and post-v0.1 direction:
 
@@ -114,6 +117,9 @@ Operational and demo procedures:
 
 - [Demo runbook](docs/runbooks/DEMO.md)
 - [LOOP-1 Demo Playbook](docs/runbooks/LOOP1_DEMO_PLAYBOOK.md)
+- [Agent Gallery Phase 1](docs/architecture/SOLERA_AGENT_GALLERY_PHASE1.md)
+- [FASTEN-1 Concept Experience](docs/architecture/FASTEN1_CONCEPT_EXPERIENCE.md)
+- [HEAT-1 Concept Experience](docs/architecture/HEAT1_CONCEPT_EXPERIENCE.md)
 - [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
 - [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
 - [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)

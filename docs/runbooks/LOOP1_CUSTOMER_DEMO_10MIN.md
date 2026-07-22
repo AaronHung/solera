@@ -50,7 +50,7 @@ Sidecar settings：
 
 ## 0:00–0:45｜問題與邊界
 
-畫面：Sidecar 的 **Canvas → LOOP-1 Agent Lab**。
+畫面：Sidecar 的 **Canvas → Solera Agent Platform**。
 
 Talk track：
 
@@ -66,10 +66,11 @@ Talk track：
 
 操作：
 
-1. 點 **Open LOOP-1 Experience**。
-2. 留在 **Unit**。
-3. 指向 Pulse、simulation time、tick 與 quality。
-4. 指向 FV-101、R-101、E-101、V-101、K-101、T-101。
+1. 點 **Open Agent Gallery**。
+2. 在 LOOP-1 卡片點 **Open Live Agent**。
+3. 留在 **Unit**。
+4. 指向 Pulse、simulation time、tick 與 quality。
+5. 指向 FV-101、R-101、E-101、V-101、K-101、T-101。
 
 Talk track：
 

@@ -4,9 +4,11 @@ Last updated: 2026-07-22
 Contracts: `docs/contracts/SOLERA_V0_1.md` v0.1.0 and
 `docs/contracts/SOLERA_LOOP1_V0_1.md` v0.1.0-preview
 Current gate: v0.1, Experience Demo, and the LOOP-1 synthetic Agent core are
-implemented on `main`; external Pilot and optional productization acceptance
-remain pending. The zh-TW Case Console and live trace upgrade is isolated on
-`feature/loop1-zh-tw-agent-console` pending stakeholder review.
+implemented on `main` and tagged `v0.1.0-loop1-stable.1`; external Pilot and
+optional productization acceptance remain pending. Phase 1 Agent Gallery markup
+is on `feature/agent-gallery-concept-demos`; the FASTEN-1 multi-screen extension
+is on `feature/fasten1-concept-experience`; HEAT-1 is isolated on
+`feature/heat1-concept-experience` pending visual review.
 
 ## Verified
 
@@ -73,13 +75,32 @@ remain pending. The zh-TW Case Console and live trace upgrade is isolated on
   for Unit, Timeline, Investigation, Evidence, replay controls, Pulse, and
   Action Rail. The existing browser-local portfolio Experience remains a
   separate concept.
-- The feature branch `feature/loop1-zh-tw-agent-console` defaults LOOP-1 to
-  Traditional Chinese with an English toggle, keeps original engineering IDs,
-  and adds three bounded replay cases. A real NDJSON investigation stream
+- LOOP-1 defaults to Traditional Chinese with an English toggle, keeps original
+  engineering IDs, and includes three bounded replay cases. A real NDJSON stream
   exposes context, deterministic plan, tool boundaries, Evidence, hypotheses,
   safety boundary, and completion events; traces are persisted for replay.
   The objective input is audit context, not a free-form scenario generator,
   and the UI does not expose private model chain-of-thought.
+- Phase 1 Agent Gallery adds one shared Solera Agent Platform entry point.
+  LOOP-1 routes to the existing live backend Experience. LOOP-2 afterburn risk,
+  LOOP-3 catalyst activity/run-length, and LOOP-4 water-quality Soft Sensor are
+  deterministic interactive frontend concepts with distinct charts, structured
+  trace, result, Evidence, and draft-only next step. Every concept is labeled
+  `SYNTHETIC CONCEPT · NOT FOR OPERATIONS`; it does not call a domain backend or
+  claim a validated production model.
+- FASTEN-1 adds a separate Precision Manufacturing Gallery and a six-screen
+  `RFQ-to-First-Good-Part` concept: RFQ Inbox, Drawing Intelligence, Similar
+  Product Cases, Process/Machine/Tooling, Trial Run, and First Article Evidence.
+  The deterministic flow preserves locked stages, three Human Gates, drawing
+  source attribution, Product Thread, and `L1–L2 ONLY · NO PLC WRITE`
+  disclosure. It is not a production CAD parser, validated quality model, or
+  factory deployment.
+- HEAT-1 adds a distinct copper six-screen `Batch-to-Release Quality` concept:
+  Batch Passport, Load/Recipe, Furnace Journey, tray-level Quality Soft Sensor,
+  Deviation Investigation, and Release Evidence. The deterministic result
+  reconciles official synthetic lab data into 216 release candidates and a
+  focused 24-piece hold. It does not claim a validated metallurgy model,
+  replace official inspection, write a furnace recipe, or authorize release.
 - The versioned golden dataset contains 40 cases. The full offline run passed
   40/40: replay determinism 1.0, Top-3 truth 1.0, safe-decline accuracy 1.0,
   document retrieval 1.0, Evidence completeness 1.0, unsupported-claim rate
@@ -88,14 +109,18 @@ remain pending. The zh-TW Case Console and live trace upgrade is isolated on
   Agent Flow operations, value-validation method, acceptance checklist, live
   normal/Hero/reset preflight commands, and a secret-excluding source/extension
   package with SHA-256 checksum.
-- Final local verification: 51 Python tests and 26 TypeScript tests pass;
+- Final local verification: 51 Python tests and 35 TypeScript tests pass;
   TypeScript builds/typechecks and Ruff pass. The Brave MV3 E2E and
   managed-package contract both pass, including
   Experience launch, role/page/Create interactions, Escape cleanup, host
   restoration, LOOP-1 Unit/Timeline/Investigation navigation, synthetic
-  disclosure, 1024px horizontal-overflow assertion, and retained local
-  screenshots under ignored `artifacts/`. The default Playwright Chromium
-  executable is not installed; the test passed with local Brave.
+  disclosure, Chemical／Precision Gallery switching, all six FASTEN-1 and
+  HEAT-1 screens, steel-blue／copper color identity, HEAT Soft Sensor and lab
+  reconciliation,
+  Agent Gallery → LOOP-2 result → LOOP-1 live routing, 1024px
+  horizontal-overflow assertion, and retained local screenshots under ignored
+  `artifacts/`. The latest browser flow passed with Playwright Chromium and the
+  MV3 package remains compatible with local Brave.
 - The opt-in Brave longevity check ran for 10.1 real minutes on 2026-07-20.
   The Experience root remained mounted, simulated updates continued, no page
   error occurred, and the test completed navigation, Create, responsive, and

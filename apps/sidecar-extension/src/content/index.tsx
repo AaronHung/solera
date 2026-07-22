@@ -28,7 +28,7 @@ interface CloseCanvasMessage {
 interface MountExperienceMessage {
   type: "SOLERA_MOUNT_EXPERIENCE";
   role?: ExperienceRole;
-  mode?: "portfolio" | "loop1";
+  mode?: "portfolio" | "loop1" | "agent-platform";
   loop1?: {
     apiBaseUrl: string;
     bearerToken: string;
@@ -107,8 +107,11 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
       if (message.role && !EXPERIENCE_ROLES.has(message.role)) {
         throw new Error("Unsupported Experience role");
       }
-      if (message.mode === "loop1" && !message.loop1) {
-        throw new Error("LOOP-1 API settings are required");
+      if (
+        (message.mode === "loop1" || message.mode === "agent-platform") &&
+        !message.loop1
+      ) {
+        throw new Error("Agent Platform API settings are required");
       }
       canvasHandle?.dispose();
       canvasHandle = null;

@@ -146,5 +146,6 @@ export type Loop1Page = "unit" | "timeline" | "investigation" | "evidence";
 
 export interface Loop1ExperienceProps extends Loop1ApiOptions {
   locale?: Loop1Locale;
+  onBack?: () => void;
   onClose?: () => void;
 }

@@ -768,15 +768,16 @@ Status: 已在 `feature/loop1-agent-clarity` 實作。
 主流程：
 
 1. `npm run demo:loop1:normal`
-2. Open LOOP-1 Experience
-3. 看正常 Unit
-4. 打開 Investigation／Case Console
-5. 點 Run Hero scenario
-6. 看 execution trace
-7. 看 Timeline
-8. 回 Investigation 看 Top-3
-9. 看 Evidence
-10. 指出 Request approval，但 viewer flow 不點
+2. Open Agent Gallery
+3. 在 LOOP-1 卡片點 Open Live Agent
+4. 看正常 Unit
+5. 打開 Investigation／Case Console
+6. 點 Run Hero scenario
+7. 看 execution trace
+8. 看 Timeline
+9. 回 Investigation 看 Top-3
+10. 看 Evidence
+11. 指出 Request approval，但 viewer flow 不點
 
 主流程不要使用：
 

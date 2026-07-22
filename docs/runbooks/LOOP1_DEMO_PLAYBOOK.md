@@ -381,7 +381,7 @@ Decision 只由 operator／supervisor／admin API 執行。即使 approved：
 正式開始時，畫面停在：
 
 ```text
-Sidecar → Canvas → LOOP-1 工業 Agent 實驗室
+Sidecar → Canvas → Solera Agent Platform
 ```
 
-不要預先執行 Hero。
+不要先點 **Open Agent Gallery**，也不要預先執行 Hero。
