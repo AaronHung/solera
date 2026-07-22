@@ -7,7 +7,8 @@ Current gate: v0.1, Experience Demo, and the LOOP-1 synthetic Agent core are
 implemented on `main` and tagged `v0.1.0-loop1-stable.1`; external Pilot and
 optional productization acceptance remain pending. Phase 1 Agent Gallery markup
 is on `feature/agent-gallery-concept-demos`; the FASTEN-1 multi-screen extension
-is isolated on `feature/fasten1-concept-experience` pending visual review.
+is on `feature/fasten1-concept-experience`; HEAT-1 is isolated on
+`feature/heat1-concept-experience` pending visual review.
 
 ## Verified
 
@@ -94,6 +95,12 @@ is isolated on `feature/fasten1-concept-experience` pending visual review.
   source attribution, Product Thread, and `L1–L2 ONLY · NO PLC WRITE`
   disclosure. It is not a production CAD parser, validated quality model, or
   factory deployment.
+- HEAT-1 adds a distinct copper six-screen `Batch-to-Release Quality` concept:
+  Batch Passport, Load/Recipe, Furnace Journey, tray-level Quality Soft Sensor,
+  Deviation Investigation, and Release Evidence. The deterministic result
+  reconciles official synthetic lab data into 216 release candidates and a
+  focused 24-piece hold. It does not claim a validated metallurgy model,
+  replace official inspection, write a furnace recipe, or authorize release.
 - The versioned golden dataset contains 40 cases. The full offline run passed
   40/40: replay determinism 1.0, Top-3 truth 1.0, safe-decline accuracy 1.0,
   document retrieval 1.0, Evidence completeness 1.0, unsupported-claim rate
@@ -102,16 +109,18 @@ is isolated on `feature/fasten1-concept-experience` pending visual review.
   Agent Flow operations, value-validation method, acceptance checklist, live
   normal/Hero/reset preflight commands, and a secret-excluding source/extension
   package with SHA-256 checksum.
-- Final local verification: 51 Python tests and 34 TypeScript tests pass;
+- Final local verification: 51 Python tests and 35 TypeScript tests pass;
   TypeScript builds/typechecks and Ruff pass. The Brave MV3 E2E and
   managed-package contract both pass, including
   Experience launch, role/page/Create interactions, Escape cleanup, host
   restoration, LOOP-1 Unit/Timeline/Investigation navigation, synthetic
-  disclosure, Chemical／Precision Gallery switching, all six FASTEN-1 screens,
+  disclosure, Chemical／Precision Gallery switching, all six FASTEN-1 and
+  HEAT-1 screens, steel-blue／copper color identity, HEAT Soft Sensor and lab
+  reconciliation,
   Agent Gallery → LOOP-2 result → LOOP-1 live routing, 1024px
   horizontal-overflow assertion, and retained local screenshots under ignored
-  `artifacts/`. The default Playwright Chromium executable is not installed;
-  the test passed with local Brave.
+  `artifacts/`. The latest browser flow passed with Playwright Chromium and the
+  MV3 package remains compatible with local Brave.
 - The opt-in Brave longevity check ran for 10.1 real minutes on 2026-07-20.
   The Experience root remained mounted, simulated updates continued, no page
   error occurred, and the test completed navigation, Create, responsive, and

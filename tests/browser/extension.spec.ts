@@ -437,7 +437,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       .click();
     await expect(
       loop1Experience.getByRole("heading", {
-        name: "從一張客戶圖面，到第一顆合格螺絲",
+        name: "從新品導入到熱處理品質，跨越兩種製造決策",
       }),
     ).toBeVisible();
     await hostPage.screenshot({
@@ -445,9 +445,11 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
         "artifacts/experience-demo/solera-precision-gallery-1440x900.png",
       ),
     });
-    await loop1Experience
-      .getByRole("button", { name: /Open Workflow Story/ })
-      .click();
+    const fastenCard = loop1Experience.locator(".agent-card").filter({
+      hasText: "FASTEN-1",
+    });
+    await expect(fastenCard).toHaveClass(/accent-steel/);
+    await fastenCard.getByRole("button", { name: /Open Workflow Story/ }).click();
     await expect(
       loop1Experience.getByRole("heading", {
         name: "一封詢價信，啟動跨系統 Engineering Workflow",
@@ -520,6 +522,92 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       .getByRole("button", { name: "Complete FASTEN-1 Story" })
       .click();
     await expect(loop1Experience.getByText("FASTEN-1 STORY COMPLETE")).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Precision Gallery", exact: true })
+      .click();
+    const heatCard = loop1Experience.locator(".agent-card").filter({
+      hasText: "HEAT-1",
+    });
+    await expect(heatCard).toHaveClass(/accent-copper/);
+    await heatCard.getByRole("button", { name: /Open Workflow Story/ }).click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "在爐門關上之前，先知道這一批「是誰、要變成什麼」",
+      }),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Lock Batch Passport" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Open Load & Recipe" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Validate Load & Recipe" })
+      .click();
+    await expect(loop1Experience.getByText("TC coverage checked")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-load-recipe-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate A & Replay Journey/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Replay Furnace Journey" })
+      .click();
+    await expect(loop1Experience.getByText("3 deviations linked")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-furnace-journey-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Run Quality Soft Sensor" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Estimate Quality Distribution" })
+      .click();
+    await expect(
+      loop1Experience.getByText("T6 edge tray requires HOLD candidate"),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-soft-sensor-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Investigate T6 Deviation" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Build Evidence Investigation" })
+      .click();
+    await expect(
+      loop1Experience.getByText(
+        "Zone 3 edge load + quench agitation interaction",
+      ),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-investigation-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Approve Sampling Plan" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Reconcile Official Lab" })
+      .click();
+    await expect(loop1Experience.getByText("PARTIAL HOLD")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-heat1-release-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Complete HEAT-1 Story" })
+      .click();
+    await expect(loop1Experience.getByText("HEAT-1 STORY COMPLETE")).toBeVisible();
     await loop1Experience
       .getByRole("button", { name: "Precision Gallery", exact: true })
       .click();

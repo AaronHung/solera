@@ -1,6 +1,7 @@
 export { CanvasView } from "./CanvasView";
 export { AgentPlatformExperience } from "./agent-platform/AgentPlatformExperience";
 export { Fasten1Experience } from "./agent-platform/Fasten1Experience";
+export { Heat1Experience } from "./agent-platform/Heat1Experience";
 export type {
   AgentDefinition,
   AgentId,

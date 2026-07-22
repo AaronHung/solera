@@ -1,6 +1,18 @@
-export type AgentId = "loop1" | "loop2" | "loop3" | "loop4" | "fasten1";
+export type AgentId =
+  | "loop1"
+  | "loop2"
+  | "loop3"
+  | "loop4"
+  | "fasten1"
+  | "heat1";
 export type AgentPortfolio = "chemical" | "precision";
-export type AgentAccent = "cyan" | "amber" | "violet" | "green" | "steel";
+export type AgentAccent =
+  | "cyan"
+  | "amber"
+  | "violet"
+  | "green"
+  | "steel"
+  | "copper";
 export type AgentMaturity = "live" | "concept";
 
 export interface ConceptMetric {
@@ -460,6 +472,29 @@ export const AGENTS: AgentDefinition[] = [
       "Human Gates",
     ],
     preview: [18, 25, 34, 42, 56, 63, 71, 78, 89, 96],
+  },
+  {
+    id: "heat1",
+    portfolio: "precision",
+    code: "HEAT-1",
+    title: "從熱處理批次到可核准放行",
+    shortTitle: "Batch-to-Release Quality",
+    domain: "Precision Manufacturing · Heat Treatment",
+    archetype: "Quality Soft Sensor Workflow",
+    maturity: "concept",
+    accent: "copper",
+    description:
+      "連結零件規格、材料批次、裝載位置、爐程、碳勢、淬火、延遲 lab 與量測結果，提前估算 case depth、hardness 與 distortion risk。",
+    outcome: "延遲／破壞性檢驗 → 提前分層風險、精準採樣與放行草稿",
+    sharedCapabilities: [
+      "Batch Passport",
+      "Recipe Context",
+      "Furnace Journey",
+      "Quality Soft Sensor",
+      "Deviation Evidence",
+      "Release Gate",
+    ],
+    preview: [34, 38, 45, 57, 68, 76, 81, 74, 62, 55],
   },
 ];
 

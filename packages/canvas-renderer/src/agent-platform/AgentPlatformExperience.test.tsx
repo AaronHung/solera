@@ -106,7 +106,7 @@ describe("AgentPlatformExperience", () => {
   });
 
   it("presents FASTEN-1 as a multi-screen RFQ-to-first-good-part workflow", async () => {
-    render(
+    const { container } = render(
       <AgentPlatformExperience
         apiBaseUrl="http://localhost:8000"
         bearerToken="dev:tenant-demo:test:viewer"
@@ -118,12 +118,19 @@ describe("AgentPlatformExperience", () => {
     );
     expect(
       screen.getByRole("heading", {
-        name: "從一張客戶圖面，到第一顆合格螺絲",
+        name: "從新品導入到熱處理品質，跨越兩種製造決策",
       }),
     ).toBeTruthy();
+    const fastenCard = screen
+      .getByRole("heading", { name: "從客戶詢價圖面到首件良品" })
+      .closest("article");
+    expect(fastenCard?.classList.contains("accent-steel")).toBe(true);
     fireEvent.click(
-      screen.getByRole("button", { name: /Open Workflow Story/ }),
+      within(fastenCard as HTMLElement).getByRole("button", {
+        name: /Open Workflow Story/,
+      }),
     );
+    expect(container.querySelector(".fasten-shell")).toBeTruthy();
     expect(screen.getAllByText("RFQ-2026-00182")).toHaveLength(2);
 
     fireEvent.click(
@@ -172,5 +179,80 @@ describe("AgentPlatformExperience", () => {
       screen.getByRole("button", { name: "Complete FASTEN-1 Story" }),
     );
     expect(screen.getByText("FASTEN-1 STORY COMPLETE")).toBeTruthy();
+  }, 12_000);
+
+  it("presents HEAT-1 as a copper six-stage batch-to-release workflow", async () => {
+    const { container } = render(
+      <AgentPlatformExperience
+        apiBaseUrl="http://localhost:8000"
+        bearerToken="dev:tenant-demo:test:viewer"
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Precision Manufacturing/ }),
+    );
+    const heatCard = screen
+      .getByRole("heading", { name: "從熱處理批次到可核准放行" })
+      .closest("article");
+    expect(heatCard?.classList.contains("accent-copper")).toBe(true);
+    fireEvent.click(
+      within(heatCard as HTMLElement).getByRole("button", {
+        name: /Open Workflow Story/,
+      }),
+    );
+    expect(container.querySelector(".heat-shell")).toBeTruthy();
+    expect(screen.getAllByText("HT-BATCH-260722-17").length).toBeGreaterThan(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Lock Batch Passport" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open Load & Recipe" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Validate Load & Recipe" }),
+    );
+    await waitFor(() => expect(screen.getByText("TC coverage checked")).toBeTruthy());
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Confirm Gate A & Replay Journey/ }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Replay Furnace Journey" }),
+    );
+    await waitFor(() => expect(screen.getByText("3 deviations linked")).toBeTruthy());
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Run Quality Soft Sensor" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Estimate Quality Distribution" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByText("T6 edge tray requires HOLD candidate")).toBeTruthy(),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Investigate T6 Deviation" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Build Evidence Investigation" }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("Zone 3 edge load + quench agitation interaction"),
+      ).toBeTruthy(),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Approve Sampling Plan" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reconcile Official Lab" }),
+    );
+    await waitFor(() => expect(screen.getByText("4 / 4 received")).toBeTruthy());
+    expect(screen.getByText("PARTIAL HOLD")).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Complete HEAT-1 Story" }),
+    );
+    expect(screen.getByText("HEAT-1 STORY COMPLETE")).toBeTruthy();
   }, 12_000);
 });

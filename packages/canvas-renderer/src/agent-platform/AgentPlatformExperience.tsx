@@ -10,6 +10,7 @@ import {
   Droplets,
   FileCheck2,
   Factory,
+  Flame,
   FlaskConical,
   Gauge,
   Layers3,
@@ -29,6 +30,7 @@ import {
 import { Loop1Experience } from "../loop1/Loop1Experience";
 import type { Loop1ApiOptions } from "../loop1/types";
 import { Fasten1Experience } from "./Fasten1Experience";
+import { Heat1Experience } from "./Heat1Experience";
 import {
   AGENTS,
   getAgent,
@@ -48,6 +50,7 @@ const AGENT_ICONS: Record<AgentId, LucideIcon> = {
   loop3: Gauge,
   loop4: Droplets,
   fasten1: Wrench,
+  heat1: Flame,
 };
 
 const CHEMICAL_LAYERS = [
@@ -119,7 +122,7 @@ function AgentCard({
       <footer>
         <span>{agent.archetype}</span>
         <button onClick={() => onOpen(agent.id)}>
-          {agent.id === "fasten1"
+          {agent.id === "fasten1" || agent.id === "heat1"
             ? "Open Workflow Story"
             : agent.maturity === "live"
               ? "Open Live Agent"
@@ -146,7 +149,7 @@ function AgentGallery({
   const agents = AGENTS.filter((agent) => agent.portfolio === portfolio);
   const layers = precision ? PRECISION_LAYERS : CHEMICAL_LAYERS;
   return (
-    <div className="agent-platform-shell">
+    <div className={`agent-platform-shell ${precision ? "portfolio-precision-shell" : ""}`}>
       <header className="agent-platform-topbar">
         <div className="agent-platform-brand">
           <span><Sparkles /></span>
@@ -158,7 +161,7 @@ function AgentGallery({
         <div className="agent-platform-boundary">
           <ShieldCheck />
           {precision
-            ? "FASTEN-1 SYNTHETIC WORKFLOW CONCEPT"
+            ? "FASTEN-1 + HEAT-1 SYNTHETIC WORKFLOW CONCEPTS"
             : "LOOP-1 LIVE · LOOP-2–4 SYNTHETIC CONCEPTS"}
         </div>
         <button className="agent-platform-close" aria-label="Close Agent Platform" onClick={onClose}>
@@ -176,22 +179,22 @@ function AgentGallery({
             </span>
             <h1>
               {precision
-                ? "從一張客戶圖面，到第一顆合格螺絲"
+                ? "從新品導入到熱處理品質，跨越兩種製造決策"
                 : "一個可信平台，長出多種工業 Agent"}
             </h1>
             <p>
               {precision
-                ? "FASTEN-1 不是報價 Bot，而是一條跨過 Email、CAD、ERP、MES、QMS、老機台與老師傅經驗的 RFQ-to-First-Good-Part workflow。"
+                ? "FASTEN-1 串起 RFQ-to-First-Good-Part；HEAT-1 串起 Batch-to-Release Quality。兩者共用 Product Thread、Evidence 與 Human Gates，但保留完全不同的工程故事。"
                 : "LOOP-1 證明 Evidence-first investigation；LOOP-2～4 展示同一套 Data Hub、Thread、policy 與 evaluation 如何承載 dynamic risk、lifecycle prediction 與 Soft Sensor。"}
             </p>
           </div>
           <aside>
             {precision ? (
               <>
-                <strong>6 STAGES</strong>
-                <span>linked workflow screens</span>
-                <strong>3 AGENTS</strong>
-                <span>RFQ · Technician · Quality</span>
+                <strong>2 WORKFLOWS</strong>
+                <span>distinct Agent stories</span>
+                <strong>12 STAGES</strong>
+                <span>engineering → quality</span>
               </>
             ) : (
               <>
@@ -219,7 +222,7 @@ function AgentGallery({
           >
             <Wrench />
             <span><small>GALLERY 02</small><strong>Precision Manufacturing</strong></span>
-            <em>FASTEN-1</em>
+            <em>FASTEN-1 · HEAT-1</em>
           </button>
         </nav>
 
@@ -244,29 +247,42 @@ function AgentGallery({
               <header>
                 <Route />
                 <div>
-                  <small>AGENTIC WORKFLOW</small>
-                  <h2>一個 Case，跨越六個 Stages 與三個 Human Gates</h2>
+                  <small>AGENTIC WORKFLOW PORTFOLIO</small>
+                  <h2>兩種製造決策：新品導入與熱處理品質放行</h2>
                 </div>
               </header>
-              <ol>
+              <div className="precision-workflow-tracks">
                 {[
-                  ["01", "RFQ Inbox", "Email + attachments"],
-                  ["02", "Drawing Intelligence", "PDF/CAD + validation"],
-                  ["03", "Similar Cases", "Product Case Store"],
-                  ["04", "Process & Assets", "ERP/MES/tooling"],
-                  ["05", "Trial Run", "Machine Edge + teacher"],
-                  ["06", "Quality Evidence", "QMS + first article"],
-                ].map(([index, title, detail]) => (
-                  <li key={index}>
-                    <span>{index}</span>
-                    <div><strong>{title}</strong><small>{detail}</small></div>
-                    <ChevronRight />
-                  </li>
+                  {
+                    code: "FASTEN-1",
+                    tone: "fasten",
+                    label: "RFQ-to-First-Good-Part",
+                    stages: ["RFQ", "Drawing", "Cases", "Plan", "Trial", "Quality"],
+                  },
+                  {
+                    code: "HEAT-1",
+                    tone: "heat",
+                    label: "Batch-to-Release Quality",
+                    stages: ["Batch", "Load", "Journey", "Predict", "Explain", "Release"],
+                  },
+                ].map((workflow) => (
+                  <section key={workflow.code} className={`track-${workflow.tone}`}>
+                    <header><strong>{workflow.code}</strong><span>{workflow.label}</span></header>
+                    <ol>
+                      {workflow.stages.map((workflowStage, index) => (
+                        <li key={workflowStage}>
+                          <span>0{index + 1}</span>
+                          <strong>{workflowStage}</strong>
+                          {index < workflow.stages.length - 1 && <ChevronRight />}
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
                 ))}
-              </ol>
+              </div>
               <footer>
                 <ShieldCheck />
-                Read-only analysis · draft-only write-back · human-approved decisions
+                Blue: engineering workflow · Copper: thermal quality workflow · human-approved decisions
               </footer>
             </article>
           )}
@@ -620,6 +636,17 @@ export function AgentPlatformExperience({
   if (activeAgent.id === "fasten1") {
     return (
       <Fasten1Experience
+        onBack={() => {
+          setPortfolio("precision");
+          setActiveAgentId(null);
+        }}
+        {...(onClose ? { onClose } : {})}
+      />
+    );
+  }
+  if (activeAgent.id === "heat1") {
+    return (
+      <Heat1Experience
         onBack={() => {
           setPortfolio("precision");
           setActiveAgentId(null);

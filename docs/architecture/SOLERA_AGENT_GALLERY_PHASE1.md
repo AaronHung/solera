@@ -141,16 +141,21 @@ Forbidden pitch：
 
 ## Phase 2
 
-`feature/fasten1-concept-experience` 已增加第二個
+`feature/fasten1-concept-experience` 與
+`feature/heat1-concept-experience` 已增加第二個
 `Precision Manufacturing` Gallery：
 
 - FASTEN-1：RFQ-to-First-Good-Part 六階段 workflow concept
-- HEAT-1：heat-treatment quality／hardness／case depth／distortion（尚未實作）
+- HEAT-1：Batch-to-Release heat-treatment quality 六階段 workflow concept
 
-FASTEN-1 共用 Agent Platform shell，但不複製化工 dashboard template。它使用
-RFQ、Drawing、Similar Cases、Process/Assets、Trial、Quality 六個不同畫面與
-三個 Human Gates。完整 boundary 見
-[`FASTEN1_CONCEPT_EXPERIENCE.md`](FASTEN1_CONCEPT_EXPERIENCE.md)。
+兩個 Agent Packs 共用 Agent Platform shell，但不複製化工 dashboard
+template。FASTEN-1 使用 RFQ、Drawing、Similar Cases、Process/Assets、Trial、
+Quality 六個不同畫面與三個 Human Gates；HEAT-1 使用 Batch Passport、
+Load/Recipe、Furnace Journey、Quality Soft Sensor、Deviation Investigation、
+Release Evidence 六個畫面。完整 boundary 見：
+
+- [`FASTEN1_CONCEPT_EXPERIENCE.md`](FASTEN1_CONCEPT_EXPERIENCE.md)
+- [`HEAT1_CONCEPT_EXPERIENCE.md`](HEAT1_CONCEPT_EXPERIENCE.md)
 
 ## Verification
 
@@ -162,6 +167,9 @@ Automated checks cover：
 - Gallery → LOOP-1 live backend routing
 - Chemical／Precision Gallery switching
 - FASTEN-1 六階段 workflow、locked future stages 與 Human Gates
+- FASTEN steel-blue／HEAT copper Gallery 與 Experience color identity
+- HEAT-1 六階段 workflow、tray-level Soft Sensor、focused hold 與 official lab
+  reconciliation
 - Brave／Chromium MV3 Shadow DOM mount
 - Escape cleanly removes overlay
 
@@ -170,4 +178,8 @@ Browser screenshots：
 ```text
 artifacts/experience-demo/solera-agent-gallery-1440x900.png
 artifacts/experience-demo/solera-loop2-afterburn-concept-1440x900.png
+artifacts/experience-demo/solera-precision-gallery-1440x900.png
+artifacts/experience-demo/solera-fasten1-quality-1440x900.png
+artifacts/experience-demo/solera-heat1-soft-sensor-1440x900.png
+artifacts/experience-demo/solera-heat1-release-1440x900.png
 ```
