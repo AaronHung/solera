@@ -73,6 +73,22 @@ SOLERA_LOOP1_EXTERNAL_EVENT_BUS=in-process
 
 ## 5. 啟動與 preflight
 
+這裡有兩層操作，請不要把它們當成同一件事：
+
+- `demo:loop1:preflight` 是技術健康檢查，不是客戶 Demo。
+- `demo:loop1:normal` 是把 synthetic run 準備到乾淨的正常起點，不是
+  Agent 的 case prompt。
+- 客戶 Demo 真正從 browser Sidecar 的 **Open LOOP-1 Experience** 開始，
+  再用 Experience 裡的 **Run Hero scenario**、**Investigate**、Timeline、
+  Evidence 與 Action Rail 展示 investigation。
+
+目前 LOOP-1 Agent Lab 是「scenario-driven investigation」：它先從已知且可重播
+的工業事件建立 investigation context，再由 bounded Agent 執行分析。它不是
+一般自由聊天視窗，也不是每個 prompt 都即時改變 process state。Sidecar 的
+一般 Chat tab 是 page-context Agent；LOOP-1 Experience 則是 backend-bound
+industrial case workspace。兩者共用 read-only、Evidence-first 與安全邊界，
+但操作入口不同。
+
 Terminal A：
 
 ```bash
@@ -96,6 +112,33 @@ Preflight 必須通過：
 - Pulse health/quality
 - 6 bounded Skills
 - 4 optional productization gates 可見且未誤啟用
+
+### 為什麼需要 `normal`
+
+`normal` 會把 run replay 到 tick 60：
+
+- 目前沒有 fault
+- 沒有 alarm flood
+- Pulse healthy
+- Agent 應回 `no-abnormality`
+- 不應產生 Action draft
+
+它的作用是讓每次 Demo 都從同一個可預期的 baseline 開始。若你上次 Demo
+停在 tick 220，直接打開 Experience，客戶會看到上一輪 fault state，Demo
+就不再可控。
+
+### 為什麼需要 `preflight`
+
+`preflight` 會檢查：
+
+- API 是否可連線
+- database 是否 ready
+- synthetic catalog 是否載入
+- 10 Assets、60 Tags、6 Skills 是否存在
+- Pulse、quality 與 synthetic clock 是否正常
+- optional productization gates 是否誤啟用
+
+它是 presenter 的「開演前檢查」，不是產品功能本身。
 
 ## 6. Sidecar settings
 
@@ -152,6 +195,102 @@ Expected：
 - SOP-R101-04 Revision 4 retrieved
 - draft-only Action available
 
+## 8. 客戶真正看到的 Agent Case Flow
+
+### Case：Reactor cooling deviation
+
+客戶不需要先理解 terminal command。Presenter 先用 command 將 demo 準備好，
+接著把螢幕交給 Experience：
+
+1. **Unit**：展示正常設備、Tags、Pulse 與 synthetic/read-only disclosure。
+2. **Run Hero scenario**：產生一個已知的 cooling-valve stiction abnormal case。
+3. **Timeline**：展示 18 個 raw alarms，以及 command → position → flow →
+   thermal 的因果順序。
+4. **Investigate**：呼叫 LOOP-1 backend Agent。
+5. **Investigation**：展示 Top-1、Top-3、supporting/counter Evidence 與
+   bounded confidence。
+6. **Evidence**：展示 SOP Revision 4、P&ID、MOC、maintenance history、
+   shift log 與 similar cases。
+7. **Request approval**：建立 draft-only inspection action，說明不會寫入
+   CMMS、DCS、PLC 或任何 plant control system。
+
+這個 flow 的 input 不是一段自由文字，而是：
+
+- selected scenario/run
+- replay tick
+- injected fault
+- current Asset/Tag/Alarm state
+- Investigator 的 read-only tool calls
+
+Agent 的 output 是：
+
+- investigation status
+- alarm clusters
+- ranked hypotheses
+- Evidence ledger
+- procedure/document retrieval
+- similar cases
+- recommendations
+- optional draft-only Action
+
+### 這樣如何展現客戶價值
+
+Presenter 不要只說「模型找到 valve stiction」。應把前後差異說清楚：
+
+```text
+沒有 Solera：
+18 個 alarms
+→ 多個畫面與文件
+→ 人工找 earliest change
+→ 人工確認 SOP revision
+→ 人工搜尋相似案例
+→ 口頭交班或另開 draft
+
+使用 Solera：
+18 個 raw alarms
+→ 一條 causal timeline
+→ Top-3 hypotheses + Evidence
+→ 正確 SOP revision
+→ linked maintenance/cases
+→ human-approved draft
+```
+
+真正要在 Customer Pilot 量測的是：
+
+- alarm onset 到第一個可 review hypothesis 的時間
+- 找到正確 SOP/case 的時間
+- reviewer 對 Top-3 的 agreement
+- Evidence completeness
+- bad-quality data 時的 safe-decline
+- investigation labor、downtime 或 off-spec baseline
+
+### 目前尚未提供的操作
+
+目前 LOOP-1 Experience 尚未提供「在 Experience 內輸入任意自然語言 case
+prompt，讓 Agent 自由規劃新的工業調查」的入口。這是刻意的 v0.1 邊界：
+先驗證 deterministic data、Evidence、bounded Skills、safe-decline 與 approval。
+
+Sidecar 的一般 Chat tab 可以接受 page-context 問題，例如：
+
+```text
+這個 PI Vision 畫面在做什麼？
+這個畫面的主要設備與訊號有哪些？
+請摘要目前畫面中的異常與資料品質風險。
+```
+
+但這些 page-context prompts 與 LOOP-1 Hero investigation 是兩條不同的 flow。
+下一階段若要做更像 ChatGPT 的 Agent Case Console，應新增：
+
+1. Case prompt/input
+2. scenario/Asset/time-window selector
+3. Agent plan preview
+4. tool-call trace
+5. user-confirmed investigation start
+6. prompt-to-Evidence audit record
+
+在該功能完成前，Demo 應誠實稱為「可重播的 industrial investigation
+workspace」，而不是自由式 autonomous Agent。
+
 ### AT-03 Reset
 
 ```bash
@@ -196,7 +335,7 @@ Expected：
 - boundary banner visible
 - Escape cleanly unmounts
 
-## 8. 建立 handoff package
+## 9. 建立 handoff package
 
 先產生最新 scorecard：
 
@@ -228,7 +367,7 @@ Package 包含：
 
 接收者解壓後，以 package 內的 `START_HERE.md` 開始。
 
-## 9. Demo-day checklist
+## 10. Demo-day checklist
 
 ### 前一晚
 
@@ -262,7 +401,7 @@ Package 包含：
 - 不把 synthetic KPI 誤寫成 customer result。
 - 寄出 read-only scope、next-step worksheet 與 workshop proposal。
 
-## 10. Demo 失敗時的處理
+## 11. Demo 失敗時的處理
 
 ### API not ready
 
@@ -301,7 +440,7 @@ npm run demo:loop1:normal
 
 明確說這是 recorded walkthrough。
 
-## 11. Handoff acceptance
+## 12. Handoff acceptance
 
 交付完成必須同時滿足：
 
@@ -314,7 +453,7 @@ npm run demo:loop1:normal
 - Demo script 與 permitted/forbidden claims 已 review。
 - customer follow-up owner 與日期已填寫。
 
-## 12. Owner checklist
+## 13. Owner checklist
 
 Demo owner：
 

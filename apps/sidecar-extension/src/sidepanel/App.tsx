@@ -21,21 +21,18 @@ interface SidecarSettings {
 const LOCAL_DEMO_TOKEN = "dev:tenant-demo:demo-user:viewer";
 
 const OPENROUTER_MODELS = [
-  { id: "deepseek/deepseek-v4-pro", label: "DeepSeek V4 Pro" },
   { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna" },
+  { id: "openai/gpt-5.6-terra", label: "GPT-5.6 Terra" },
+  { id: "anthropic/claude-sonnet-5", label: "Claude Sonnet 5 💰" },
   { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6 💰" },
   { id: "anthropic/claude-opus-4.8", label: "Claude Opus 4.8 💰💰" },
-  { id: "deepseek/deepseek-v4-flash", label: "DeepSeek V4 Flash" },
+  { id: "x-ai/grok-4.5", label: "Grok 4.5 💰" },
   {
     id: "nvidia/nemotron-3-ultra-550b-a55b:free",
     label: "Nemotron 3 Ultra 🎁",
   },
-  { id: "xiaomi/mimo-v2.5", label: "Mimo V2.5" },
-  { id: "minimax/minimax-m3", label: "Minimax M3" },
-  { id: "tencent/hy3:free", label: "Tencent HY3 🎁" },
-  { id: "z-ai/glm-5.2", label: "GLM 5.2" },
 ] as const;
-const DEFAULT_MODEL = OPENROUTER_MODELS[0].id;
+const DEFAULT_MODEL = "openai/gpt-5.6-luna";
 
 const DEFAULT_SETTINGS: SidecarSettings = {
   apiBaseUrl: "http://localhost:8000",
@@ -107,9 +104,7 @@ async function loadSettings(): Promise<SidecarSettings> {
     ...DEFAULT_SETTINGS,
     ...storedSettings,
   };
-  if (settings.modelName === "openai/gpt-5.6-luna") {
-    settings.modelName = DEFAULT_MODEL;
-  } else if (!OPENROUTER_MODELS.some((model) => model.id === settings.modelName)) {
+  if (!OPENROUTER_MODELS.some((model) => model.id === settings.modelName)) {
     settings.modelName = DEFAULT_MODEL;
   }
   if (!settings.bearerToken && settings.apiBaseUrl.startsWith("http://localhost")) {

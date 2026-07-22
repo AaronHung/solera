@@ -40,16 +40,13 @@ balanced and use standard table syntax; do not return HTML or JavaScript."""
 
 SUPPORTED_OPENROUTER_MODELS = frozenset(
     {
-        "deepseek/deepseek-v4-pro",
         "openai/gpt-5.6-luna",
+        "openai/gpt-5.6-terra",
+        "anthropic/claude-sonnet-5",
         "anthropic/claude-sonnet-4.6",
         "anthropic/claude-opus-4.8",
-        "deepseek/deepseek-v4-flash",
+        "x-ai/grok-4.5",
         "nvidia/nemotron-3-ultra-550b-a55b:free",
-        "xiaomi/mimo-v2.5",
-        "minimax/minimax-m3",
-        "tencent/hy3:free",
-        "z-ai/glm-5.2",
     }
 )
 
