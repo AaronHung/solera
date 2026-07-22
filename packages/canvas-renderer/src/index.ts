@@ -1,4 +1,10 @@
 export { CanvasView } from "./CanvasView";
+export { AgentPlatformExperience } from "./agent-platform/AgentPlatformExperience";
+export type {
+  AgentDefinition,
+  AgentId,
+  ConceptScenario,
+} from "./agent-platform/data";
 export { ExperienceView } from "./experience/ExperienceView";
 export { Loop1Experience } from "./loop1/Loop1Experience";
 export type {

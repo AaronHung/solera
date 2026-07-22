@@ -1,5 +1,6 @@
 import {
   Activity,
+  ArrowLeft,
   CircleDot,
   FastForward,
   FileCheck2,
@@ -113,6 +114,7 @@ export function Loop1Experience({
   apiBaseUrl,
   bearerToken,
   locale: initialLocale = "zh-TW",
+  onBack,
   onClose,
 }: Loop1ExperienceProps) {
   const api = useMemo(
@@ -320,6 +322,15 @@ export function Loop1Experience({
             <Languages />
             <small>{locale === "zh-TW" ? "EN" : "中"}</small>
           </button>
+          {onBack && (
+            <button
+              aria-label="Back to Agent Gallery"
+              title="Back to Agent Gallery"
+              onClick={onBack}
+            >
+              <ArrowLeft />
+            </button>
+          )}
           <button aria-label="Close LOOP-1" onClick={onClose}><X /></button>
         </div>
       </header>

@@ -169,9 +169,11 @@ portfolio visualization concept，使用 bundle 內固定的 mock industrial
 data；不會讀取或修改 PI、SCADA、MES、ERP 資料，也不會把 mock data 當成
 production Evidence。
 
-同一頁另有 **LOOP-1 Agent Lab**，它使用 backend deterministic scenario、
-Data Hub、Pulse、Thread 與 Evidence。完整操作請依
-`docs/runbooks/LOOP1_DEMO_SOP.md`；兩者不可混稱為 customer live data。
+同一頁另有 **Solera Agent Platform**：LOOP-1 使用 backend deterministic
+scenario、Data Hub、Pulse、Thread 與 Evidence；LOOP-2～4 是明確標示的
+interactive synthetic concept markup。完整操作請依
+`docs/runbooks/LOOP1_DEMO_SOP.md`；Concept Agent 不可說成已完成 runtime，
+兩者也不可混稱為 customer live data。
 
 ### 開啟 Experience
 

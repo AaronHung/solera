@@ -205,21 +205,21 @@ async function openExperience(role: ExperienceRole): Promise<void> {
   }
 }
 
-async function openLoop1(settings: SidecarSettings): Promise<void> {
+async function openAgentPlatform(settings: SidecarSettings): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) {
     throw new Error("No active browser tab is available");
   }
   const response = (await chrome.tabs.sendMessage(tab.id, {
     type: "SOLERA_MOUNT_EXPERIENCE",
-    mode: "loop1",
+    mode: "agent-platform",
     loop1: {
       apiBaseUrl: settings.apiBaseUrl,
       bearerToken: settings.bearerToken,
     },
   })) as { ok: boolean; error?: string };
   if (!response.ok) {
-    throw new Error(response.error ?? "LOOP-1 Experience could not be opened");
+    throw new Error(response.error ?? "Solera Agent Platform could not be opened");
   }
 }
 
@@ -1333,35 +1333,35 @@ export function App() {
       {tab === "canvas" && (
         <main className="detail-panel">
           <p className="eyebrow">SOLERA EXPERIENCE LAB</p>
-          <h2>LOOP-1 工業 Agent 實驗室</h2>
+          <h2>Solera Agent Platform</h2>
           <article className="experience-launcher">
             <div className="experience-preview" aria-hidden="true">
               <i />
               <i />
               <i />
-              <strong>L1</strong>
+              <strong>A4</strong>
             </div>
             <p>
-              啟動可重播的反應器冷卻 Case Console；查看 Agent Plan、實際 tool
-              執行、根因假設、Evidence、反證，以及需要人工核准的 Action 草稿。
+              從 Agent Gallery 進入 LOOP-1 Live Experience，或探索 LOOP-2
+              後燃風險、LOOP-3 觸媒活性與 LOOP-4 水質 Soft Sensor concepts。
             </p>
             <button
               className="experience-open"
               onClick={() =>
-                void openLoop1(settings).catch((loop1Error) =>
+                void openAgentPlatform(settings).catch((platformError) =>
                   setError(
-                    loop1Error instanceof Error
-                      ? loop1Error.message
-                      : "LOOP-1 Experience 啟動失敗",
+                    platformError instanceof Error
+                      ? platformError.message
+                      : "Solera Agent Platform 啟動失敗",
                   ),
                 )
               }
             >
-              Open LOOP-1 Experience
+              Open Agent Gallery
               <span>↗</span>
             </button>
             <small>
-              合成資料 · 唯讀 · 可重播 · 按 Esc 關閉
+              LOOP-1 Live · LOOP-2–4 Concept · 按 Esc 關閉
             </small>
           </article>
 

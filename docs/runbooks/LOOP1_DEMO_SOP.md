@@ -85,13 +85,14 @@ npm run demo:loop1:preflight
 npm run demo:loop1:normal
 ```
 
-## 3. Open LOOP-1 Experience
+## 3. Open Agent Gallery and LOOP-1 Live
 
 1. Open an approved Easy PI, PI Vision, or SCADA host page.
 2. Open Solera Sidecar.
 3. Choose **Canvas**.
-4. Under **LOOP-1 Agent Lab**, choose **Open LOOP-1 Experience**.
-5. Confirm the top banner says
+4. Under **Solera Agent Platform**, choose **Open Agent Gallery**.
+5. On the LOOP-1 card, choose **Open Live Agent**.
+6. Confirm the top banner says
    `SYNTHETIC · READ-ONLY · NOT A SAFETY SYSTEM`.
 
 The full-screen workspace uses Shadow DOM. Closing it removes the Solera root

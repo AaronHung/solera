@@ -83,11 +83,11 @@ SOLERA_LOOP1_EXTERNAL_EVENT_BUS=in-process
 - `demo:loop1:preflight` 是技術健康檢查，不是客戶 Demo。
 - `demo:loop1:normal` 是把 synthetic run 準備到乾淨的正常起點，不是
   Agent 的 case prompt。
-- 客戶 Demo 真正從 browser Sidecar 的 **Open LOOP-1 Experience** 開始，
-  再用 Experience 裡的 **Run Hero scenario**、**Investigate**、Timeline、
-  Evidence 與 Action Rail 展示 investigation。
+- 客戶 Demo 從 browser Sidecar 的 **Open Agent Gallery** 開始，再由 LOOP-1
+  卡片進入 **Open Live Agent**，使用 **Run Hero scenario**、Timeline、
+  Investigation、Evidence 與 Action Rail 展示 investigation。
 
-目前 LOOP-1 Agent Lab 是「scenario-driven investigation」：它先從已知且可重播
+目前 Gallery 中的 LOOP-1 是「scenario-driven investigation」：它先從已知且可重播
 的工業事件建立 investigation context，再由 bounded Agent 執行分析。它不是
 一般自由聊天視窗，也不是每個 prompt 都即時改變 process state。Sidecar 的
 一般 Chat tab 是 page-context Agent；LOOP-1 Experience 則是 backend-bound
@@ -405,7 +405,7 @@ Package 包含：
 - 啟動 API。
 - 執行 `npm run demo:loop1:normal`。
 - 打開 approved host 與 Sidecar。
-- 測一次 **Open LOOP-1 Experience**。
+- 測一次 **Open Agent Gallery → Open Live Agent**。
 - Reset/prepare 回 normal。
 - 放大 browser 至 audience 可讀。
 

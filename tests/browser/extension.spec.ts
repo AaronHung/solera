@@ -35,10 +35,10 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     await expect(page.getByText("What should we verify?")).toBeVisible();
     await page.getByRole("button", { name: "Canvas" }).click();
     await expect(
-      page.getByRole("heading", { name: "LOOP-1 工業 Agent 實驗室" }),
+      page.getByRole("heading", { name: "Solera Agent Platform" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Open LOOP-1 Experience/ }),
+      page.getByRole("button", { name: /Open Agent Gallery/ }),
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: "Experience Demo" })).toBeVisible();
     await expect(
@@ -396,7 +396,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       }
       return chrome.tabs.sendMessage(hostTab.id, {
         type: "SOLERA_MOUNT_EXPERIENCE",
-        mode: "loop1",
+        mode: "agent-platform",
         loop1: {
           apiBaseUrl: "http://localhost:8000",
           bearerToken: "dev:tenant-demo:browser:viewer",
@@ -405,6 +405,37 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     });
     expect(loop1Launch).toEqual({ ok: true });
     const loop1Experience = hostPage.locator("#solera-experience-root");
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "一個可信平台，長出多種工業 Agent",
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-agent-gallery-1440x900.png",
+      ),
+    });
+    const loop2Card = loop1Experience.locator(".agent-card").filter({
+      hasText: "LOOP-2",
+    });
+    await loop2Card.getByRole("button", { name: /Explore Concept/ }).click();
+    await expect(
+      loop1Experience.getByText("SYNTHETIC CONCEPT · NOT FOR OPERATIONS"),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Run Afterburn Analysis" })
+      .click();
+    await expect(loop1Experience.getByText("後燃風險正在形成")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-loop2-afterburn-concept-1440x900.png",
+      ),
+    });
+    await loop1Experience.getByRole("button", { name: "Back to Gallery" }).click();
+    const loop1Card = loop1Experience.locator(".agent-card").filter({
+      hasText: "LOOP-1",
+    });
+    await loop1Card.getByRole("button", { name: /Open Live Agent/ }).click();
     await expect(
       loop1Experience.getByRole("heading", { name: "即時單元總覽" }),
     ).toBeVisible();
