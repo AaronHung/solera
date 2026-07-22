@@ -9,25 +9,32 @@ import {
   Database,
   Droplets,
   FileCheck2,
+  Factory,
   FlaskConical,
   Gauge,
   Layers3,
   Link2,
+  Mail,
   Play,
   RotateCcw,
+  Route,
+  ScanLine,
   ShieldCheck,
   Sparkles,
+  Wrench,
   X,
   type LucideIcon,
 } from "lucide-react";
 
 import { Loop1Experience } from "../loop1/Loop1Experience";
 import type { Loop1ApiOptions } from "../loop1/types";
+import { Fasten1Experience } from "./Fasten1Experience";
 import {
   AGENTS,
   getAgent,
   type AgentDefinition,
   type AgentId,
+  type AgentPortfolio,
   type ConceptScenario,
 } from "./data";
 
@@ -40,15 +47,25 @@ const AGENT_ICONS: Record<AgentId, LucideIcon> = {
   loop2: Activity,
   loop3: Gauge,
   loop4: Droplets,
+  fasten1: Wrench,
 };
 
-const PLATFORM_LAYERS = [
+const CHEMICAL_LAYERS = [
   { icon: Database, label: "Data Hub", detail: "Identity · time-series · quality" },
   { icon: Activity, label: "Pulse", detail: "Freshness · drift · health" },
   { icon: Link2, label: "Thread", detail: "Asset · Tag · SOP · Case" },
   { icon: Layers3, label: "Skills", detail: "Tools · models · calculations" },
   { icon: FileCheck2, label: "Evidence", detail: "Lineage · version · audit" },
   { icon: ShieldCheck, label: "Policy", detail: "Read-only · decline · approval" },
+];
+
+const PRECISION_LAYERS = [
+  { icon: Mail, label: "Document Intake", detail: "Email · PDF · revision · hash" },
+  { icon: ScanLine, label: "Drawing Intelligence", detail: "Parser · OCR · validation" },
+  { icon: Link2, label: "Product Thread", detail: "Part · material · tool · lot" },
+  { icon: Factory, label: "Machine Edge", detail: "Capability · state · signals" },
+  { icon: FileCheck2, label: "Quality Evidence", detail: "Drawing · QMS · first article" },
+  { icon: ShieldCheck, label: "Human Gates", detail: "Engineering · quality · business" },
 ];
 
 function Sparkline({ values }: { values: number[] }) {
@@ -102,7 +119,11 @@ function AgentCard({
       <footer>
         <span>{agent.archetype}</span>
         <button onClick={() => onOpen(agent.id)}>
-          {agent.maturity === "live" ? "Open Live Agent" : "Explore Concept"}
+          {agent.id === "fasten1"
+            ? "Open Workflow Story"
+            : agent.maturity === "live"
+              ? "Open Live Agent"
+              : "Explore Concept"}
           <ChevronRight />
         </button>
       </footer>
@@ -111,12 +132,19 @@ function AgentCard({
 }
 
 function AgentGallery({
+  portfolio,
+  onPortfolioChange,
   onOpen,
   onClose,
 }: {
+  portfolio: AgentPortfolio;
+  onPortfolioChange: (portfolio: AgentPortfolio) => void;
   onOpen: (agentId: AgentId) => void;
   onClose?: () => void;
 }) {
+  const precision = portfolio === "precision";
+  const agents = AGENTS.filter((agent) => agent.portfolio === portfolio);
+  const layers = precision ? PRECISION_LAYERS : CHEMICAL_LAYERS;
   return (
     <div className="agent-platform-shell">
       <header className="agent-platform-topbar">
@@ -129,7 +157,9 @@ function AgentGallery({
         </div>
         <div className="agent-platform-boundary">
           <ShieldCheck />
-          LOOP-1 LIVE · LOOP-2–4 SYNTHETIC CONCEPTS
+          {precision
+            ? "FASTEN-1 SYNTHETIC WORKFLOW CONCEPT"
+            : "LOOP-1 LIVE · LOOP-2–4 SYNTHETIC CONCEPTS"}
         </div>
         <button className="agent-platform-close" aria-label="Close Agent Platform" onClick={onClose}>
           <X />
@@ -139,24 +169,62 @@ function AgentGallery({
       <main className="agent-gallery-main">
         <section className="agent-gallery-hero">
           <div>
-            <span>SOLERA AGENT FOUNDRY / CHEMICAL PORTFOLIO</span>
-            <h1>一個可信平台，長出多種工業 Agent</h1>
+            <span>
+              {precision
+                ? "SOLERA AGENT FOUNDRY / PRECISION MANUFACTURING"
+                : "SOLERA AGENT FOUNDRY / CHEMICAL PORTFOLIO"}
+            </span>
+            <h1>
+              {precision
+                ? "從一張客戶圖面，到第一顆合格螺絲"
+                : "一個可信平台，長出多種工業 Agent"}
+            </h1>
             <p>
-              LOOP-1 證明 Evidence-first investigation；LOOP-2～4 展示同一套
-              Data Hub、Thread、policy 與 evaluation 如何承載 dynamic risk、
-              lifecycle prediction 與 Soft Sensor。
+              {precision
+                ? "FASTEN-1 不是報價 Bot，而是一條跨過 Email、CAD、ERP、MES、QMS、老機台與老師傅經驗的 RFQ-to-First-Good-Part workflow。"
+                : "LOOP-1 證明 Evidence-first investigation；LOOP-2～4 展示同一套 Data Hub、Thread、policy 與 evaluation 如何承載 dynamic risk、lifecycle prediction 與 Soft Sensor。"}
             </p>
           </div>
           <aside>
-            <strong>1 LIVE</strong>
-            <span>validated Agent</span>
-            <strong>3 CONCEPTS</strong>
-            <span>interactive blueprints</span>
+            {precision ? (
+              <>
+                <strong>6 STAGES</strong>
+                <span>linked workflow screens</span>
+                <strong>3 AGENTS</strong>
+                <span>RFQ · Technician · Quality</span>
+              </>
+            ) : (
+              <>
+                <strong>1 LIVE</strong>
+                <span>validated Agent</span>
+                <strong>3 CONCEPTS</strong>
+                <span>interactive blueprints</span>
+              </>
+            )}
           </aside>
         </section>
 
+        <nav className="agent-portfolio-tabs" aria-label="Industrial Agent galleries">
+          <button
+            className={!precision ? "is-active" : ""}
+            onClick={() => onPortfolioChange("chemical")}
+          >
+            <FlaskConical />
+            <span><small>GALLERY 01</small><strong>Chemical Agents</strong></span>
+            <em>LOOP-1–4</em>
+          </button>
+          <button
+            className={precision ? "is-active" : ""}
+            onClick={() => onPortfolioChange("precision")}
+          >
+            <Wrench />
+            <span><small>GALLERY 02</small><strong>Precision Manufacturing</strong></span>
+            <em>FASTEN-1</em>
+          </button>
+        </nav>
+
         <section className="agent-platform-layers" aria-label="Shared Agent platform capabilities">
-          {PLATFORM_LAYERS.map(({ icon: Icon, label, detail }) => (
+          {layers.map(({ icon: Icon, label, detail }) => (
             <article key={label}>
               <Icon />
               <div>
@@ -167,17 +235,50 @@ function AgentGallery({
           ))}
         </section>
 
-        <section className="agent-gallery-grid">
-          {AGENTS.map((agent) => (
+        <section className={`agent-gallery-grid ${precision ? "portfolio-precision" : ""}`}>
+          {agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} onOpen={onOpen} />
           ))}
+          {precision && (
+            <article className="precision-journey-preview">
+              <header>
+                <Route />
+                <div>
+                  <small>AGENTIC WORKFLOW</small>
+                  <h2>一個 Case，跨越六個 Stages 與三個 Human Gates</h2>
+                </div>
+              </header>
+              <ol>
+                {[
+                  ["01", "RFQ Inbox", "Email + attachments"],
+                  ["02", "Drawing Intelligence", "PDF/CAD + validation"],
+                  ["03", "Similar Cases", "Product Case Store"],
+                  ["04", "Process & Assets", "ERP/MES/tooling"],
+                  ["05", "Trial Run", "Machine Edge + teacher"],
+                  ["06", "Quality Evidence", "QMS + first article"],
+                ].map(([index, title, detail]) => (
+                  <li key={index}>
+                    <span>{index}</span>
+                    <div><strong>{title}</strong><small>{detail}</small></div>
+                    <ChevronRight />
+                  </li>
+                ))}
+              </ol>
+              <footer>
+                <ShieldCheck />
+                Read-only analysis · draft-only write-back · human-approved decisions
+              </footer>
+            </article>
+          )}
         </section>
 
         <footer className="agent-gallery-footer">
           <div>
             <span>AGENT PACK CONTRACT</span>
             <strong>
-              Manifest → Assets/Tags → Skills/Models → Evidence → Policy → Evaluation
+              {precision
+                ? "Trigger → Documents → Product Thread → Tools → Human Gates → Evidence"
+                : "Manifest → Assets/Tags → Skills/Models → Evidence → Policy → Evaluation"}
             </strong>
           </div>
           <p>
@@ -490,6 +591,7 @@ export function AgentPlatformExperience({
   onClose,
 }: AgentPlatformExperienceProps) {
   const [activeAgentId, setActiveAgentId] = useState<AgentId | null>(null);
+  const [portfolio, setPortfolio] = useState<AgentPortfolio>("chemical");
   const activeAgent = useMemo(
     () => (activeAgentId ? getAgent(activeAgentId) : null),
     [activeAgentId],
@@ -498,6 +600,8 @@ export function AgentPlatformExperience({
   if (!activeAgent) {
     return (
       <AgentGallery
+        portfolio={portfolio}
+        onPortfolioChange={setPortfolio}
         onOpen={setActiveAgentId}
         {...(onClose ? { onClose } : {})}
       />
@@ -509,6 +613,17 @@ export function AgentPlatformExperience({
         apiBaseUrl={apiBaseUrl}
         bearerToken={bearerToken}
         onBack={() => setActiveAgentId(null)}
+        {...(onClose ? { onClose } : {})}
+      />
+    );
+  }
+  if (activeAgent.id === "fasten1") {
+    return (
+      <Fasten1Experience
+        onBack={() => {
+          setPortfolio("precision");
+          setActiveAgentId(null);
+        }}
         {...(onClose ? { onClose } : {})}
       />
     );

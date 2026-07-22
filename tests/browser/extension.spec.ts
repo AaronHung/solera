@@ -432,6 +432,100 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       ),
     });
     await loop1Experience.getByRole("button", { name: "Back to Gallery" }).click();
+    await loop1Experience
+      .getByRole("button", { name: /Precision Manufacturing/ })
+      .click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "從一張客戶圖面，到第一顆合格螺絲",
+      }),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-precision-gallery-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Open Workflow Story/ })
+      .click();
+    await expect(
+      loop1Experience.getByRole("heading", {
+        name: "一封詢價信，啟動跨系統 Engineering Workflow",
+      }),
+    ).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Accept RFQ & Start Workflow" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: /Open Drawing Intelligence/ })
+      .click();
+    await loop1Experience.getByRole("button", { name: "Analyze Drawing" }).click();
+    await expect(loop1Experience.getByText("7 verified · 1 missing")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-drawing-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate A/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Search Similar Products" })
+      .click();
+    await expect(loop1Experience.getByText("P-008821 / Rev B")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-cases-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Use Case P-008821" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Build Manufacturing Plan" })
+      .click();
+    await expect(loop1Experience.getByText("New DIE-2047 required")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-planning-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: /Confirm Gate B/ })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Run Synthetic Trial" })
+      .click();
+    await expect(
+      loop1Experience.getByText("Second-station die radius / alignment"),
+    ).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-trial-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Approve Inspection Order" })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: "Generate First Article Package" })
+      .click();
+    await expect(loop1Experience.getByText("CONDITIONAL PASS")).toBeVisible();
+    await hostPage.screenshot({
+      path: path.resolve(
+        "artifacts/experience-demo/solera-fasten1-quality-1440x900.png",
+      ),
+    });
+    await loop1Experience
+      .getByRole("button", { name: "Complete FASTEN-1 Story" })
+      .click();
+    await expect(loop1Experience.getByText("FASTEN-1 STORY COMPLETE")).toBeVisible();
+    await loop1Experience
+      .getByRole("button", { name: "Precision Gallery", exact: true })
+      .click();
+    await loop1Experience
+      .getByRole("button", { name: /Chemical Agents/ })
+      .click();
     const loop1Card = loop1Experience.locator(".agent-card").filter({
       hasText: "LOOP-1",
     });

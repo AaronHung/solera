@@ -141,13 +141,16 @@ Forbidden pitch：
 
 ## Phase 2
 
-使用相同 Agent Gallery contract 增加：
+`feature/fasten1-concept-experience` 已增加第二個
+`Precision Manufacturing` Gallery：
 
-- FASTEN-1：precision machining／tool wear／dimension drift／scrap
-- HEAT-1：heat-treatment quality／hardness／case depth／distortion
+- FASTEN-1：RFQ-to-First-Good-Part 六階段 workflow concept
+- HEAT-1：heat-treatment quality／hardness／case depth／distortion（尚未實作）
 
-Phase 2 不應複製 Gallery shell；只新增 Agent definitions、concept datasets、
-domain-specific visualizations 與 tests。
+FASTEN-1 共用 Agent Platform shell，但不複製化工 dashboard template。它使用
+RFQ、Drawing、Similar Cases、Process/Assets、Trial、Quality 六個不同畫面與
+三個 Human Gates。完整 boundary 見
+[`FASTEN1_CONCEPT_EXPERIENCE.md`](FASTEN1_CONCEPT_EXPERIENCE.md)。
 
 ## Verification
 
@@ -157,6 +160,8 @@ Automated checks cover：
 - LOOP-2 Run 依序完成 trace、result、Evidence 與 draft
 - Back to Gallery
 - Gallery → LOOP-1 live backend routing
+- Chemical／Precision Gallery switching
+- FASTEN-1 六階段 workflow、locked future stages 與 Human Gates
 - Brave／Chromium MV3 Shadow DOM mount
 - Escape cleanly removes overlay
 

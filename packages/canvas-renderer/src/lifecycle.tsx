@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 
 import { AgentPlatformExperience } from "./agent-platform/AgentPlatformExperience";
 import { agentPlatformStyles } from "./agent-platform/styles";
+import { fasten1Styles } from "./agent-platform/fasten1Styles";
 import { CanvasView } from "./CanvasView";
 import { ExperienceView } from "./experience/ExperienceView";
 import { experienceStyles } from "./experience/styles";
@@ -110,7 +111,7 @@ export function mountExperienceOverlay(
   style.dataset.soleraOwned = "experience-style";
   style.textContent =
     options.mode === "agent-platform"
-      ? `${agentPlatformStyles}\n${loop1Styles}`
+      ? `${agentPlatformStyles}\n${fasten1Styles}\n${loop1Styles}`
       : options.mode === "loop1"
         ? loop1Styles
         : experienceStyles;

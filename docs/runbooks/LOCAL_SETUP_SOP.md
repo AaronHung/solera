@@ -171,7 +171,9 @@ production Evidence。
 
 同一頁另有 **Solera Agent Platform**：LOOP-1 使用 backend deterministic
 scenario、Data Hub、Pulse、Thread 與 Evidence；LOOP-2～4 是明確標示的
-interactive synthetic concept markup。完整操作請依
+interactive synthetic concept markup。`Precision Manufacturing` Gallery
+中的 FASTEN-1 是六階段 RFQ-to-First-Good-Part deterministic workflow。
+完整操作請依
 `docs/runbooks/LOOP1_DEMO_SOP.md`；Concept Agent 不可說成已完成 runtime，
 兩者也不可混稱為 customer live data。
 

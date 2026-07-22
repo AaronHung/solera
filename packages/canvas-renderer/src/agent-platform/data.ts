@@ -1,5 +1,6 @@
-export type AgentId = "loop1" | "loop2" | "loop3" | "loop4";
-export type AgentAccent = "cyan" | "amber" | "violet" | "green";
+export type AgentId = "loop1" | "loop2" | "loop3" | "loop4" | "fasten1";
+export type AgentPortfolio = "chemical" | "precision";
+export type AgentAccent = "cyan" | "amber" | "violet" | "green" | "steel";
 export type AgentMaturity = "live" | "concept";
 
 export interface ConceptMetric {
@@ -48,6 +49,7 @@ export interface ConceptScenario {
 
 export interface AgentDefinition {
   id: AgentId;
+  portfolio: AgentPortfolio;
   code: string;
   title: string;
   shortTitle: string;
@@ -65,6 +67,7 @@ export interface AgentDefinition {
 export const AGENTS: AgentDefinition[] = [
   {
     id: "loop1",
+    portfolio: "chemical",
     code: "LOOP-1",
     title: "反應器冷卻偏差調查",
     shortTitle: "Causal Investigation",
@@ -80,6 +83,7 @@ export const AGENTS: AgentDefinition[] = [
   },
   {
     id: "loop2",
+    portfolio: "chemical",
     code: "LOOP-2",
     title: "FCC 再生器後燃風險 Agent",
     shortTitle: "Regenerator Afterburn Guard",
@@ -198,6 +202,7 @@ export const AGENTS: AgentDefinition[] = [
   },
   {
     id: "loop3",
+    portfolio: "chemical",
     code: "LOOP-3",
     title: "觸媒活性與 Run-length Agent",
     shortTitle: "Catalyst Activity & Run-length",
@@ -316,6 +321,7 @@ export const AGENTS: AgentDefinition[] = [
   },
   {
     id: "loop4",
+    portfolio: "chemical",
     code: "LOOP-4",
     title: "水質 Soft Sensor 與合規風險 Agent",
     shortTitle: "Water Quality Soft Sensor",
@@ -431,6 +437,29 @@ export const AGENTS: AgentDefinition[] = [
         unit: "mg/L",
       },
     },
+  },
+  {
+    id: "fasten1",
+    portfolio: "precision",
+    code: "FASTEN-1",
+    title: "從客戶詢價圖面到首件良品",
+    shortTitle: "RFQ-to-First-Good-Part",
+    domain: "Precision Manufacturing · Fasteners",
+    archetype: "Engineering Workflow Agent",
+    maturity: "concept",
+    accent: "steel",
+    description:
+      "串起 Email、工程圖、歷史產品、ERP、機台能力、模具、Edge signals 與首件量測，協助工程師判斷能不能做、怎麼做與風險在哪裡。",
+    outcome: "一張新圖面 → 一條有來源、有人核准的首件良品路徑",
+    sharedCapabilities: [
+      "Document Intake",
+      "Drawing Parser",
+      "Product Thread",
+      "Machine Edge",
+      "Quality Evidence",
+      "Human Gates",
+    ],
+    preview: [18, 25, 34, 42, 56, 63, 71, 78, 89, 96],
   },
 ];
 

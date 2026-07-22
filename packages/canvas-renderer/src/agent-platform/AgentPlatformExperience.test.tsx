@@ -104,4 +104,73 @@ describe("AgentPlatformExperience", () => {
     });
     expect(screen.getByText(evidence)).toBeTruthy();
   });
+
+  it("presents FASTEN-1 as a multi-screen RFQ-to-first-good-part workflow", async () => {
+    render(
+      <AgentPlatformExperience
+        apiBaseUrl="http://localhost:8000"
+        bearerToken="dev:tenant-demo:test:viewer"
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Precision Manufacturing/ }),
+    );
+    expect(
+      screen.getByRole("heading", {
+        name: "從一張客戶圖面，到第一顆合格螺絲",
+      }),
+    ).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Open Workflow Story/ }),
+    );
+    expect(screen.getAllByText("RFQ-2026-00182")).toHaveLength(2);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Accept RFQ & Start Workflow" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /Open Drawing Intelligence/ }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Analyze Drawing" }));
+    await waitFor(() => expect(screen.getByText("7 verified · 1 missing")).toBeTruthy());
+    expect(screen.getByText("Not specified")).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Confirm Gate A/ }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Search Similar Products" }),
+    );
+    await waitFor(() => expect(screen.getByText("P-008821 / Rev B")).toBeTruthy());
+
+    fireEvent.click(screen.getByRole("button", { name: "Use Case P-008821" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Build Manufacturing Plan" }),
+    );
+    await waitFor(() => expect(screen.getByText("New DIE-2047 required")).toBeTruthy());
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Confirm Gate B/ }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Run Synthetic Trial" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByText("Second-station die radius / alignment")).toBeTruthy(),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Approve Inspection Order" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Generate First Article Package" }),
+    );
+    await waitFor(() => expect(screen.getByText("CONDITIONAL PASS")).toBeTruthy());
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Complete FASTEN-1 Story" }),
+    );
+    expect(screen.getByText("FASTEN-1 STORY COMPLETE")).toBeTruthy();
+  }, 12_000);
 });

@@ -1343,7 +1343,8 @@ export function App() {
             </div>
             <p>
               從 Agent Gallery 進入 LOOP-1 Live Experience，或探索 LOOP-2
-              後燃風險、LOOP-3 觸媒活性與 LOOP-4 水質 Soft Sensor concepts。
+              後燃風險、LOOP-3 觸媒活性、LOOP-4 水質 Soft Sensor，以及
+              FASTEN-1 從詢價圖面到首件良品的多階段 workflow。
             </p>
             <button
               className="experience-open"
@@ -1361,7 +1362,7 @@ export function App() {
               <span>↗</span>
             </button>
             <small>
-              LOOP-1 Live · LOOP-2–4 Concept · 按 Esc 關閉
+              Chemical + Precision Galleries · Synthetic concepts · 按 Esc 關閉
             </small>
           </article>
 
