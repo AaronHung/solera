@@ -307,7 +307,10 @@ export function Loop1Experience({
             <CircleDot /> {stateLabel(snapshot?.run.state ?? "offline", locale)}
           </span>
           <span>Tick {snapshot?.run.tick ?? 0}</span>
-          <span>{snapshot ? ageLabel(snapshot.run.simulationTime) : "—"}</span>
+          <span>
+            {t(locale, "simulationTime")}{" "}
+            {snapshot ? ageLabel(snapshot.run.simulationTime) : "—"}
+          </span>
           <button
             className="loop1-locale"
             aria-label={t(locale, "locale")}
@@ -410,7 +413,8 @@ export function Loop1Experience({
         </div>
         <button
           className="loop1-icon-button"
-          title={autoRun ? "Pause replay" : "Start replay"}
+          title={t(locale, autoRun ? "pauseReplay" : "playReplay")}
+          aria-label={t(locale, autoRun ? "pauseReplay" : "playReplay")}
           onClick={() => setAutoRun((value) => !value)}
         >
           {autoRun ? <Pause /> : <Play />}
@@ -420,6 +424,7 @@ export function Loop1Experience({
             <button
               key={value}
               className={speed === value ? "active" : ""}
+              title={t(locale, "speedReplay")}
               onClick={() => setSpeed(value)}
             >
               {value}x
@@ -429,12 +434,21 @@ export function Loop1Experience({
         <button
           onClick={() => void runControl({ action: "reset" })}
           disabled={busy}
+          title={t(locale, "resetReplay")}
         >
-          <RotateCcw /> Reset
+          <RotateCcw /> Reset to tick 0
+        </button>
+        <button
+          onClick={() => void runControl({ action: "replay", toTick: 60 })}
+          disabled={busy}
+          title={t(locale, "normalReplay")}
+        >
+          <CircleDot /> Normal baseline
         </button>
         <button
           onClick={() => void runControl({ action: "jump-to-fault" })}
           disabled={busy}
+          title={t(locale, "jumpReplay")}
         >
           <FastForward /> Jump to fault
         </button>
@@ -445,18 +459,21 @@ export function Loop1Experience({
             void runCaseInvestigation("hero");
           }}
           disabled={busy}
+          title={t(locale, "heroReplay")}
         >
           <TriangleAlert /> Run Hero scenario
         </button>
         <button
           onClick={() => void runCaseInvestigation("current")}
           disabled={busy}
+          title={t(locale, "currentInvestigation")}
         >
           <Search /> Investigate
         </button>
         <button
           className="loop1-approve"
           disabled={!investigation?.actionDraft || busy}
+          title={t(locale, "approvalRequest")}
           onClick={() => {
             setBusy(true);
             void requestLoop1Approval(api)

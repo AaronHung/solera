@@ -5,6 +5,11 @@ Duration: 10 分鐘 Demo + 5 分鐘 Q&A
 Presenter goal: 讓觀眾看懂「問題、產品、可信 Agent、商業價值、下一步」，
 而不是展示最多技術細節。
 
+如果要深入理解 tick、seed、Replay controls、三個 Cases、Bounded Plan、
+LLM 邊界、alarms、Evidence、safe-decline 與未來 Data Hub／Thread 設計，
+請配合閱讀
+`docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md`。
+
 ## 先記住一句話
 
 > Solera 不是另一個 dashboard 或 chatbot；它是在既有工業系統之上，

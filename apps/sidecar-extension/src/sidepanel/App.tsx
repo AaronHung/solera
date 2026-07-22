@@ -10,7 +10,8 @@ import {
 
 import { listCanvases, saveCanvas, streamChat } from "../api/client";
 
-interface SidecarSettings {
+export interface SidecarSettings {
+  settingsRevision: number;
   apiBaseUrl: string;
   bearerToken: string;
   tenantId: string;
@@ -19,9 +20,10 @@ interface SidecarSettings {
 }
 
 const LOCAL_DEMO_TOKEN = "dev:tenant-demo:demo-user:viewer";
+const CURRENT_SETTINGS_REVISION = 2;
 
 const OPENROUTER_MODELS = [
-  { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna" },
+  { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna · Default" },
   { id: "openai/gpt-5.6-terra", label: "GPT-5.6 Terra" },
   { id: "anthropic/claude-sonnet-5", label: "Claude Sonnet 5 💰" },
   { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6 💰" },
@@ -32,9 +34,10 @@ const OPENROUTER_MODELS = [
     label: "Nemotron 3 Ultra 🎁",
   },
 ] as const;
-const DEFAULT_MODEL = "openai/gpt-5.6-luna";
+export const DEFAULT_MODEL = "openai/gpt-5.6-luna";
 
 const DEFAULT_SETTINGS: SidecarSettings = {
+  settingsRevision: CURRENT_SETTINGS_REVISION,
   apiBaseUrl: "http://localhost:8000",
   bearerToken: "",
   tenantId: "tenant-demo",
@@ -97,18 +100,38 @@ interface Attachment {
   type: string;
 }
 
-async function loadSettings(): Promise<SidecarSettings> {
-  const stored = await chrome.storage.local.get("soleraSettings");
-  const storedSettings = stored.soleraSettings as Partial<SidecarSettings> | undefined;
+export function resolveSettings(
+  storedSettings?: Partial<SidecarSettings>,
+): SidecarSettings {
   const settings = {
     ...DEFAULT_SETTINGS,
     ...storedSettings,
   };
-  if (!OPENROUTER_MODELS.some((model) => model.id === settings.modelName)) {
+  const needsLunaMigration =
+    (storedSettings?.settingsRevision ?? 0) < CURRENT_SETTINGS_REVISION;
+  if (
+    needsLunaMigration ||
+    !OPENROUTER_MODELS.some((model) => model.id === settings.modelName)
+  ) {
     settings.modelName = DEFAULT_MODEL;
   }
+  settings.settingsRevision = CURRENT_SETTINGS_REVISION;
   if (!settings.bearerToken && settings.apiBaseUrl.startsWith("http://localhost")) {
     settings.bearerToken = LOCAL_DEMO_TOKEN;
+  }
+  return settings;
+}
+
+async function loadSettings(): Promise<SidecarSettings> {
+  const stored = await chrome.storage.local.get("soleraSettings");
+  const storedSettings = stored.soleraSettings as Partial<SidecarSettings> | undefined;
+  const settings = resolveSettings(storedSettings);
+  if (
+    storedSettings?.settingsRevision !== settings.settingsRevision ||
+    storedSettings?.modelName !== settings.modelName ||
+    storedSettings?.bearerToken !== settings.bearerToken
+  ) {
+    await chrome.storage.local.set({ soleraSettings: settings });
   }
   return settings;
 }

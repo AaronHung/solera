@@ -173,6 +173,8 @@ npm run demo:loop1:normal
 
 - First-time presenter and investor rehearsal:
   \`source/docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md\`
+- Demo mechanics, controls, Agent boundaries, and product evolution:
+  \`source/docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md\`
 - 10-minute script:
   \`source/docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md\`
 - Full technical SOP:

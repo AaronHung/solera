@@ -93,7 +93,8 @@ Talk track：
 客戶應看到：
 
 - `query_signals`、`cluster_alarms`、文件與案例查詢的實際 trace。
-- 每個 trace event 有 timestamp 與 trace ID。
+- 畫面顯示每個 trace event 的 timestamp 與 event type；完整 trace ID 與
+  events 保存在 API trace／audit metadata。
 - 這是 audit-friendly execution trace，不是私密 chain-of-thought。
 
 不要說：
