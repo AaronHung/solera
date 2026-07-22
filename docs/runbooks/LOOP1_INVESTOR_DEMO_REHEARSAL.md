@@ -5,6 +5,9 @@ Duration: 10 分鐘 Demo + 5 分鐘 Q&A
 Presenter goal: 讓觀眾看懂「問題、產品、可信 Agent、商業價值、下一步」，
 而不是展示最多技術細節。
 
+先用 `docs/runbooks/LOOP1_DEMO_PLAYBOOK.md` 選擇 audience route 與 appendix；
+本文件只負責 Investor 版 Core Hero Demo 與第一次演練。
+
 如果要深入理解 tick、seed、Replay controls、三個 Cases、Bounded Plan、
 LLM 邊界、alarms、Evidence、safe-decline 與未來 Data Hub／Thread 設計，
 請配合閱讀
@@ -42,13 +45,15 @@ cd /Users/aaron/xk8/00_solera
 git status --short --branch
 ```
 
-Expected：
+Expected：目前所在 branch 與 remote tracking 正常，且沒有未預期的 modified
+files。例如：
 
 ```text
-## main...origin/main
+## feature/loop1-agent-clarity...origin/feature/loop1-agent-clarity
 ```
 
-如果看到其他 branch 或 modified files，先記錄，不要在 Demo 前臨時改 code。
+不要求一定在 `main`。如果看到 modified files，先記錄，不要在 Demo 前臨時
+改 code、切 branch 或 merge。
 
 ### Step 2｜Build extension
 
@@ -341,6 +346,11 @@ Investor value：
 - 縮短從 alarm onset 到第一個可 review hypothesis 的時間。
 - 所有原始警報仍然可 audit。
 
+目前 Timeline 只直接顯示 raw alarms、時間與 cluster。完整的
+command → position → flow → thermal signal lanes 尚未實作；因果順序來自
+deterministic investigation summary。不要指著 Timeline 宣稱四條 curves
+已在同一畫面可視化。
+
 ### 5:30–7:00｜Top-3 Hypotheses：答案不是單一猜測
 
 你點：
@@ -405,6 +415,10 @@ Investor 應該看見：
 - 知識不只存在 chat history，而能累積成組織可重用的 case memory。
 - 客戶可以替換成自己的 PI alias、CMMS equipment number、ERP material
   number 與 approved SOP。
+
+目前 UI 顯示 Evidence claim、source ID、value、document／case summary 與
+Skill trace；完整 timestamp、quality、formula inputs、section／URI 等
+lineage details 保存在 API payload，尚未提供 clickable detail drawer。
 
 關鍵字：
 

@@ -16,6 +16,16 @@ Scenario Engine
 
 Experience 不產生 process truth；browser-local portfolio simulation 也不會混入 LOOP-1。PI 不可用時，完整 Hero scenario 仍可執行、reset 與 replay。
 
+### Current Demo status
+
+- Experience 目前視覺化 Unit、Pulse、alarms、Investigation 與 Evidence summary。
+- Catalog、raw Pulse、Thread edges、approval decision 與 productization gates
+  目前透過 API／Terminal 證明。
+- 尚未完成 Data Hub configuration UI、Asset tree editor、Thread graph explorer
+  或 Approval Inbox。
+- 現場操作順序與 `curl` examples 請使用
+  `docs/runbooks/LOOP1_DEMO_PLAYBOOK.md` 的 Data Hub module。
+
 ## 2. Data Hub 已完成的功能
 
 ### Scenario Catalog
@@ -246,13 +256,18 @@ Decision payload：
 
 ```bash
 cd /Users/aaron/xk8/00_solera
-cp .env.example .env
 uv sync --frozen
 npm install
 npm run build
 ```
 
-確認 `.env`：
+只有 `.env` 不存在時才執行：
+
+```bash
+cp .env.example .env
+```
+
+不要覆蓋現有 `.env`。確認設定：
 
 ```text
 SOLERA_LOOP1_ENABLED=true
@@ -329,6 +344,10 @@ Reset 到 tick 0；它不是刪除 fixture/catalog，也不會清除其他 tenan
 - PI OMF mirror、DWSIM/OPC UA、multimodal 與 external broker 都 fail-closed。
 
 ## 7. 如何驗證「不是假 Agent」
+
+這一節是 technical acceptance，不是主 10 分鐘 Demo。UI 可顯示 summary；
+完整 calculation／document lineage、Thread edges 與 approval payload 應由 API
+驗證。
 
 每次 investigation 檢查：
 

@@ -9,29 +9,36 @@ validated Canvas views without changing the host system's business data.
 
 ## Start here
 
-Read these files in order before changing code:
+Before changing code, read:
 
 1. [v0.1 Product Contract](docs/contracts/SOLERA_V0_1.md)
 2. [LOOP-1 Synthetic Contract](docs/contracts/SOLERA_LOOP1_V0_1.md)
 3. [Current Project State](docs/PROJECT_STATE.md)
-4. [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
-5. [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
-6. [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
-7. [LOOP-1 Demo Mechanics and Product Evolution](docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md)
-8. [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
-9. [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
-10. [Customer Use Case Catalog](docs/pitch/SOLERA_CUSTOMER_USE_CASES.md)
-11. [Product, Presales, and Investor Pitch](docs/pitch/SOLERA_PRODUCT_PITCH.md)
-12. [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
-11. [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
-12. [System Architecture](docs/architecture/SYSTEM.md)
-13. [Architecture Decisions](docs/adr/)
-14. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
-15. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
-16. [Threat Model](docs/security/THREAT_MODEL.md)
-17. [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
-18. [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
-19. [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
+4. [v0.1 Completion Checklist](docs/runbooks/V0_1_COMPLETION_CHECKLIST.md)
+5. [System Architecture](docs/architecture/SYSTEM.md)
+6. [Architecture Decisions](docs/adr/)
+7. [v0.1 Backlog](docs/backlog/V0_1_BACKLOG.md)
+8. [Golden Evaluation Set](docs/evals/GOLDEN_QUESTIONS.md)
+9. [Threat Model](docs/security/THREAT_MODEL.md)
+
+For a LOOP-1 Demo, start here:
+
+1. [LOOP-1 Demo Playbook](docs/runbooks/LOOP1_DEMO_PLAYBOOK.md)
+2. [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
+3. [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
+4. [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)
+5. [LOOP-1 Demo SOP](docs/runbooks/LOOP1_DEMO_SOP.md)
+6. [LOOP-1 Demo Mechanics and Product Evolution](docs/architecture/LOOP1_DEMO_MECHANICS_AND_PRODUCT_EVOLUTION.md)
+7. [LOOP-1 Data Hub and Agent Flow](docs/architecture/LOOP1_DATA_HUB_AGENT_FLOW.md)
+8. [LOOP-1 Value Validation](docs/value/LOOP1_VALUE_VALIDATION.md)
+
+Product and post-v0.1 direction:
+
+- [Customer Use Case Catalog](docs/pitch/SOLERA_CUSTOMER_USE_CASES.md)
+- [Product, Presales, and Investor Pitch](docs/pitch/SOLERA_PRODUCT_PITCH.md)
+- [Post-v0.1 Skill System Proposal](docs/contracts/SOLERA_SKILL_SYSTEM_V0_2.md)
+- [Solera vs GPT-style Sidecar](docs/architecture/SOLERA_VS_GPT_SIDECAR.md)
+- [v0.2 Skill Backlog](docs/backlog/V0_2_SKILL_BACKLOG.md)
 
 The contract is authoritative. Scope changes require an ADR and a contract
 changelog entry. Every implementation change must reference a requirement or
@@ -106,6 +113,7 @@ branded-browser acceptance runs through enterprise extension management.
 Operational and demo procedures:
 
 - [Demo runbook](docs/runbooks/DEMO.md)
+- [LOOP-1 Demo Playbook](docs/runbooks/LOOP1_DEMO_PLAYBOOK.md)
 - [LOOP-1 Investor Demo Rehearsal](docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md)
 - [LOOP-1 Handoff and Test](docs/runbooks/LOOP1_HANDOFF_AND_TEST.md)
 - [LOOP-1 Customer Demo — 10 minutes](docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md)

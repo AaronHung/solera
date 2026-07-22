@@ -1,5 +1,9 @@
 # LOOP-1 Agent Value Validation
 
+本文件定義 capability proof、Pilot metrics 與 business validation。Demo
+安排請先看 `docs/runbooks/LOOP1_DEMO_PLAYBOOK.md`；以下 Test A–E 是可選
+technical／trust modules，不是另一套必須完整演完的客戶 Demo。
+
 ## 1. 驗證原則
 
 LOOP-1 把兩種證據分開：
@@ -86,6 +90,8 @@ Acceptance thresholds：
 
 ### Test A — Deterministic replay
 
+Status: Terminal + UI
+
 1. 執行 `npm run demo:loop1:hero`。
 2. 記錄 run tick、alarm count、Top-1 與 Evidence count。
 3. 再執行一次。
@@ -101,9 +107,13 @@ Pass：
 
 ### Test B — Safe decline
 
-1. 使用 `missing-data` 或 `questionable-data` golden case。
-2. 執行 investigation。
-3. 檢查 status 與 Action Rail。
+Status: Live UI 可驗證 history 不足；missing/questionable variants 由 golden
+evaluation 驗證。
+
+1. Experience 的 Investigation 選 `資料不足安全拒答 · tick 10`。
+2. 點 **Start Investigation**。
+3. 檢查 status、missing data 與 Action Rail。
+4. 若要驗證 explicit missing/questionable quality，執行 40-case evaluation。
 
 Pass：
 
@@ -114,10 +124,17 @@ Pass：
 
 ### Test C — Evidence lineage
 
+Status: UI summary + API detail
+
 1. 打開 Evidence workspace。
-2. 選一個 change-point calculation。
-3. 追到 source Tag、Asset、quality、timestamp 與 formula version。
-4. 打開 SOP-R101-04。
+2. 檢查 Evidence claim、source ID、value／unit、documents 與 cases。
+3. 使用 investigation／trace API payload 檢查 source Tag、Asset、quality、
+   timestamp、calculation inputs 與 formula version。
+4. 檢查 SOP-R101-04 的 document ID／revision；section／URI／retrieval
+   version 由 API payload 驗證。
+
+目前 UI 沒有 clickable Evidence detail drawer，不能在畫面上假裝完成第三、
+第四步的完整 drill-down。
 
 Pass：
 
@@ -127,10 +144,14 @@ Pass：
 
 ### Test D — Read-only boundary
 
-1. 以 viewer request approval，應被拒絕。
-2. 以 engineer request，建立 pending draft。
-3. 以 operator/supervisor/admin decide。
-4. 查 approval payload。
+Status: Request 可用 UI；decision 與完整 audit 需 API
+
+1. Hero investigation 完成後，以 viewer 點 Request approval，應被拒絕。
+2. Demo 開始前改用 engineer token，重新執行 Hero，再建立 pending draft。
+3. 以 operator/supervisor/admin 經 API decide。
+4. 經 API 查 approval payload 與 audit metadata。
+
+目前沒有 Approval Inbox／Decision UI。
 
 Pass：
 
@@ -140,6 +161,8 @@ Pass：
 - 沒有 outbound CMMS/DCS/SCADA call
 
 ### Test E — Browser isolation
+
+Status: Live UI + Browser E2E
 
 1. 在 approved host page 開 LOOP-1 Experience。
 2. 瀏覽 Unit、Timeline、Investigation、Evidence。
@@ -232,6 +255,8 @@ Annual downtime value
 不得把三個公式無條件相加；需先排除 overlapping benefits。
 
 ## 7. 90 分鐘 Data-readiness Workshop
+
+這是客戶對 Demo 有興趣後的 discovery workshop，不是現場產品 Demo。
 
 ### 0–15 分鐘：Use case
 

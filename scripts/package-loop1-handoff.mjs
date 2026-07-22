@@ -149,7 +149,8 @@ scoreboard, fixtures, tests, contracts, and customer demo documentation.
 ## Quick start
 
 1. Extract this archive.
-2. Open \`source/docs/runbooks/LOOP1_HANDOFF_AND_TEST.md\`.
+2. Open \`source/docs/runbooks/LOOP1_DEMO_PLAYBOOK.md\`, then
+   \`source/docs/runbooks/LOOP1_HANDOFF_AND_TEST.md\`.
 3. Copy \`source/.env.example\` to \`source/.env\` and keep all optional
    productization gates disabled.
 4. From \`source\`, run:
@@ -171,6 +172,8 @@ npm run demo:loop1:normal
 
 ## Demo
 
+- Audience routes and Demo modules:
+  \`source/docs/runbooks/LOOP1_DEMO_PLAYBOOK.md\`
 - First-time presenter and investor rehearsal:
   \`source/docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md\`
 - Demo mechanics, controls, Agent boundaries, and product evolution:

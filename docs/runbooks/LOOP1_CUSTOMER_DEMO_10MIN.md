@@ -3,6 +3,9 @@
 Audience: 製造／操作主管、Process Safety、Maintenance/Reliability、Digital/IT
 Demo objective: 證明 Solera 能把 synthetic 時序、警報、Asset、SOP、案例與人工核准串成可重播、可驗證、read-only 的 Agent investigation。
 
+先用 `docs/runbooks/LOOP1_DEMO_PLAYBOOK.md` 決定是否加演 Safe-decline、
+causal replay 或 technical proof；本文件只負責 10 分鐘 Core Hero Demo。
+
 LOOP-1 是目前可 live demo 的 continuous-process scenario。若 audience 來自
 Reliability、Batch Manufacturing、Discrete Manufacturing、Energy/Facilities
 或 Operations Knowledge，先使用
@@ -16,7 +19,9 @@ Reliability、Batch Manufacturing、Discrete Manufacturing、Energy/Facilities
 
 ## 一句話定位
 
-> Solera 不是再做一個 dashboard；它把工業資料的 identity、freshness、causal timeline、SOP 與案例組成 Evidence-first Agent 工作流，並在資料不足時安全拒答。
+> Solera 不是再做一個 dashboard；它把工業資料的 identity、freshness、
+> alarm/event context、SOP 與案例組成 Evidence-first Agent 工作流，
+> 並在資料不足時安全拒答。
 
 ## Demo 前固定狀態
 
@@ -123,7 +128,8 @@ Talk track：
 
 - 減少 alarm flood 的認知負擔。
 - 保留每個 alarm 與 event time，仍可 audit。
-- 把 command → position → flow → thermal response 的先後順序可視化。
+- Agent summary 解釋 command → position → flow → thermal response 的先後
+  順序；目前 Timeline 本身只直接顯示 raw alarms 與 clusters。
 
 ## 4:00–6:00｜Bounded Agent Investigation
 
@@ -155,7 +161,7 @@ Talk track：
 
 Talk track：
 
-> Solera Thread 把 Tag、Asset、Alarm、Document、Case 與 Action 接到 stable identity。Agent 找到的是特定 document revision、section、URI 與 retrieval version，不只是把相似文字丟給模型。這也讓客戶未來能替換為自己的 PI aliases、CMMS equipment number、ERP material number 與 approved SOP。
+> Solera Thread 把 Tag、Asset、Alarm、Document、Case 與 Action 接到 stable identity。Experience 顯示 Evidence source ID、特定 document revision 與 retrieval score；完整 section、URI、quality、timestamp 與 calculation version 保存在 API payload。這也讓客戶未來能替換為自己的 PI aliases、CMMS equipment number、ERP material number 與 approved SOP。
 
 價值：
 
@@ -167,9 +173,10 @@ Talk track：
 
 操作：
 
-1. 若要展示 request，Sidecar 改用 engineer token。
-2. 點 **Request approval**。
-3. 說明 approval record，不執行外部 write。
+1. Core Demo 使用 viewer token，只指出 **Request approval**，不要點。
+2. 說明 engineer 可以建立 pending draft。
+3. 若要實際點擊，改用 Playbook 的 Approval appendix，並在 Demo 開始前就
+   設定 engineer token；不要在 10 分鐘主流程中途切 token。
 
 Talk track：
 
@@ -190,6 +197,9 @@ Talk track：
 ```bash
 npm run eval:loop1 -- --output artifacts/loop1-scoreboard.json
 ```
+
+這個 command 在 Demo 前執行；現場只展示已產生的 summary，不要中斷
+10 分鐘主流程等待 evaluation。
 
 目前 local result：
 

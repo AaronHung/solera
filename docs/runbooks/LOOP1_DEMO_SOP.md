@@ -15,6 +15,7 @@ Always state:
 
 For a customer-facing session, start with:
 
+- `LOOP1_DEMO_PLAYBOOK.md` for audience route and optional modules
 - `LOOP1_HANDOFF_AND_TEST.md` for installation and acceptance
 - `LOOP1_CUSTOMER_DEMO_10MIN.md` for the timed talk track
 - `LOOP1_DATA_HUB_AGENT_FLOW.md` for architecture and data operations
@@ -96,7 +97,10 @@ npm run demo:loop1:normal
 The full-screen workspace uses Shadow DOM. Closing it removes the Solera root
 and leaves the host page unchanged.
 
-## 4. Recommended eight-minute demo
+## 4. Recommended eight-minute engineering demo
+
+This is the technical causal-replay route, not an additional customer story.
+Use the ten-minute Customer or Investor runbook for the primary presentation.
 
 ### A. Normal state
 
@@ -112,7 +116,7 @@ On **Unit**:
 Choose **Jump to fault**. This resets and replays to tick 120, where cooling
 valve stiction begins.
 
-Choose `10x`, then **Start replay**, or use **Run Hero scenario** to replay
+Choose `10x`, then **Play**, or use **Run Hero scenario** to replay
 directly to tick 220.
 
 Expected causal order:
@@ -149,16 +153,20 @@ the Agent returns `safe-decline` and creates no Action draft.
 
 Open **Evidence**:
 
-- verify signal and calculation Evidence IDs
+- verify Evidence claims, source IDs, values, and units
 - show SOP-R101-04 Revision 4
 - show the P&ID, MOC, maintenance history, shift log, and similar cases
 - explain that each document/case resolves to stable Asset and Tag identity
 - show Skill trace for Alarm Triage, Process Context, Procedure & Safety,
   Case Retrieval, Asset Integrity, and Shift Handover
 
+The current UI is a summary. Inspect the API payload for calculation inputs,
+formula version, quality, timestamps, document section/URI, and retrieval
+version.
+
 ### F. Action Rail
 
-Choose **Request approval** with an engineer/operator demo token.
+Choose **Request approval** with an engineer demo token.
 
 The resulting record:
 
@@ -168,15 +176,18 @@ The resulting record:
 - does not issue, dispatch, isolate, notify, or control anything
 
 Approval does not convert the draft into an external work order in this release.
+The current Experience has no Approval Inbox or decision UI; operator,
+supervisor, or admin decision remains an API-level technical proof.
 
 ## 5. Replay controls
 
-- **Start/Pause** controls automatic synthetic ticks.
+- **Play/Pause** controls automatic synthetic ticks, not plant equipment.
 - **1x/5x/10x** means simulation ticks advanced per wall-clock second.
+- **Normal baseline** replays to the fault-free tick 60 baseline.
 - **Jump to fault** resets and replays to tick 120.
 - **Run Hero scenario** resets and replays to tick 220.
-- **Reset** removes persisted observations/alarms for the current synthetic run
-  and returns to tick 0.
+- **Reset to tick 0** removes persisted observations/alarms for the current
+  synthetic run. It is not the same as Normal baseline.
 - Escape or Close removes only the browser overlay; backend replay state remains.
 
 There is no need to clear data after five or ten minutes. The bounded equations
@@ -263,8 +274,8 @@ cannot request or decide an approval.
 ### Pulse is degraded
 
 Open Pulse and check quality counts. Missing or questionable values are an
-expected golden test condition. Reset or replay the Hero scenario to restore
-the canonical run.
+expected golden test condition. Use **Normal baseline** or
+`npm run demo:loop1:normal` to restore the canonical clean start.
 
 ### Experience is blank
 
