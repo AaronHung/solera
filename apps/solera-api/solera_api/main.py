@@ -23,6 +23,7 @@ from .api_models import (
     KnowledgeDocumentRequest,
     Loop1ApprovalDecisionRequest,
     Loop1ControlRequest,
+    Loop1InvestigationRequest,
 )
 from .auth import PrincipalDependency
 from .config import Settings, get_settings
@@ -37,7 +38,12 @@ from .productization import (
     evaluate_productization_gates,
 )
 from .rate_limit import SlidingWindowRateLimiter
-from .skills.loop1 import LOOP1_SKILLS, Loop1Investigator, Loop1ReadOnlyTools
+from .skills.loop1 import (
+    LOOP1_SKILLS,
+    Loop1Investigator,
+    Loop1ReadOnlyTools,
+    Loop1TraceEvent,
+)
 from .storage import (
     AuditRepository,
     CanvasRepository,
@@ -62,7 +68,7 @@ def _error_event(trace_id: str, code: str, message: str) -> AgentStreamEvent:
     )
 
 
-def _trace_safe_event(event: AgentStreamEvent) -> dict[str, Any]:
+def _trace_safe_event(event: AgentStreamEvent | Loop1TraceEvent) -> dict[str, Any]:
     payload = dict(event.payload)
     if event.type == "tool-result":
         payload.pop("series", None)
@@ -644,6 +650,58 @@ def create_app(
             skill.model_dump(by_alias=True, mode="json") for skill in LOOP1_SKILLS
         ]
 
+    @app.get(f"{resolved_settings.api_prefix}/loop1/cases")
+    async def loop1_cases(
+        principal: PrincipalDependency,
+    ) -> list[dict[str, object]]:
+        if app.state.loop1_engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        return [
+            {
+                "caseId": "normal",
+                "title": {"zh-TW": "正常製程基準", "en": "Normal process baseline"},
+                "description": {
+                    "zh-TW": "重播至 tick 60，驗證 Agent 不應虛構異常或產生 Action。",
+                    "en": (
+                        "Replay to tick 60 and verify that the Agent does not invent "
+                        "an abnormality or Action."
+                    ),
+                },
+                "targetTick": 60,
+                "expectedStatus": "no-abnormality",
+            },
+            {
+                "caseId": "hero",
+                "title": {"zh-TW": "FV-101 冷卻閥卡滯", "en": "FV-101 valve stiction"},
+                "description": {
+                    "zh-TW": (
+                        "重播至 tick 220，調查閥指令、位置、流量與下游熱反應。"
+                    ),
+                    "en": (
+                        "Replay to tick 220 and investigate command, position, flow, "
+                        "and downstream thermal response."
+                    ),
+                },
+                "targetTick": 220,
+                "expectedStatus": "complete",
+            },
+            {
+                "caseId": "safe-decline",
+                "title": {"zh-TW": "資料不足安全拒答", "en": "Insufficient-data decline"},
+                "description": {
+                    "zh-TW": (
+                        "重播至 tick 10，驗證歷史資料不足時不排名根因、不建立 Action。"
+                    ),
+                    "en": (
+                        "Replay to tick 10 and verify that insufficient history "
+                        "produces no ranked cause or Action."
+                    ),
+                },
+                "targetTick": 10,
+                "expectedStatus": "safe-decline",
+            },
+        ]
+
     @app.post(f"{resolved_settings.api_prefix}/loop1/investigate")
     async def loop1_investigate(
         principal: PrincipalDependency,
@@ -656,6 +714,82 @@ def create_app(
             run_id=engine.run.run_id,
         )
         return result.model_dump(by_alias=True, mode="json")
+
+    @app.post(f"{resolved_settings.api_prefix}/loop1/investigate/stream")
+    async def loop1_investigate_stream(
+        investigation_request: Loop1InvestigationRequest,
+        principal: PrincipalDependency,
+    ) -> StreamingResponse:
+        engine = app.state.loop1_engine
+        if engine is None or principal.tenant_id != "tenant-demo":
+            raise HTTPException(status_code=404, detail={"code": "LOOP1_NOT_FOUND"})
+        _require_role(principal.roles, {"admin", "engineer", "operator", "viewer"})
+        target_ticks = {"normal": 60, "hero": 220, "safe-decline": 10}
+        target_tick = target_ticks.get(investigation_request.case_id)
+        if target_tick is not None:
+            await run_loop1_replay(
+                repository=app.state.data_hub,
+                engine=engine,
+                to_tick=target_tick,
+            )
+        trace_id = f"trace-loop1-{uuid4()}"
+        await app.state.traces.start(
+            trace_id=trace_id,
+            tenant_id=principal.tenant_id,
+            actor_id=principal.actor_id,
+            question=investigation_request.objective,
+        )
+
+        async def stream_events() -> AsyncIterator[bytes]:
+            trace_events: list[dict[str, Any]] = []
+            trace_status = "completed"
+            try:
+                async for event in app.state.loop1_investigator.investigate_stream(
+                    tenant_id=principal.tenant_id,
+                    run_id=engine.run.run_id,
+                    trace_id=trace_id,
+                    case_id=investigation_request.case_id,
+                    objective=investigation_request.objective,
+                    locale=investigation_request.locale,
+                ):
+                    trace_events.append(_trace_safe_event(event))
+                    if event.type == "error":
+                        trace_status = "failed"
+                    if event.type == "tool-start":
+                        await app.state.audit.record(
+                            event_id=f"audit-{uuid4()}",
+                            tenant_id=principal.tenant_id,
+                            actor_id=principal.actor_id,
+                            action=f"loop1.tool.{event.payload.get('tool', 'unknown')}",
+                            outcome="allowed",
+                            trace_id=trace_id,
+                            resource_type="loop1-run",
+                            resource_id=engine.run.run_id,
+                            metadata={
+                                "caseId": investigation_request.case_id,
+                                "synthetic": True,
+                            },
+                        )
+                    yield (event.model_dump_json(by_alias=True) + "\n").encode()
+            except CancelledError:
+                trace_status = "cancelled"
+                raise
+            finally:
+                await app.state.traces.finish(
+                    trace_id=trace_id,
+                    status=trace_status,
+                    events=trace_events,
+                )
+
+        return StreamingResponse(
+            stream_events(),
+            media_type="application/x-ndjson",
+            headers={
+                "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff",
+                "X-Solera-Trace-Id": trace_id,
+            },
+        )
 
     @app.post(f"{resolved_settings.api_prefix}/loop1/approvals")
     async def loop1_request_approval(

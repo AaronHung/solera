@@ -34,7 +34,9 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     await expect(page.getByText("Solera", { exact: true })).toBeVisible();
     await expect(page.getByText("What should we verify?")).toBeVisible();
     await page.getByRole("button", { name: "Canvas" }).click();
-    await expect(page.getByRole("heading", { name: "LOOP-1 Agent Lab" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "LOOP-1 工業 Agent 實驗室" }),
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Open LOOP-1 Experience/ }),
     ).toBeVisible();
@@ -276,7 +278,67 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
 
     await context.route("http://localhost:8000/v1/loop1/**", async (route) => {
       const pathName = new URL(route.request().url()).pathname;
-      const payload = pathName.endsWith("/investigate")
+      if (pathName.endsWith("/investigate/stream")) {
+        const traceEvents = [
+          {
+            eventId: "browser-context",
+            traceId: "trace-browser",
+            type: "context",
+            occurredAt: "2026-01-01T00:00:20.000Z",
+            payload: { caseId: "hero", synthetic: true },
+          },
+          {
+            eventId: "browser-plan",
+            traceId: "trace-browser",
+            type: "plan",
+            occurredAt: "2026-01-01T00:00:20.010Z",
+            payload: { bounded: true },
+          },
+          {
+            eventId: "browser-tool",
+            traceId: "trace-browser",
+            type: "tool-start",
+            occurredAt: "2026-01-01T00:00:20.020Z",
+            payload: { tool: "query_signals" },
+          },
+          {
+            eventId: "browser-safety",
+            traceId: "trace-browser",
+            type: "safety",
+            occurredAt: "2026-01-01T00:00:20.030Z",
+            payload: { actionDraftAllowed: false },
+          },
+          {
+            eventId: "browser-complete",
+            traceId: "trace-browser",
+            type: "complete",
+            occurredAt: "2026-01-01T00:00:20.040Z",
+            payload: {},
+          },
+        ];
+        await route.fulfill({
+          contentType: "application/x-ndjson",
+          body: traceEvents.map((event) => JSON.stringify(event)).join("\n"),
+        });
+        return;
+      }
+      const payload = pathName.endsWith("/cases")
+        ? [
+            {
+              caseId: "hero",
+              title: {
+                "zh-TW": "FV-101 冷卻閥卡滯",
+                en: "FV-101 valve stiction",
+              },
+              description: {
+                "zh-TW": "調查冷卻閥指令、位置與製程反應。",
+                en: "Investigate valve command, position, and process response.",
+              },
+              targetTick: 220,
+              expectedStatus: "complete",
+            },
+          ]
+        : pathName.endsWith("/investigate")
         ? {
             investigationId: "inv-browser",
             runId: "run-browser",
@@ -344,22 +406,34 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     expect(loop1Launch).toEqual({ ok: true });
     const loop1Experience = hostPage.locator("#solera-experience-root");
     await expect(
-      loop1Experience.getByRole("heading", { name: "Live Unit Overview" }),
+      loop1Experience.getByRole("heading", { name: "即時單元總覽" }),
     ).toBeVisible();
     await expect(
-      loop1Experience.getByText("SYNTHETIC · READ-ONLY · NOT A SAFETY SYSTEM"),
+      loop1Experience.getByText("合成資料 · 唯讀 · 非安全系統"),
     ).toBeVisible();
     await expect(
       loop1Experience.getByRole("button", { name: /Run Hero scenario/ }),
     ).toBeVisible();
-    await loop1Experience.getByRole("button", { name: "Timeline" }).click();
+    await loop1Experience
+      .getByRole("button", { name: /Run Hero scenario/ })
+      .click();
     await expect(
-      loop1Experience.getByRole("heading", { name: "Causal Alarm Timeline" }),
+      loop1Experience.getByText("已確認 Case、run 與 synthetic context"),
     ).toBeVisible();
-    await loop1Experience.getByRole("button", { name: "Investigation" }).click();
     await expect(
-      loop1Experience.getByText("Synthetic, read-only investigation."),
+      loop1Experience.getByText("調查完成，結果與 Evidence 已封裝"),
     ).toBeVisible();
+    await loop1Experience.getByRole("button", { name: "時間軸" }).click();
+    await expect(
+      loop1Experience.getByRole("heading", { name: "因果警報時間軸" }),
+    ).toBeVisible();
+    await loop1Experience.getByRole("button", { name: "調查" }).click();
+    await expect(
+      loop1Experience.getByText(
+        "此為合成、唯讀的調查結果，不是設備控制指令或安全判定。",
+      ),
+    ).toBeVisible();
+    await expect(loop1Experience.getByText("Case Console")).toBeVisible();
     await hostPage.screenshot({
       path: path.resolve(
         "artifacts/experience-demo/solera-loop1-investigation.png",

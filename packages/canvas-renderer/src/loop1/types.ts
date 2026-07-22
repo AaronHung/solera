@@ -3,6 +3,33 @@ export interface Loop1ApiOptions {
   bearerToken: string;
 }
 
+export type Loop1Locale = "zh-TW" | "en";
+
+export interface Loop1CaseSummary {
+  caseId: "normal" | "hero" | "safe-decline";
+  title: Record<Loop1Locale, string>;
+  description: Record<Loop1Locale, string>;
+  targetTick: number;
+  expectedStatus: Loop1Investigation["status"];
+}
+
+export interface Loop1TraceEvent {
+  eventId: string;
+  traceId: string;
+  type:
+    | "context"
+    | "plan"
+    | "tool-start"
+    | "tool-result"
+    | "evidence"
+    | "hypothesis"
+    | "safety"
+    | "complete"
+    | "error";
+  occurredAt: string;
+  payload: Record<string, unknown>;
+}
+
 export interface Loop1Snapshot {
   synthetic: true;
   run: {
@@ -118,5 +145,6 @@ export interface Loop1Investigation {
 export type Loop1Page = "unit" | "timeline" | "investigation" | "evidence";
 
 export interface Loop1ExperienceProps extends Loop1ApiOptions {
+  locale?: Loop1Locale;
   onClose?: () => void;
 }

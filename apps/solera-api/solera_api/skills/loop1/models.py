@@ -47,6 +47,24 @@ class Loop1SkillTrace(ContractModel):
     tool_calls: list[str] = Field(default_factory=list)
 
 
+class Loop1TraceEvent(ContractModel):
+    event_id: str
+    trace_id: str
+    type: Literal[
+        "context",
+        "plan",
+        "tool-start",
+        "tool-result",
+        "evidence",
+        "hypothesis",
+        "safety",
+        "complete",
+        "error",
+    ]
+    occurred_at: datetime
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
 class Loop1ActionDraft(ContractModel):
     action_type: Literal["draft-inspection-work-order", "draft-shift-handover"]
     title: str

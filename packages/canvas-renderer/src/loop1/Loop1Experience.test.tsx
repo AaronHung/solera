@@ -147,11 +147,28 @@ const investigation = {
   safetyNotice: "Synthetic, read-only investigation.",
 };
 
+const cases = [
+  {
+    caseId: "hero",
+    title: { "zh-TW": "FV-101 冷卻閥卡滯", en: "FV-101 valve stiction" },
+    description: {
+      "zh-TW": "調查冷卻閥異常。",
+      en: "Investigate the cooling-valve anomaly.",
+    },
+    targetTick: 220,
+    expectedStatus: "complete",
+  },
+];
+
 describe("Loop1Experience", () => {
-  it("renders one backend truth across Unit, Timeline, Investigation, and Evidence", async () => {
+  it("defaults to zh-TW, preserves engineering IDs, and toggles English", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = String(input);
-      const payload = url.endsWith("/investigate") ? investigation : snapshot;
+      const payload = url.endsWith("/investigate")
+        ? investigation
+        : url.endsWith("/cases")
+          ? cases
+          : snapshot;
       return new Response(JSON.stringify(payload), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -167,25 +184,104 @@ describe("Loop1Experience", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByRole("heading", { name: "Live Unit Overview" }),
+        screen.getByRole("heading", { name: "即時單元總覽" }),
       ).toBeTruthy(),
     );
     expect(screen.getByText("15.00 pp")).toBeTruthy();
-    expect(screen.getByText("SYNTHETIC · READ-ONLY · NOT A SAFETY SYSTEM")).toBeTruthy();
+    expect(screen.getByText("合成資料 · 唯讀 · 非安全系統")).toBeTruthy();
+    expect(screen.getByText("冷卻閥指令")).toBeTruthy();
+    expect(screen.getByText("cooling-valve-command")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Timeline" }));
+    fireEvent.click(screen.getByRole("button", { name: "時間軸" }));
     expect(
-      screen.getByRole("heading", { name: "Causal Alarm Timeline" }),
+      screen.getByRole("heading", { name: "因果警報時間軸" }),
     ).toBeTruthy();
-    expect(screen.getByText("FV-101 position deviation")).toBeTruthy();
+    expect(screen.getByText("冷卻閥實際位置異常警報")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Investigation" }));
-    expect(screen.getByText("FV-101 cooling-water valve stiction")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "調查" }));
+    expect(screen.getByText("選擇可重播案例")).toBeTruthy();
+    expect(screen.getByText("FV-101 冷卻水控制閥卡滯")).toBeTruthy();
     expect(screen.getByText("94%")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Evidence" }));
-    expect(screen.getByText("SOP-R101-04 Revision 4")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "證據" }));
+    expect(
+      screen.getByText("SOP-R101-04 反應器冷卻偏差程序（Revision 4）"),
+    ).toBeTruthy();
     expect(screen.getByText("loop1-alarm-triage")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Request approval/ })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "中文 / EN" }));
+    expect(screen.getByRole("heading", { name: "Evidence & Case Thread" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Unit" })).toBeTruthy();
+  });
+
+  it("renders real NDJSON Agent events in the Case Console", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/investigate/stream")) {
+        const events = [
+          {
+            eventId: "event-context",
+            traceId: "trace-1",
+            type: "context",
+            occurredAt: "2026-01-01T00:00:00.000Z",
+            payload: { caseId: "hero", synthetic: true },
+          },
+          {
+            eventId: "event-plan",
+            traceId: "trace-1",
+            type: "plan",
+            occurredAt: "2026-01-01T00:00:00.010Z",
+            payload: { bounded: true },
+          },
+          {
+            eventId: "event-tool",
+            traceId: "trace-1",
+            type: "tool-start",
+            occurredAt: "2026-01-01T00:00:00.020Z",
+            payload: { tool: "query_signals" },
+          },
+          {
+            eventId: "event-complete",
+            traceId: "trace-1",
+            type: "complete",
+            occurredAt: "2026-01-01T00:00:00.030Z",
+            payload: { result: investigation },
+          },
+        ];
+        return new Response(events.map((event) => JSON.stringify(event)).join("\n"), {
+          status: 200,
+          headers: { "Content-Type": "application/x-ndjson" },
+        });
+      }
+      const payload = url.endsWith("/investigate")
+        ? investigation
+        : url.endsWith("/cases")
+          ? cases
+          : snapshot;
+      return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+
+    render(
+      <Loop1Experience
+        apiBaseUrl="http://localhost:8000"
+        bearerToken="dev:tenant-demo:test:viewer"
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "調查" })).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "調查" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start Investigation" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("已確認 Case、run 與 synthetic context")).toBeTruthy(),
+    );
+    expect(screen.getByText("Bounded Agent Plan 已建立")).toBeTruthy();
+    expect(screen.getByText("開始：查詢關鍵訊號")).toBeTruthy();
+    expect(screen.getByText("調查完成，結果與 Evidence 已封裝")).toBeTruthy();
   });
 });

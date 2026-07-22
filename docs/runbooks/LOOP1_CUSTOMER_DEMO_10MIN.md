@@ -67,21 +67,29 @@ Talk track：
 
 客戶應看到：
 
-- `SYNTHETIC · READ-ONLY · NOT A SAFETY SYSTEM`
+- `合成資料 · 唯讀 · 非安全系統`
 - Pulse `healthy`
+- Asset／Tag 以繁體中文說明並保留原始工程 ID
 - 正常 command-position mismatch 約在小範圍
 - 目前沒有 alarm flood
 
-## 2:00–3:00｜注入 Hero fault
+## 2:00–3:00｜選擇 Case 與預覽 Plan
 
 操作：
 
-1. 點 **Jump to fault**，到 tick 120。
-2. 點 `10x` 並開始 replay；或直接點 **Run Hero scenario** 到 tick 220。
+1. 打開 **Investigation**，指出 Case Console 與調查目標。
+2. 選擇 `FV-101 冷卻閥卡滯`，說明五步 Bounded Plan。
+3. 點右側 **Run Hero scenario**；它會重播至 tick 220 並立即顯示 live trace。
 
 Talk track：
 
-> 現在注入 cooling-water valve stiction。Controller command 先上升，但 independent valve position 沒有跟上；接著 cooling-water flow 降低，之後 reactor temperature、pressure、separator 與 product-quality proxy 依 causal delay 偏移。所有事件由同一個 seed 與 simulation clock 產生，可以 byte-for-byte replay。
+> 這不是預先錄好的動畫。Case Console 先顯示 bounded plan；啟動後，backend 依實際執行順序串流 context validation、tool start/result、Evidence、hypothesis ranking 與 safety boundary。Hero case 注入 cooling-water valve stiction：Controller command 先上升，但 independent valve position 沒有跟上；接著 cooling-water flow 降低，之後才出現 reactor 與下游偏移。
+
+客戶應看到：
+
+- `query_signals`、`cluster_alarms`、文件與案例查詢的實際 trace。
+- 每個 trace event 有 timestamp 與 trace ID。
+- 這是 audit-friendly execution trace，不是私密 chain-of-thought。
 
 不要說：
 
@@ -115,13 +123,13 @@ Talk track：
 
 操作：
 
-1. 點 **Investigate**。
-2. 打開 **Investigation**。
-3. 展示 Top-3 hypotheses。
+1. 回到 **Investigation**。
+2. 由上往下指出 Case、調查目標、Bounded Plan 與已完成的 live trace。
+3. 展示 Top-3 hypotheses；需要時可改選 normal 或 safe-decline 再執行。
 
 Talk track：
 
-> Agent 不是自由猜測。Alarm Triage、Process Context、Procedure & Safety、Case Retrieval、Asset Integrity、Shift Handover 六個 bounded Skills，透過 read-only tools 取得結構化事實。Top-1 是 FV-101 valve stiction；position feedback bias 與 common cooling-water disturbance 仍保留為 alternatives。
+> Agent 不是自由猜測，也不是只顯示最後答案。畫面中的 Plan 與 execution trace 對應 backend 的實際 read-only tools。Alarm Triage、Process Context、Procedure & Safety、Case Retrieval、Asset Integrity、Shift Handover 六個 bounded Skills 取得結構化事實。Top-1 是 FV-101 valve stiction；position feedback bias 與 common cooling-water disturbance 仍保留為 alternatives。
 
 指出：
 

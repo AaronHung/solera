@@ -1,11 +1,12 @@
 # Solera Project State
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 Contracts: `docs/contracts/SOLERA_V0_1.md` v0.1.0 and
 `docs/contracts/SOLERA_LOOP1_V0_1.md` v0.1.0-preview
 Current gate: v0.1, Experience Demo, and the LOOP-1 synthetic Agent core are
 implemented on `main`; external Pilot and optional productization acceptance
-remain pending
+remain pending. The zh-TW Case Console and live trace upgrade is isolated on
+`feature/loop1-zh-tw-agent-console` pending stakeholder review.
 
 ## Verified
 
@@ -72,6 +73,13 @@ remain pending
   for Unit, Timeline, Investigation, Evidence, replay controls, Pulse, and
   Action Rail. The existing browser-local portfolio Experience remains a
   separate concept.
+- The feature branch `feature/loop1-zh-tw-agent-console` defaults LOOP-1 to
+  Traditional Chinese with an English toggle, keeps original engineering IDs,
+  and adds three bounded replay cases. A real NDJSON investigation stream
+  exposes context, deterministic plan, tool boundaries, Evidence, hypotheses,
+  safety boundary, and completion events; traces are persisted for replay.
+  The objective input is audit context, not a free-form scenario generator,
+  and the UI does not expose private model chain-of-thought.
 - The versioned golden dataset contains 40 cases. The full offline run passed
   40/40: replay determinism 1.0, Top-3 truth 1.0, safe-decline accuracy 1.0,
   document retrieval 1.0, Evidence completeness 1.0, unsupported-claim rate
@@ -80,7 +88,7 @@ remain pending
   Agent Flow operations, value-validation method, acceptance checklist, live
   normal/Hero/reset preflight commands, and a secret-excluding source/extension
   package with SHA-256 checksum.
-- Final local verification: 46 Python tests and 25 TypeScript tests pass;
+- Final local verification: 51 Python tests and 26 TypeScript tests pass;
   TypeScript builds/typechecks and Ruff pass. The Brave MV3 E2E and
   managed-package contract both pass, including
   Experience launch, role/page/Create interactions, Escape cleanup, host
@@ -106,6 +114,9 @@ remain pending
   support is configured locally, while live SCADA, PI Vision, deployment,
   visual stakeholder review, and Pilot acceptance evidence are still being
   closed.
+- The zh-TW Case Console/live trace feature branch has passed local unit,
+  integration, build, typecheck, Ruff, and Brave MV3 E2E checks; visual
+  stakeholder acceptance and merge to `main` remain pending.
 - External environment onboarding and the 5–10 user Pilot remain product
   acceptance work, not code that can be truthfully simulated locally.
 

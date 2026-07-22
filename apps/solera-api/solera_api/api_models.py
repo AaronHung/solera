@@ -39,6 +39,19 @@ class Loop1ControlRequest(ApiModel):
     to_tick: int | None = Field(default=None, alias="toTick", ge=1, le=3_600)
 
 
+class Loop1InvestigationRequest(ApiModel):
+    case_id: Literal["current", "normal", "hero", "safe-decline"] = Field(
+        default="current",
+        alias="caseId",
+    )
+    objective: str = Field(
+        default="調查目前製程狀態、主要異常、根因假設與可追溯 Evidence。",
+        min_length=1,
+        max_length=1000,
+    )
+    locale: Literal["zh-TW", "en"] = "zh-TW"
+
+
 class Loop1ApprovalDecisionRequest(ApiModel):
     decision: Literal["approved", "rejected"]
     rationale: str | None = Field(default=None, max_length=2000)

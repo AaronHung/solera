@@ -1310,7 +1310,7 @@ export function App() {
       {tab === "canvas" && (
         <main className="detail-panel">
           <p className="eyebrow">SOLERA EXPERIENCE LAB</p>
-          <h2>LOOP-1 Agent Lab</h2>
+          <h2>LOOP-1 工業 Agent 實驗室</h2>
           <article className="experience-launcher">
             <div className="experience-preview" aria-hidden="true">
               <i />
@@ -1319,9 +1319,8 @@ export function App() {
               <strong>L1</strong>
             </div>
             <p>
-              Run the deterministic reactor-cooling Hero scenario with shared
-              backend telemetry, alarm timeline, Agent hypotheses, Evidence,
-              cases and approval-gated drafts.
+              啟動可重播的反應器冷卻 Case Console；查看 Agent Plan、實際 tool
+              執行、根因假設、Evidence、反證，以及需要人工核准的 Action 草稿。
             </p>
             <button
               className="experience-open"
@@ -1330,7 +1329,7 @@ export function App() {
                   setError(
                     loop1Error instanceof Error
                       ? loop1Error.message
-                      : "LOOP-1 Experience failed",
+                      : "LOOP-1 Experience 啟動失敗",
                   ),
                 )
               }
@@ -1339,7 +1338,7 @@ export function App() {
               <span>↗</span>
             </button>
             <small>
-              SYNTHETIC · READ-ONLY · REPLAYABLE · Press Esc to close
+              合成資料 · 唯讀 · 可重播 · 按 Esc 關閉
             </small>
           </article>
 

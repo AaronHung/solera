@@ -145,6 +145,72 @@ def test_loop1_preflight_rejects_unapproved_origins() -> None:
     assert response.status_code == 400
 
 
+def test_loop1_case_catalog_is_bounded_and_localized() -> None:
+    auth = {"Authorization": "Bearer dev:tenant-demo:user-1:viewer"}
+    with make_client() as client:
+        response = client.get("/v1/loop1/cases", headers=auth)
+
+    assert response.status_code == 200
+    cases = response.json()
+    assert [case["caseId"] for case in cases] == ["normal", "hero", "safe-decline"]
+    assert cases[1]["title"]["zh-TW"] == "FV-101 冷卻閥卡滯"
+
+
+def test_loop1_hero_stream_exposes_auditable_steps_and_trace_replay() -> None:
+    auth = {"Authorization": "Bearer dev:tenant-demo:user-1:viewer"}
+    with make_client() as client:
+        with client.stream(
+            "POST",
+            "/v1/loop1/investigate/stream",
+            headers=auth,
+            json={
+                "caseId": "hero",
+                "objective": "調查反應器冷卻偏差與主要根因。",
+                "locale": "zh-TW",
+            },
+        ) as response:
+            events = parse_events(response)
+            trace_id = response.headers["x-solera-trace-id"]
+        replay = client.get(f"/v1/traces/{trace_id}", headers=auth)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/x-ndjson")
+    event_types = [event["type"] for event in events]
+    assert event_types[:2] == ["context", "plan"]
+    assert "tool-start" in event_types
+    assert "tool-result" in event_types
+    assert "evidence" in event_types
+    assert event_types.count("hypothesis") == 3
+    assert event_types[-2:] == ["safety", "complete"]
+    assert events[-1]["payload"]["result"]["status"] == "complete"
+    assert replay.status_code == 200
+    assert replay.json()["status"] == "completed"
+    assert replay.json()["question"] == "調查反應器冷卻偏差與主要根因。"
+
+
+def test_loop1_safe_decline_stream_has_no_action_draft() -> None:
+    auth = {"Authorization": "Bearer dev:tenant-demo:user-1:viewer"}
+    with make_client() as client:
+        with client.stream(
+            "POST",
+            "/v1/loop1/investigate/stream",
+            headers=auth,
+            json={
+                "caseId": "safe-decline",
+                "objective": "驗證資料不足時 Agent 是否安全拒答。",
+                "locale": "zh-TW",
+            },
+        ) as response:
+            events = parse_events(response)
+
+    assert response.status_code == 200
+    complete = events[-1]
+    assert complete["type"] == "complete"
+    assert complete["payload"]["result"]["status"] == "safe-decline"
+    assert complete["payload"]["result"]["actionDraft"] is None
+    assert [event for event in events if event["type"] == "hypothesis"] == []
+
+
 def test_compare_stream_contains_deterministic_analysis_and_evidence() -> None:
     with make_client() as client:
         with client.stream(
