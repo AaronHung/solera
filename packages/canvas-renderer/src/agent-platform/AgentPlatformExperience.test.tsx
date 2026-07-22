@@ -19,7 +19,7 @@ describe("AgentPlatformExperience", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "一個可信平台，長出多種工業 Agent" }),
+      screen.getByRole("heading", { name: "一個可信平台，快速建置多種工業 Agent" }),
     ).toBeTruthy();
     expect(
       screen.getByRole("button", {
@@ -66,7 +66,10 @@ describe("AgentPlatformExperience", () => {
     );
 
     await waitFor(
-      () => expect(screen.getByText("後燃風險正在形成")).toBeTruthy(),
+      () =>
+        expect(
+          screen.getByText("後燃風險指標高於 synthetic dynamic envelope"),
+        ).toBeTruthy(),
       { timeout: 4_000 },
     );
     expect(screen.getAllByText("82%")).toHaveLength(2);
@@ -75,7 +78,7 @@ describe("AgentPlatformExperience", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Back to Gallery" }));
     expect(
-      screen.getByRole("heading", { name: "一個可信平台，長出多種工業 Agent" }),
+      screen.getByRole("heading", { name: "一個可信平台，快速建置多種工業 Agent" }),
     ).toBeTruthy();
   });
 
@@ -128,16 +131,16 @@ describe("AgentPlatformExperience", () => {
     );
     expect(
       screen.getByRole("heading", {
-        name: "從新品導入到熱處理品質，跨越兩種製造決策",
+        name: "從新品導入到熱處理品質，跨越多種製造決策",
       }),
     ).toBeTruthy();
     const fastenCard = screen
-      .getByRole("heading", { name: "從客戶詢價圖面到首件良品" })
+      .getByRole("heading", { name: "RFQ 至首件品質工程流程" })
       .closest("article");
     expect(fastenCard?.classList.contains("accent-steel")).toBe(true);
     fireEvent.click(
       within(fastenCard as HTMLElement).getByRole("button", {
-        name: /Open Workflow Story/,
+        name: /^Open Workflow$/,
       }),
     );
     expect(container.querySelector(".fasten-shell")).toBeTruthy();
@@ -186,9 +189,9 @@ describe("AgentPlatformExperience", () => {
     await waitFor(() => expect(screen.getByText("CONDITIONAL PASS")).toBeTruthy());
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Complete FASTEN-1 Story" }),
+      screen.getByRole("button", { name: "Complete FASTEN-1 Workflow" }),
     );
-    expect(screen.getByText("FASTEN-1 STORY COMPLETE")).toBeTruthy();
+    expect(screen.getByText("FASTEN-1 WORKFLOW COMPLETE")).toBeTruthy();
   }, 12_000);
 
   it("presents HEAT-1 as a copper six-stage batch-to-release workflow", async () => {
@@ -203,12 +206,12 @@ describe("AgentPlatformExperience", () => {
       screen.getByRole("button", { name: /Precision Manufacturing/ }),
     );
     const heatCard = screen
-      .getByRole("heading", { name: "從熱處理批次到可核准放行" })
+      .getByRole("heading", { name: "熱處理批次品質與放行流程" })
       .closest("article");
     expect(heatCard?.classList.contains("accent-copper")).toBe(true);
     fireEvent.click(
       within(heatCard as HTMLElement).getByRole("button", {
-        name: /Open Workflow Story/,
+        name: /^Open Workflow$/,
       }),
     );
     expect(container.querySelector(".heat-shell")).toBeTruthy();
@@ -236,7 +239,9 @@ describe("AgentPlatformExperience", () => {
       screen.getByRole("button", { name: "Estimate Quality Distribution" }),
     );
     await waitFor(() =>
-      expect(screen.getByText("T6 edge tray requires HOLD candidate")).toBeTruthy(),
+      expect(
+        screen.getByText("T6 edge tray classified as HOLD candidate"),
+      ).toBeTruthy(),
     );
 
     fireEvent.click(
@@ -261,8 +266,8 @@ describe("AgentPlatformExperience", () => {
     expect(screen.getByText("PARTIAL HOLD")).toBeTruthy();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Complete HEAT-1 Story" }),
+      screen.getByRole("button", { name: "Complete HEAT-1 Workflow" }),
     );
-    expect(screen.getByText("HEAT-1 STORY COMPLETE")).toBeTruthy();
+    expect(screen.getByText("HEAT-1 WORKFLOW COMPLETE")).toBeTruthy();
   }, 12_000);
 });

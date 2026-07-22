@@ -407,7 +407,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     const loop1Experience = hostPage.locator("#solera-experience-root");
     await expect(
       loop1Experience.getByRole("heading", {
-        name: "一個可信平台，長出多種工業 Agent",
+        name: "一個可信平台，快速建置多種工業 Agent",
       }),
     ).toBeVisible();
     await hostPage.screenshot({
@@ -425,7 +425,9 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
     await loop1Experience
       .getByRole("button", { name: "Run Afterburn Analysis" })
       .click();
-    await expect(loop1Experience.getByText("後燃風險正在形成")).toBeVisible();
+    await expect(
+      loop1Experience.getByText("後燃風險指標高於 synthetic dynamic envelope"),
+    ).toBeVisible();
     await hostPage.screenshot({
       path: path.resolve(
         "artifacts/experience-demo/solera-loop2-afterburn-concept-1440x900.png",
@@ -437,7 +439,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       .click();
     await expect(
       loop1Experience.getByRole("heading", {
-        name: "從新品導入到熱處理品質，跨越兩種製造決策",
+        name: "從新品導入到熱處理品質，跨越多種製造決策",
       }),
     ).toBeVisible();
     await hostPage.screenshot({
@@ -449,10 +451,10 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       hasText: "FASTEN-1",
     });
     await expect(fastenCard).toHaveClass(/accent-steel/);
-    await fastenCard.getByRole("button", { name: /Open Workflow Story/ }).click();
+    await fastenCard.getByRole("button", { name: /^Open Workflow$/ }).click();
     await expect(
       loop1Experience.getByRole("heading", {
-        name: "一封詢價信，啟動跨系統 Engineering Workflow",
+        name: "建立 RFQ、交付需求與文件版本基準",
       }),
     ).toBeVisible();
     await loop1Experience
@@ -519,9 +521,11 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       ),
     });
     await loop1Experience
-      .getByRole("button", { name: "Complete FASTEN-1 Story" })
+      .getByRole("button", { name: "Complete FASTEN-1 Workflow" })
       .click();
-    await expect(loop1Experience.getByText("FASTEN-1 STORY COMPLETE")).toBeVisible();
+    await expect(
+      loop1Experience.getByText("FASTEN-1 WORKFLOW COMPLETE"),
+    ).toBeVisible();
     await loop1Experience
       .getByRole("button", { name: "Precision Gallery", exact: true })
       .click();
@@ -529,10 +533,10 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       hasText: "HEAT-1",
     });
     await expect(heatCard).toHaveClass(/accent-copper/);
-    await heatCard.getByRole("button", { name: /Open Workflow Story/ }).click();
+    await heatCard.getByRole("button", { name: /^Open Workflow$/ }).click();
     await expect(
       loop1Experience.getByRole("heading", {
-        name: "在爐門關上之前，先知道這一批「是誰、要變成什麼」",
+        name: "建立批次識別、製程條件與品質規格基準",
       }),
     ).toBeVisible();
     await loop1Experience
@@ -569,7 +573,7 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       .getByRole("button", { name: "Estimate Quality Distribution" })
       .click();
     await expect(
-      loop1Experience.getByText("T6 edge tray requires HOLD candidate"),
+      loop1Experience.getByText("T6 edge tray classified as HOLD candidate"),
     ).toBeVisible();
     await hostPage.screenshot({
       path: path.resolve(
@@ -605,9 +609,11 @@ test("Chromium loads the Sidecar and Experience Demo", async ({}, testInfo) => {
       ),
     });
     await loop1Experience
-      .getByRole("button", { name: "Complete HEAT-1 Story" })
+      .getByRole("button", { name: "Complete HEAT-1 Workflow" })
       .click();
-    await expect(loop1Experience.getByText("HEAT-1 STORY COMPLETE")).toBeVisible();
+    await expect(
+      loop1Experience.getByText("HEAT-1 WORKFLOW COMPLETE"),
+    ).toBeVisible();
     await loop1Experience
       .getByRole("button", { name: "Precision Gallery", exact: true })
       .click();

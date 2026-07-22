@@ -123,7 +123,7 @@ function AgentCard({
         <span>{agent.archetype}</span>
         <button onClick={() => onOpen(agent.id)}>
           {agent.id === "fasten1" || agent.id === "heat1"
-            ? "Open Workflow Story"
+            ? "Open Workflow"
             : agent.maturity === "live"
               ? "Open Live Agent"
               : "Explore Concept"}
@@ -179,20 +179,20 @@ function AgentGallery({
             </span>
             <h1>
               {precision
-                ? "從新品導入到熱處理品質，跨越兩種製造決策"
-                : "一個可信平台，長出多種工業 Agent"}
+                ? "從新品導入到熱處理品質，跨越多種製造決策"
+                : "一個可信平台，快速建置多種工業 Agent"}
             </h1>
             <p>
               {precision
-                ? "FASTEN-1 串起 RFQ-to-First-Good-Part；HEAT-1 串起 Batch-to-Release Quality。兩者共用 Product Thread、Evidence 與 Human Gates，但保留完全不同的工程故事。"
-                : "LOOP-1 證明 Evidence-first investigation；LOOP-2～4 展示同一套 Data Hub、Thread、policy 與 evaluation 如何承載 dynamic risk、lifecycle prediction 與 Soft Sensor。"}
+                ? "FASTEN-1 支援 RFQ-to-First-Good-Part；HEAT-1 支援 Batch-to-Release Quality。兩者共用 Product Thread、Evidence 與 Human Gates，並維持各自的流程與模型邊界。"
+                : "LOOP-1 提供 Evidence-first investigation；LOOP-2～4 示範 dynamic risk、lifecycle prediction 與 Soft Sensor Agent 在共用 Data Hub、Thread、policy 及 evaluation 契約下的建置方式。"}
             </p>
           </div>
           <aside>
             {precision ? (
               <>
                 <strong>2 WORKFLOWS</strong>
-                <span>distinct Agent stories</span>
+                <span>governed Agent workflows</span>
                 <strong>12 STAGES</strong>
                 <span>engineering → quality</span>
               </>
@@ -248,7 +248,7 @@ function AgentGallery({
                 <Route />
                 <div>
                   <small>AGENTIC WORKFLOW PORTFOLIO</small>
-                  <h2>兩種製造決策：新品導入與熱處理品質放行</h2>
+                  <h2>製造決策工作流：新品導入與熱處理品質放行</h2>
                 </div>
               </header>
               <div className="precision-workflow-tracks">
@@ -438,7 +438,7 @@ function ResultWorkspace({
         <p>
           {complete
             ? scenario.summary
-            : "按 Run Concept 後，畫面會依序顯示 bounded trace、結果、Evidence 與 Action draft。"}
+            : "執行 Concept Agent 後，系統依序顯示 bounded trace、分析結果、Evidence 與 Action draft。"}
         </p>
       </article>
 

@@ -88,8 +88,8 @@ export const AGENTS: AgentDefinition[] = [
     maturity: "live",
     accent: "cyan",
     description:
-      "把 valve command、independent position、cooling flow、alarms、SOP 與歷史案例組成可重播調查。",
-    outcome: "18 個 alarms → 一個可 review 的 Evidence package",
+      "整合 valve command、independent position、cooling flow、alarms、SOP 與歷史案例，建立可重播的冷卻偏差調查。",
+    outcome: "將 18 個 alarms 整理為可 review 的 Evidence package",
     sharedCapabilities: ["Pulse", "Thread", "Read-only Tools", "Evidence", "Approval"],
     preview: [42, 43, 41, 45, 49, 58, 67, 76, 79, 82],
   },
@@ -105,7 +105,7 @@ export const AGENTS: AgentDefinition[] = [
     accent: "amber",
     description:
       "融合 dense/dilute phase 溫度、O₂、CO/CO₂、air distribution 與 catalyst circulation，動態估算 afterburn risk。",
-    outcome: "固定高溫警報 → 會隨製程條件移動的風險邊界",
+    outcome: "依製程條件計算 dynamic risk envelope，補充固定溫度警報",
     sharedCapabilities: ["Pulse", "Soft Sensor", "Dynamic Envelope", "Evidence", "Policy"],
     preview: [28, 31, 34, 40, 48, 59, 72, 85, 91, 88],
     scenario: {
@@ -113,7 +113,7 @@ export const AGENTS: AgentDefinition[] = [
       scenarioDescription:
         "Spent catalyst coke load 上升後，稀相 CO oxidation 加速；dense bed 尚未越過固定限制，但 cyclone temperature 已偏離動態 envelope。",
       runLabel: "Run Afterburn Analysis",
-      verdict: "後燃風險正在形成",
+      verdict: "後燃風險指標高於 synthetic dynamic envelope",
       summary:
         "稀相與 dense bed 的溫差持續擴大，CO 降低但 CO₂ 與 cyclone temperature 同步上升。最符合稀相持續氧化，不宜只用單一 700°C 門檻判定。",
       confidenceLabel: "Bounded risk score",
@@ -224,7 +224,7 @@ export const AGENTS: AgentDefinition[] = [
     accent: "violet",
     description:
       "正規化 feed severity、H₂ partial pressure、LHSV、WABT、ΔP 與 product lab，追蹤 catalyst deactivation。",
-    outcome: "零散 trend → 可解釋的 activity index 與 run-length range",
+    outcome: "建立可解釋的 activity index 與 run-length range",
     sharedCapabilities: ["Lab Fusion", "Lifecycle Model", "Scenario Compare", "Evidence", "Planning"],
     preview: [96, 94, 91, 89, 86, 83, 80, 77, 74, 71],
     scenario: {
@@ -343,17 +343,17 @@ export const AGENTS: AgentDefinition[] = [
     accent: "green",
     description:
       "融合 pH、ORP、DO、UV254、turbidity、flow、dosing 與 delayed lab results，估算即時 effluent quality。",
-    outcome: "數小時後的 lab result → 即時估算、uncertainty 與採樣優先序",
+    outcome: "在 lab result 完成前提供有 uncertainty 的估算與採樣優先序",
     sharedCapabilities: ["Sensor Fusion", "Lab Reconciliation", "Drift Monitor", "Evidence", "Compliance"],
     preview: [38, 40, 42, 45, 51, 58, 66, 74, 79, 83],
     scenario: {
       scenarioLabel: "Ammonia/COD breakthrough risk",
       scenarioDescription:
-        "Upstream sour-water load 上升，ORP 與 DO response 落後；official lab 尚需數小時，Agent 先產生有 uncertainty 的 quality estimate。",
+        "Upstream sour-water load 上升，ORP 與 DO response 落後；在 official lab 完成前，Agent 產生有 uncertainty 的 quality estimate。",
       runLabel: "Run Water Quality Estimate",
       verdict: "Effluent excursion risk 高於 synthetic site envelope",
       summary:
-        "UV254、conductivity 與 upstream load 同步上升，DO recovery 變慢。Soft Sensor 預估 COD 接近 synthetic site limit；需優先採樣確認，不能把估算值當成 official lab result。",
+        "UV254、conductivity 與 upstream load 同步上升，DO recovery 變慢。Soft Sensor 預估 COD 接近 synthetic site limit；需優先採樣確認，估算值不得視為 official lab result。",
       confidenceLabel: "Estimate confidence",
       confidence: 79,
       metrics: [
@@ -454,15 +454,15 @@ export const AGENTS: AgentDefinition[] = [
     id: "fasten1",
     portfolio: "precision",
     code: "FASTEN-1",
-    title: "從客戶詢價圖面到首件良品",
+    title: "RFQ 至首件品質工程流程",
     shortTitle: "RFQ-to-First-Good-Part",
     domain: "Precision Manufacturing / 精密加工 · Fasteners",
     archetype: "Engineering Workflow Agent",
     maturity: "concept",
     accent: "steel",
     description:
-      "串起 Email、工程圖、歷史產品、ERP、機台能力、模具、Edge signals 與首件量測，協助工程師判斷能不能做、怎麼做與風險在哪裡。",
-    outcome: "一張新圖面 → 一條有來源、有人核准的首件良品路徑",
+      "整合 Email、工程圖、歷史產品、ERP、機台能力、模具、Edge signals 與首件量測，支援 manufacturability、製程規劃與風險審查。",
+    outcome: "建立具來源與核准紀錄的 First-Good-Part workflow",
     sharedCapabilities: [
       "Document Intake",
       "Drawing Parser",
@@ -477,15 +477,15 @@ export const AGENTS: AgentDefinition[] = [
     id: "heat1",
     portfolio: "precision",
     code: "HEAT-1",
-    title: "從熱處理批次到可核准放行",
+    title: "熱處理批次品質與放行流程",
     shortTitle: "Batch-to-Release Quality",
     domain: "Metals / 金屬熱處理 · Batch Quality",
     archetype: "Quality Soft Sensor Workflow",
     maturity: "concept",
     accent: "copper",
     description:
-      "連結零件規格、材料批次、裝載位置、爐程、碳勢、淬火、延遲 lab 與量測結果，提前估算 case depth、hardness 與 distortion risk。",
-    outcome: "延遲／破壞性檢驗 → 提前分層風險、精準採樣與放行草稿",
+      "整合零件規格、材料批次、裝載位置、爐程、碳勢、淬火、延遲 lab 與量測結果，建立 case depth、hardness 與 distortion risk 估算。",
+    outcome: "提供 tray-level risk、採樣優先序與 release／hold 草稿",
     sharedCapabilities: [
       "Batch Passport",
       "Recipe Context",

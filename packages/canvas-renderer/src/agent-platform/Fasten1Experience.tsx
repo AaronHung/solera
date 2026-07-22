@@ -67,10 +67,10 @@ function IntakeStage() {
       <header className="fasten-stage-hero">
         <div>
           <span>STAGE 01 · CUSTOMER INTAKE</span>
-          <h1>一封詢價信，啟動跨系統 Engineering Workflow</h1>
+          <h1>建立 RFQ、交付需求與文件版本基準</h1>
           <p>
-            不讓 LLM 直接「看信後猜報價」。Email Connector、Document Intake
-            與版本控制先建立可追蹤的 RFQ context。
+            Email Connector、Document Intake 與版本控制建立可追蹤的 RFQ
+            context；系統不由 LLM 直接產生報價或交付承諾。
           </p>
         </div>
         <aside>
@@ -231,8 +231,8 @@ function DrawingStage({ revealed }: StageViewProps) {
       <header className="fasten-stage-hero compact">
         <div>
           <span>STAGE 02 · DRAWING INTELLIGENCE</span>
-          <h1>圖面不是交給 LLM 猜，而是多路解析後交叉驗證</h1>
-          <p>Vector parser、OCR、區域切割與 multimodal understanding 共同產生 Canonical Product Specification。</p>
+          <h1>解析並驗證工程圖面規格</h1>
+          <p>Vector parser、OCR、區域切割與 multimodal understanding 交叉驗證，產生 Canonical Product Specification。</p>
         </div>
         <aside><small>PARSER STATUS</small><strong>{revealed ? "8 fields mapped" : "Ready to scan"}</strong><span>Revision C locked</span></aside>
       </header>
@@ -272,8 +272,8 @@ function CasesStage({ revealed }: StageViewProps) {
       <header className="fasten-stage-hero compact">
         <div>
           <span>STAGE 03 · PRODUCT CASE STORE</span>
-          <h1>不是只找「長得像」，而是解釋哪裡相同、哪裡不同</h1>
-          <p>Hard filters → semantic retrieval → engineering-weighted ranking；每個 Product ID 與品質結果都可追查。</p>
+          <h1>依工程條件檢索並比較歷史產品案例</h1>
+          <p>依序執行 hard filters、semantic retrieval 與 engineering-weighted ranking；每個 Product ID 與品質結果均可追查。</p>
         </div>
         <aside><small>SEARCH SCOPE</small><strong>{revealed ? "142 products" : "Case store ready"}</strong><span>Fastener family · 5 years</span></aside>
       </header>
@@ -309,7 +309,7 @@ function PlanningStage({ revealed }: StageViewProps) {
       <header className="fasten-stage-hero compact">
         <div>
           <span>STAGE 04 · MANUFACTURABILITY</span>
-          <h1>把圖面與舊案，轉成可 review 的製程、機台與模具計畫</h1>
+          <h1>建立可審查的製程、機台與模具計畫</h1>
           <p>Agent 只能從 capability registry、schedule 與 tooling database 回傳的候選項目中選擇。</p>
         </div>
         <aside><small>HUMAN GATE B</small><strong>{revealed ? "Engineering review" : "Plan not built"}</strong><span>No ERP write-back</span></aside>
@@ -360,7 +360,7 @@ function TrialStage({ revealed }: StageViewProps) {
       <header className="fasten-stage-hero compact">
         <div>
           <span>STAGE 05 · MASTER TECHNICIAN AGENT</span>
-          <h1>試車出現異常時，把機台訊號、影像與老師傅案例放在一起</h1>
+          <h1>整合試車訊號、影像與歷史技術案例</h1>
           <p>Machine Sidecar 在 Edge 聚合 load、vibration 與 camera event；Agent 提出檢查順序，不直接停機或改 PLC。</p>
         </div>
         <aside><small>TRIAL LOT</small><strong>TRIAL-AB102938-01</strong><span>HDR-04 · DIE-2047</span></aside>
@@ -417,7 +417,7 @@ function QualityStage({ revealed }: StageViewProps) {
       <header className="fasten-stage-hero compact">
         <div>
           <span>STAGE 06 · QUALITY EVIDENCE AGENT</span>
-          <h1>首件合格不是一句話，而是一包能回到圖面與製程的 Evidence</h1>
+          <h1>建立可追溯至圖面與製程的首件品質 Evidence</h1>
           <p>量測值由 QMS／instrument 提供；Agent 負責對照、解釋、組成 review package 與新 Case draft。</p>
         </div>
         <aside className={revealed ? "is-pass" : ""}><small>FIRST ARTICLE STATUS</small><strong>{revealed ? "CONDITIONAL PASS" : "Pending inspection"}</strong><span>{revealed ? "Human approval required" : "6 checks waiting"}</span></aside>
@@ -437,7 +437,7 @@ function QualityStage({ revealed }: StageViewProps) {
           </table>
         </article>
         <section className={`fasten-evidence-thread ${revealed ? "is-revealed" : ""}`}>
-          <header><Database /><div><small>PRODUCT THREAD</small><h2>One traceable manufacturing case</h2></div></header>
+          <header><Database /><div><small>PRODUCT THREAD</small><h2>Traceable manufacturing case</h2></div></header>
           {[
             ["RFQ", FASTEN_RFQ.id, "Email + 3 attachments"],
             ["Drawing", "AB-102938 Rev C", "8 specification fields"],
@@ -507,7 +507,7 @@ const STAGE_ACTIONS: Record<
   },
   quality: {
     run: "Generate First Article Package",
-    next: "Complete FASTEN-1 Story",
+    next: "Complete FASTEN-1 Workflow",
     completed: "Quality Evidence ready",
   },
 };
@@ -614,8 +614,8 @@ export function Fasten1Experience({ onBack, onClose }: Fasten1ExperienceProps) {
         {storyComplete ? (
           <section className="fasten-story-complete">
             <span><BadgeCheck /></span>
-            <small>FASTEN-1 STORY COMPLETE</small>
-            <h1>從一張客戶圖面，到一包可核准的首件良品 Evidence</h1>
+            <small>FASTEN-1 WORKFLOW COMPLETE</small>
+            <h1>RFQ 至首件品質的 Evidence package 已建立</h1>
             <p>
               這個 deterministic concept 展示 workflow、tools、Human Gates 與資料
               lineage；不代表 production CAD parser、quality model 或工廠實測 KPI。
@@ -627,7 +627,7 @@ export function Fasten1Experience({ onBack, onClose }: Fasten1ExperienceProps) {
                 setMaxUnlocked(0);
                 setRevealedStages(new Set());
                 setCompletedStages(new Set());
-              }}><Play /> Replay Story</button>
+              }}><Play /> Replay Workflow</button>
               <button onClick={onBack}><Boxes /> Back to Precision Gallery</button>
             </div>
           </section>

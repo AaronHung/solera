@@ -98,10 +98,10 @@ function PassportStage() {
       <header className="heat-stage-hero">
         <div>
           <span>STAGE 01 · BATCH PASSPORT</span>
-          <h1>在爐門關上之前，先知道這一批「是誰、要變成什麼」</h1>
+          <h1>建立批次識別、製程條件與品質規格基準</h1>
           <p>
-            Batch Context Agent 把 drawing、material lot、recipe、furnace、
-            control plan 與 customer requirement 綁成不可混淆的 Heat Thread。
+            Batch Context Agent 整合 drawing、material lot、recipe、furnace、
+            control plan 與 customer requirement，建立受控且可追溯的 Heat Thread。
           </p>
         </div>
         <aside>
@@ -146,7 +146,7 @@ function PassportStage() {
         </article>
 
         <article className="heat-document-thread">
-          <header><Database /><div><small>INPUT AUTHORITY</small><h2>Five linked records</h2></div></header>
+          <header><Database /><div><small>INPUT AUTHORITY</small><h2>Authoritative linked records</h2></div></header>
           <div>
             {HEAT_DOCUMENTS.map((document) => (
               <article key={document.id}>
@@ -168,8 +168,8 @@ function LoadStage({ revealed }: StageViewProps) {
       <header className="heat-stage-hero compact">
         <div>
           <span>STAGE 02 · LOAD & RECIPE INTELLIGENCE</span>
-          <h1>同一爐、同一 recipe，不代表每個裝載位置經歷相同</h1>
-          <p>把 tray position、load thermocouple、part count 與 recipe phases 放進同一個可追蹤 load map。</p>
+          <h1>評估裝載位置差異與核准 Recipe 的適用範圍</h1>
+          <p>整合 tray position、load thermocouple、part count 與 recipe phases，建立可追溯的 load map 與位置相關 exposure context。</p>
         </div>
         <aside><small>RECIPE</small><strong>{HEAT_BATCH.recipe}</strong><span>{HEAT_BATCH.furnace} · approved v7</span></aside>
       </header>
@@ -200,7 +200,7 @@ function LoadStage({ revealed }: StageViewProps) {
         </article>
 
         <article className={`heat-recipe-panel ${revealed ? "is-revealed" : ""}`}>
-          <header><Thermometer /><div><small>APPROVED RECIPE JOURNEY</small><h2>Six bounded phases</h2></div></header>
+          <header><Thermometer /><div><small>APPROVED RECIPE JOURNEY</small><h2>Approved six-phase process</h2></div></header>
           <ol>
             {HEAT_RECIPE_PHASES.map((phase) => (
               <li key={phase.sequence}>
@@ -223,8 +223,8 @@ function JourneyStage({ revealed }: StageViewProps) {
       <header className="heat-stage-hero compact">
         <div>
           <span>STAGE 03 · FURNACE JOURNEY</span>
-          <h1>不是看現在幾度，而是重播整個材料轉變路徑</h1>
-          <p>Thermal、atmosphere、transfer 與 quench context 共同形成品質 Evidence；單點 alarm 無法取代 journey。</p>
+          <h1>重建完整熱歷程與關鍵製程偏差</h1>
+          <p>整合 thermal、atmosphere、transfer 與 quench context，形成品質相關 process journey；單點 alarm 僅作為輔助 Evidence。</p>
         </div>
         <aside><small>REPLAY WINDOW</small><strong>7h 18m</strong><span>Charge → carburize → quench → temper</span></aside>
       </header>
@@ -272,8 +272,8 @@ function SoftSensorStage({ revealed }: StageViewProps) {
       <header className="heat-stage-hero compact">
         <div>
           <span>STAGE 04 · QUALITY SOFT SENSOR</span>
-          <h1>Lab 還沒回來，Agent 先告訴你「哪裡最值得懷疑與採樣」</h1>
-          <p>估算值包含 uncertainty，不能取代 hardness、metallography 或 CMM 的 official result。</p>
+          <h1>在正式檢驗完成前提供分層品質風險估算</h1>
+          <p>估算值包含 uncertainty，用於 sampling 與 containment 規劃；hardness、metallography 及 CMM official result 仍為放行依據。</p>
         </div>
         <aside><small>OFFICIAL LAB ETA</small><strong>{revealed ? "20h 24m" : "Pending estimate"}</strong><span>{HEAT_SOFT_SENSOR.labEta}</span></aside>
       </header>
@@ -299,7 +299,7 @@ function SoftSensorStage({ revealed }: StageViewProps) {
         <section className={`heat-soft-summary ${revealed ? "is-revealed" : ""}`}>
           <article className="heat-soft-verdict">
             <span><TriangleAlert /></span>
-            <div><small>EARLY QUALITY SIGNAL</small><h2>{revealed ? "T6 edge tray requires HOLD candidate" : "Awaiting Soft Sensor"}</h2><p>{revealed ? "Predicted ECD and surface hardness cross the lower specification boundary while distortion exceeds the TIR limit." : "Run the versioned model after the furnace journey is complete."}</p></div>
+            <div><small>EARLY QUALITY SIGNAL</small><h2>{revealed ? "T6 edge tray classified as HOLD candidate" : "Awaiting Soft Sensor"}</h2><p>{revealed ? "Predicted ECD and surface hardness cross the lower specification boundary while distortion exceeds the TIR limit." : "Run the versioned model after the furnace journey is complete."}</p></div>
           </article>
           <div className="heat-soft-metrics">
             {HEAT_SOFT_SENSOR.batchMetrics.map((metric) => (
@@ -321,15 +321,15 @@ function InvestigationStage({ revealed }: StageViewProps) {
       <header className="heat-stage-hero compact">
         <div>
           <span>STAGE 05 · DEVIATION INVESTIGATION</span>
-          <h1>把「可能不合格」拆成能讓 metallurgist 驗證的假設</h1>
-          <p>Agent 排序 Evidence、counter-evidence 與 sampling plan；不直接改 recipe、不重工、不放行。</p>
+          <h1>將品質風險轉換為可驗證的工程假設</h1>
+          <p>Agent 排序 Evidence、counter-evidence 並建立 sampling plan；不直接變更 recipe、不執行重工、不核准放行。</p>
         </div>
         <aside><small>INVESTIGATION SCOPE</small><strong>{revealed ? "T6 · 24 pcs" : "Awaiting analysis"}</strong><span>Zone 3 edge · focused hold</span></aside>
       </header>
 
       <div className="heat-investigation-grid">
         <article className={`heat-causal-thread ${revealed ? "is-revealed" : ""}`}>
-          <header><Flame /><div><small>CAUSAL EVIDENCE THREAD</small><h2>What changed first?</h2></div></header>
+          <header><Flame /><div><small>CAUSAL EVIDENCE THREAD</small><h2>Deviation sequence</h2></div></header>
           <ol>
             {[
               ["10:42", "TC-07 thermal lag", "Load response separates from center trays.", "TC-07"],
@@ -354,7 +354,7 @@ function InvestigationStage({ revealed }: StageViewProps) {
       </div>
 
       <section className={`heat-sampling-plan ${revealed ? "is-revealed" : ""}`}>
-        <header><ShieldCheck /><div><small>HUMAN GATE B · CONTAINMENT DRAFT</small><h2>Targeted verification, not batch-wide guesswork</h2></div></header>
+        <header><ShieldCheck /><div><small>HUMAN GATE B · CONTAINMENT DRAFT</small><h2>Focused verification and containment plan</h2></div></header>
         <div>
           {[
             ["Hold", "Segregate T6 · 24 pcs", "No release until lab/CMM confirmation"],
@@ -376,8 +376,8 @@ function ReleaseStage({ revealed }: StageViewProps) {
       <header className="heat-stage-hero compact">
         <div>
           <span>STAGE 06 · RELEASE EVIDENCE</span>
-          <h1>Soft Sensor 提前縮小風險；official lab 決定最後的 disposition</h1>
-          <p>預測與 lab reconciliation 被保存為 Evidence，Agent 只建立 release／hold 草稿，最終由 Quality 核准。</p>
+          <h1>整合 Soft Sensor 與正式檢驗結果，建立放行依據</h1>
+          <p>Soft Sensor 估算與 lab reconciliation 均保存為 Evidence；Agent 建立 release／hold 草稿，最終 disposition 由 Quality 核准。</p>
         </div>
         <aside className={revealed ? "is-hold" : ""}><small>BATCH DISPOSITION</small><strong>{revealed ? "PARTIAL HOLD" : "Pending lab"}</strong><span>{revealed ? "216 candidate release · 24 hold" : "No release decision"}</span></aside>
       </header>
@@ -475,7 +475,7 @@ const STAGE_ACTIONS: Record<HeatStageId, { run: string; next: string; completed:
   },
   release: {
     run: "Reconcile Official Lab",
-    next: "Complete HEAT-1 Story",
+    next: "Complete HEAT-1 Workflow",
     completed: "Release and hold Evidence packaged",
   },
 };
@@ -582,8 +582,8 @@ export function Heat1Experience({ onBack, onClose }: Heat1ExperienceProps) {
         {storyComplete ? (
           <section className="heat-story-complete">
             <span><BadgeCheck /></span>
-            <small>HEAT-1 STORY COMPLETE</small>
-            <h1>提前 20 小時看見風險，最後仍由 official lab 與 Quality 決定放行</h1>
+            <small>HEAT-1 WORKFLOW COMPLETE</small>
+            <h1>品質風險已完成分層，正式放行仍由 lab 結果與 Quality 核准決定</h1>
             <p>
               216 件成為 release candidate，T6 的 24 件 focused hold。這是
               deterministic concept，不代表 validated metallurgy model 或工廠實測效益。
@@ -595,7 +595,7 @@ export function Heat1Experience({ onBack, onClose }: Heat1ExperienceProps) {
                 setMaxUnlocked(0);
                 setRevealedStages(new Set());
                 setCompletedStages(new Set());
-              }}><Play /> Replay Story</button>
+              }}><Play /> Replay Workflow</button>
               <button onClick={onBack}><Boxes /> Back to Precision Gallery</button>
             </div>
           </section>
