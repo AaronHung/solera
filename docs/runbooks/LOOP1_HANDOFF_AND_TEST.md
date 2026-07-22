@@ -4,12 +4,14 @@
 
 今天上場依序使用：
 
-1. `LOOP1_HANDOFF_AND_TEST.md`：安裝、preflight、驗收。
-2. `LOOP1_CUSTOMER_DEMO_10MIN.md`：逐分鐘操作與 talk track。
-3. `LOOP1_DATA_HUB_AGENT_FLOW.md`：Data Hub 功能與 Agent flow。
-4. `LOOP1_VALUE_VALIDATION.md`：capability proof、customer KPI 與 follow-up。
-5. `SOLERA_CUSTOMER_USE_CASES.md`：依產業、buyer 與成本選擇場景。
-6. `LOOP1_DEMO_SOP.md`：完整技術操作與 troubleshooting。
+1. `LOOP1_INVESTOR_DEMO_REHEARSAL.md`：第一次演練、逐步點擊、Investor
+   講稿、keywords、Q&A、故障備案與評分。
+2. `LOOP1_HANDOFF_AND_TEST.md`：安裝、preflight、驗收。
+3. `LOOP1_CUSTOMER_DEMO_10MIN.md`：客戶／工業 domain 版逐分鐘 talk track。
+4. `LOOP1_DATA_HUB_AGENT_FLOW.md`：Data Hub 功能與 Agent flow。
+5. `LOOP1_VALUE_VALIDATION.md`：capability proof、customer KPI 與 follow-up。
+6. `SOLERA_CUSTOMER_USE_CASES.md`：依產業、buyer 與成本選擇場景。
+7. `LOOP1_DEMO_SOP.md`：完整技術操作與 troubleshooting。
 
 ## 2. Runtime prerequisites
 

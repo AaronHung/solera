@@ -9,6 +9,11 @@ Reliability、Batch Manufacturing、Discrete Manufacturing、Energy/Facilities
 `docs/pitch/SOLERA_CUSTOMER_USE_CASES.md` 將相同平台能力對映到其產業問題；
 不要把尚未建立的 LOOP-2/3/4 template 說成已完成。
 
+第一次擔任 presenter，請先完整走一次
+`docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md`。該文件包含從 Terminal
+啟動、browser 點擊、Investor pitch、keywords、Q&A、故障備案到演練評分；
+本文件作為熟悉產品後的精簡客戶版 talk track。
+
 ## 一句話定位
 
 > Solera 不是再做一個 dashboard；它把工業資料的 identity、freshness、causal timeline、SOP 與案例組成 Evidence-first Agent 工作流，並在資料不足時安全拒答。

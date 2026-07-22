@@ -171,6 +171,8 @@ npm run demo:loop1:normal
 
 ## Demo
 
+- First-time presenter and investor rehearsal:
+  \`source/docs/runbooks/LOOP1_INVESTOR_DEMO_REHEARSAL.md\`
 - 10-minute script:
   \`source/docs/runbooks/LOOP1_CUSTOMER_DEMO_10MIN.md\`
 - Full technical SOP:
