@@ -77,6 +77,32 @@ def _require_role(roles: frozenset[str], allowed: set[str]) -> None:
         raise PolicyDenied("ROLE_DENIED", "User role cannot access this operation")
 
 
+def _cors_origins(settings: Settings) -> list[str]:
+    origins = {
+        "http://localhost",
+        "http://localhost:5173",
+        "http://127.0.0.1",
+    }
+    for domain in settings.allowed_domains:
+        if domain == "easypi.iiotfab.com":
+            origins.add("https://easypi.iiotfab.com")
+        elif domain == "pivision.iiotfab.com":
+            origins.update(
+                {
+                    "https://pivision.iiotfab.com",
+                    "https://pivision.iiotfab.com:8443",
+                }
+            )
+        elif domain == "203.146.71.23":
+            origins.update(
+                {
+                    "http://203.146.71.23",
+                    "http://203.146.71.23:8080",
+                }
+            )
+    return sorted(origins)
+
+
 def create_app(
     *,
     settings: Settings | None = None,
@@ -178,9 +204,9 @@ def create_app(
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
+        allow_origins=_cors_origins(resolved_settings),
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PUT"],
+        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Solera-Trace-Id"],
     )
 

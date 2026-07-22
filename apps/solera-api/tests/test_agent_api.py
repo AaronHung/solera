@@ -114,6 +114,37 @@ def parse_events(response) -> list[dict[str, object]]:
     return [json.loads(line) for line in response.iter_lines() if line]
 
 
+def test_loop1_preflight_allows_approved_host_origins() -> None:
+    with make_client() as client:
+        response = client.options(
+            "/v1/loop1/investigate",
+            headers={
+                "Origin": "https://pivision.iiotfab.com:8443",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "authorization,content-type",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == (
+        "https://pivision.iiotfab.com:8443"
+    )
+
+
+def test_loop1_preflight_rejects_unapproved_origins() -> None:
+    with make_client() as client:
+        response = client.options(
+            "/v1/loop1/investigate",
+            headers={
+                "Origin": "https://unapproved.example",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "authorization,content-type",
+            },
+        )
+
+    assert response.status_code == 400
+
+
 def test_compare_stream_contains_deterministic_analysis_and_evidence() -> None:
     with make_client() as client:
         with client.stream(
